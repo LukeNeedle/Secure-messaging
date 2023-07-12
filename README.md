@@ -4,15 +4,13 @@
 My project is a secure messaging system that schools could use to communicate with staff members.
 
 ### Features I would like to include are:
-- Staff-to-staff messaging – Private messaging between staff, files
+- Staff-to-staff messaging – Private messaging between staff and file exchanging
 
 - Staff-to-group messaging – Staff can send notices to groups of people.
 
-- Alert – Staff can notify all staff who should receive the alert. This message should appear on the home page for each staff member so that it is easy to see.
+- Alert – Staff can send a notification to all staff who should receive the alert. This message should appear on the home page for each of the notified staff members so that it is easy to see.
 
-- Secure reporting – Staff can record conversations, worries and information about students. These records can only be seen by members of SENCo.
-
-- Student finder – Produces the student’s timetable (Day, week, full timetable) and a list of their teachers for that day (Or week, etc.).
+- Secure reporting – Staff can securely record conversations, concerns, and information about students. These records can only be seen by members of SENCo and safeguarding.
 
 - Student notify – Sending a message to all appropriate people for a student (Head of year, tutor, teachers for the day, etc.).
 
@@ -31,7 +29,7 @@ The system should be run locally with ideally no access to the internet so that 
 3.	Sending messages
 4.	Uploading attachments
 5.	Admin page
-6.	Student timetables (to find their teachers)
+6.	Linking teachers to students (for Student notify)
 
 > ### Tip!
 >
