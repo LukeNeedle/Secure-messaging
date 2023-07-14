@@ -30,6 +30,7 @@ The system should be run locally with ideally no access to the internet so that 
 4.	Uploading attachments
 5.	Admin page
 6.	Linking teachers to students (for Student notify)
+7.	Search up student’s records for safeguarding and SENCo staff
 
 > ### Tip!
 >
@@ -56,5 +57,6 @@ The system should be run locally with ideally no access to the internet so that 
 | 4         | ❌      | -       | N/A                     |
 | 5         | ❌      | -       | N/A                     |
 | 6         | ❌      | -       | N/A                     |
+| 7         | ❌      | -       | N/A                     |
 
 ---
