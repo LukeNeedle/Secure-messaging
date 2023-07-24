@@ -20,7 +20,7 @@ passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already 
     LastName (string): The staff member's last name. Example: Smith
     Title (string): The staff member's title. Example: Mr
     AccountEnabled (bool): Whether the staff member can login, True = Can login, False = Can't login. Example: True
-    AccountArchived (bool): Whether the staff member appears in can login, True = , False = Can't login. Example: False
+    AccountArchived (bool): Whether the staff member "exists", True = , False = Can't login. Example: False
 """     
 """Roles table columns:
     StaffID (integer): The integer id associated with the staff member. Example: 1
