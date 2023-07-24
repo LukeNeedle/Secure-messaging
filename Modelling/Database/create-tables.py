@@ -51,6 +51,8 @@ conn.commit()
 
 cur.execute("""CREATE TABLE IF NOT EXISTS "Students" (
 	"StudentID"	INTEGER NOT NULL UNIQUE,
+	"FirstName" STRING NOT NULL,
+	"LastName"  STRING NOT NULL,
 	"TutorID"	INTEGER,
 	"HeadOfYearID"	INTEGER,
 	FOREIGN KEY("HeadOfYearID") REFERENCES "Staff"("StaffID"),
