@@ -28,7 +28,7 @@ passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already 
     Safeguarding (bool): Whether the staff member is a member of the safeguarding team. Example: False
     Admin (bool): Whether the staff member has administator access to the program. Example: False
 """     
-"""Login table columns:(StaffID, PassHash, PassSalt)
+"""Login table columns:
     StaffID (integer): The integer id associated with the staff member. Example: 1
     PassHash (blob): The staff member's password hash.
     PassSalt (blob): The staff member's password hash salt.
