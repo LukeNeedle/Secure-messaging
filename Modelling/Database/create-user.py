@@ -30,8 +30,8 @@ passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already 
 """     
 """Login table columns:(StaffID, PassHash, PassSalt)
     StaffID (integer): The integer id associated with the staff member. Example: 1
-    PassHash (blob): The staff member's password hash. Example: John
-    PassSalt (blob): The staff member's password hash salt. Example: Smith
+    PassHash (blob): The staff member's password hash.
+    PassSalt (blob): The staff member's password hash salt.
 """     
 #
 
