@@ -18,8 +18,6 @@ My project is a secure messaging system that schools could use to communicate wi
 
 - Full system control for admin accounts – The ability to track logins, enable/disable features, force multi-factor sign-on, etc.
 
-- Student reports – Staff can draft, finalise, and send off for review reports for their students.
-
 The system should be run locally with ideally no access to the internet so that it is more secure. Although this means that staff cannot use the system from home, it also stops hackers from attacking it.
 
 ## Objectives
