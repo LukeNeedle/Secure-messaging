@@ -66,61 +66,61 @@ The system should be run locally with ideally no access to the internet so that 
 ### Staff
 | Column          | Description                                     | Example | Type    | Primary Key | Forign Key |
 |-----------------|-------------------------------------------------|---------|---------|:-----------:|:----------:|
-| StaffID         | The integer id associated with the staff member | 1       | Integer | ✅          | ❌        |
-| FirstName       | The staff member's first name                   | John    | String  | ❌          | ❌        |
-| LastName        | The staff member's last name                    | Smith   | String  | ❌          | ❌        |
-| Title           | The staff member's title                        | Mr      | String  | ❌          | ❌        |
-| AccountEnabled  | Whether the staff member can login              | True    | Boolean | ❌          | ❌        |
-| AccountArchived | Whether the staff member "Exists"               | False   | Boolean | ❌          | ❌        |
+| StaffID         | The integer id associated with the staff member | 1       | Integer | ✅          | -          |
+| FirstName       | The staff member's first name                   | John    | String  | ❌          | -          |
+| LastName        | The staff member's last name                    | Smith   | String  | ❌          | -          |
+| Title           | The staff member's title                        | Mr      | String  | ❌          | -          |
+| AccountEnabled  | Whether the staff member can login              | True    | Boolean | ❌          | -          |
+| AccountArchived | Whether the staff member "Exists"               | False   | Boolean | ❌          | -          |
 
 ###  Roles
 | Column       | Description                                        | Example | Type    | Primary Key | Forign Key     |
 |--------------|----------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
 | StaffID      | The integer id associated with the staff member    | 1       | Integer | ❌          | Staff(StaffID) |
-| SENCo        | Whether they are a member of the SENCo team        | False   | Boolean | ❌          | ❌            |
-| Safeguarding | Whether they are a member of the safeguarding team | False   | Boolean | ❌          | ❌            |
-| Admin        | Whether the staff member have admin access         | False   | Boolean | ❌          | ❌            |
+| SENCo        | Whether they are a member of the SENCo team        | False   | Boolean | ❌          | -              |
+| Safeguarding | Whether they are a member of the safeguarding team | False   | Boolean | ❌          | -              |
+| Admin        | Whether the staff member have admin access         | False   | Boolean | ❌          | -              |
 
 ###  Login
 | Column   | Description                                     | Example | Type    | Primary Key | Forign Key     |
 |----------|-------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
 | StaffID  | The integer id associated with the staff member | 1       | Integer | ❌          | Staff(StaffID) |
-| PassHash | The hashed password                             | -       | Blob    | ❌          | ❌            |
-| PassSalt | The random salt used to hash the password       | -       | Blob    | ❌          | ❌            |
+| PassHash | The hashed password                             | -       | Blob    | ❌          | -              |
+| PassSalt | The random salt used to hash the password       | -       | Blob    | ❌          | -              |
 
 ### Messages
 | Column      | Description                                                           | Example | Type    | Primary Key | Forign Key     |
 |-------------|-----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| MessageID   | The integer id associated with the message                            | 1       | Integer | ✅          | ❌            |
+| MessageID   | The integer id associated with the message                            | 1       | Integer | ✅          | -              |
 | SenderID    | The integer id associated with the staff member sending the message   | 1       | Integer | ❌          | Staff(StaffID) |
 | RecipientID | The integer id associated with the staff member receiving the message | 1       | Integer | ❌          | Staff(StaffID) |
-| Message     | The encrypted message                                                 | -       | Blob    | ❌          | ❌            |
-| TimeStamp   | The timestamp that the message was sent                               | -       | Blob    | ❌          | ❌            |
+| Message     | The encrypted message                                                 | -       | Blob    | ❌          | -              |
+| TimeStamp   | The timestamp that the message was sent                               | -       | Blob    | ❌          | -              |
 
 ### Students
 | Column       | Description                                | Example | Type    | Primary Key | Forign Key     |
 |--------------|--------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| StudentID    | The integer id associated with the student | 1       | Integer | ✅          | ❌            |
-| FirstName    | The encrypted first name of the student    | John    | STRING  | ❌          | ❌            |
-| LastName     | The encrypted last name of the student     | Smith   | STRING  | ❌          | ❌            |
+| StudentID    | The integer id associated with the student | 1       | Integer | ✅          | -              |
+| FirstName    | The encrypted first name of the student    | John    | STRING  | ❌          | -              |
+| LastName     | The encrypted last name of the student     | Smith   | STRING  | ❌          | -              |
 | TutorID      | The id of the student's form tutor         | 1       | Integer | ❌          | Staff(StaffID) |
 | HeadOfYearID | The id of the student's head of year       | 1       | Integer | ❌          | Staff(StaffID) |
 
 ### Reporting
 | Column       | Description                                                          | Example | Type    | Primary Key | Forign Key          |
 |--------------|----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|
-| ReportID     | The integer id associated with the report                            | 1       | Integer | ✅          | ❌                 |
+| ReportID     | The integer id associated with the report                            | 1       | Integer | ✅          | -                   |
 | StudentID    | The integer id associated with the student who is being reported     | 1       | Integer | ❌          | Students(StudentID) |
 | StaffID      | The integer id associated with the staff member who filed the report | 1       | Integer | ❌          | Staff(StaffID)      |
-| Report       | The encrypted report                                                 | -       | Blob    | ❌          | ❌                 |
-| Timestamp    | The timestamp that the report was filed                              | -       | Blob    | ❌          | ❌                 |
+| Report       | The encrypted report                                                 | -       | Blob    | ❌          | -                   |
+| Timestamp    | The timestamp that the report was filed                              | -       | Blob    | ❌          | -                   |
 
 ### Files
 | Column   | Description                                                       | Example | Type    | Primary Key | Forign Key     |
 |----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| FileID   | The integer id associated with the file                           | 1       | Integer | ✅          | ❌            |
+| FileID   | The integer id associated with the file                           | 1       | Integer | ✅          | -              |
 | OwnerID  | The integer id associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) |
-| FilePath | The path on the server to the file                                | -       | Integer | ❌          | ❌            |
-| FileHash | The hash of the file (For integrity checks)                       | -       | Blob    | ❌          | ❌            |
+| FilePath | The path on the server to the file                                | -       | Integer | ❌          | -              |
+| FileHash | The hash of the file (For integrity checks)                       | -       | Blob    | ❌          | -              |
 
 ---
