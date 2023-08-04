@@ -29,6 +29,8 @@ The system should be run locally with ideally no access to the internet so that 
 5.	Admin page
 6.	Linking teachers to students (for Student notify)
 7.	Search up student’s records for safeguarding and SENCo staff
+8.  Read receipts
+9.  Session timeout
 
 > ### Tip!
 >
@@ -49,13 +51,15 @@ The system should be run locally with ideally no access to the internet so that 
 
 | Objective | Progress | Comment | Commit first introduced |
 |:---------:|:--------:|:--------|:-----------------------:|
-| 1         | ❌      | -       | N/A                     |
-| 2         | ❌      | -       | N/A                     |
-| 3         | ❌      | -       | N/A                     |
-| 4         | ❌      | -       | N/A                     |
-| 5         | ❌      | -       | N/A                     |
-| 6         | ❌      | -       | N/A                     |
-| 7         | ❌      | -       | N/A                     |
+| 1         | ❌       | -       | N/A                     |
+| 2         | ❌       | -       | N/A                     |
+| 3         | ❌       | -       | N/A                     |
+| 4         | ❌       | -       | N/A                     |
+| 5         | ❌       | -       | N/A                     |
+| 6         | ❌       | -       | N/A                     |
+| 7         | ❌       | -       | N/A                     |
+| 8         | ❌       | -       | N/A                     |
+| 9         | ❌       | -       | N/A                     |
 
 ---
 
