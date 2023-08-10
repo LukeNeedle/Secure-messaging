@@ -78,7 +78,7 @@ The system should be run locally with ideally no access to the internet so that 
 ###  Roles
 | Column       | Description                                        | Example | Type    | Primary Key | Foreign Key    | Constraints       |
 |--------------|----------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:-----------------:|
-| StaffID      | The integer id associated with the staff member    | 1       | Integer | ❌          | Staff(StaffID) | -                 |
+| StaffID      | The integer id associated with the staff member    | 1       | Integer | ✅          | Staff(StaffID) | -                 |
 | SENCo        | Whether they are a member of the SENCo team        | False   | Boolean | ❌          | -              | 'True' or 'False' |
 | Safeguarding | Whether they are a member of the safeguarding team | False   | Boolean | ❌          | -              | 'True' or 'False' |
 | Admin        | Whether the staff member have admin access         | False   | Boolean | ❌          | -              | 'True' or 'False' |
@@ -86,7 +86,7 @@ The system should be run locally with ideally no access to the internet so that 
 ###  Login
 | Column   | Description                                     | Example | Type    | Primary Key | Foreign Key    |
 |----------|-------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| StaffID  | The integer id associated with the staff member | 1       | Integer | ❌          | Staff(StaffID) |
+| StaffID  | The integer id associated with the staff member | 1       | Integer | ✅          | Staff(StaffID) |
 | PassHash | The hashed password                             | -       | Blob    | ❌          | -              |
 | PassSalt | The random salt used to hash the password       | -       | Blob    | ❌          | -              |
 

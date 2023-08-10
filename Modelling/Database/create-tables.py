@@ -21,6 +21,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Login" (
 	"StaffID"	INTEGER NOT NULL UNIQUE,
 	"PassHash"	BLOB NOT NULL UNIQUE,
 	"PassSalt"	BLOB NOT NULL UNIQUE,
+	PRIMARY KEY("StaffID"),
 	FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID")
 )""")
 conn.commit()
@@ -30,6 +31,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Roles" (
 	"SENCo"	TEXT NOT NULL DEFAULT 'False',
 	"Safeguarding"	TEXT NOT NULL DEFAULT 'False',
 	"Admin"	TEXT NOT NULL DEFAULT 'False',
+	PRIMARY KEY("StaffID"),
 	FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
 	CHECK ("SENCo"=='True' OR "SENCo"=='False'),
 	CHECK ("Safeguarding"=='True' OR "Safeguarding"=='False'),
