@@ -46,10 +46,12 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Messages" (
 	"Message"	BLOB NOT NULL,
 	"TimeStamp"	BLOB NOT NULL,
 	"ReadReceipts" TEXT NOT NULL DEFAULT 'False',
+	"Archived" TEXT NOT NULL DEFAULT 'False',
 	FOREIGN KEY("SenderID") REFERENCES "Staff"("StaffID"),
 	FOREIGN KEY("RecipientID") REFERENCES "Staff"("StaffID"),
 	PRIMARY KEY("MessageID" AUTOINCREMENT),
 	CHECK ("ReadReceipts"=='True' OR "ReadReceipts"=='False')
+	CHECK ("Archived"=='True' OR "Archived"=='False')
 )""")
 conn.commit()
 

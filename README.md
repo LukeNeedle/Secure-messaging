@@ -72,16 +72,16 @@ The system should be run locally with ideally no access to the internet so that 
 | FirstName       | The staff member's first name                   | John    | Text    | ❌          | -           | -                 |
 | LastName        | The staff member's last name                    | Smith   | Text    | ❌          | -           | -                 |
 | Title           | The staff member's title                        | Mr      | Text    | ❌          | -           | -                 |
-| AccountEnabled  | Whether the staff member can login              | True    | Boolean | ❌          | -           | 'True' or 'False' |
-| AccountArchived | Whether the staff member "Exists"               | False   | Boolean | ❌          | -           | 'True' or 'False' |
+| AccountEnabled  | Whether the staff member can login              | True    | Text | ❌          | -           | 'True' or 'False' |
+| AccountArchived | Whether the staff member "Exists"               | False   | Text | ❌          | -           | 'True' or 'False' |
 
 ### Roles
 | Column       | Description                                        | Example | Type    | Primary Key | Foreign Key    | Constraints       |
 |--------------|----------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:-----------------:|
 | StaffID      | The integer ID associated with the staff member    | 1       | Integer | ✅          | Staff(StaffID) | -                 |
-| SENCo        | Whether they are a member of the SENCo team        | False   | Boolean | ❌          | -              | 'True' or 'False' |
-| Safeguarding | Whether they are a member of the safeguarding team | False   | Boolean | ❌          | -              | 'True' or 'False' |
-| Admin        | Whether the staff member have admin access         | False   | Boolean | ❌          | -              | 'True' or 'False' |
+| SENCo        | Whether they are a member of the SENCo team        | False   | Text | ❌          | -              | 'True' or 'False' |
+| Safeguarding | Whether they are a member of the safeguarding team | False   | Text | ❌          | -              | 'True' or 'False' |
+| Admin        | Whether the staff member have admin access         | False   | Text | ❌          | -              | 'True' or 'False' |
 
 ### Login
 | Column   | Description                                     | Example | Type    | Primary Key | Foreign Key    |
@@ -98,7 +98,8 @@ The system should be run locally with ideally no access to the internet so that 
 | RecipientID  | The integer ID associated with the staff member receiving the message | 1       | Integer | ❌          | Staff(StaffID) | -                 |
 | Message      | The encrypted message                                                 | -       | Blob    | ❌          | -              | -                 |
 | TimeStamp    | The timestamp that the message was sent                               | -       | Blob    | ❌          | -              | -                 |
-| ReadReceipts | Whether the message has been read                                     | False   | Text    | ❌          | -              | 'True' or 'False' |
+| ReadReceipts | Whether the message has been read                                     | False   | Text | ❌          | -              | 'True' or 'False' |
+| Archived     | Whether the message has been archived                                 | False   | Text | ❌          | -              | 'True' or 'False' |
 
 ### Students
 | Column       | Description                                | Example | Type    | Primary Key | Foreign Key    |
