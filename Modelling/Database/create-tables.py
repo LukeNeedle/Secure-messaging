@@ -44,7 +44,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Messages" (
 	"SenderID"	INTEGER NOT NULL,
 	"RecipientID"	INTEGER NOT NULL,
 	"Message"	BLOB NOT NULL,
-	"TimeStamp"	BLOB NOT NULL,
+	"TimeStamp"	TEXT NOT NULL,
 	"ReadReceipts" TEXT NOT NULL DEFAULT 'False',
 	"Archived" TEXT NOT NULL DEFAULT 'False',
 	FOREIGN KEY("SenderID") REFERENCES "Staff"("StaffID"),
