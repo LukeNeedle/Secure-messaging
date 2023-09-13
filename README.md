@@ -68,30 +68,20 @@ These objectives aren't in any particular order and they are only numbered to he
 ## Database Schema
 
 ### Staff
-| Column          | Description                                     | Example | Type    | Primary Key | Foreign Key | Constraints       |
-|-----------------|-------------------------------------------------|---------|---------|:-----------:|:-----------:|:-----------------:|
-| StaffID         | The integer ID associated with the staff member | 1       | Integer | ✅          | -           | -                 |
-| FirstName       | The staff member's first name                   | John    | Text    | ❌          | -           | -                 |
-| LastName        | The staff member's last name                    | Smith   | Text    | ❌          | -           | -                 |
-| Title           | The staff member's title                        | Mr      | Text    | ❌          | -           | -                 |
-| AccountEnabled  | Whether the staff member can login              | True    | Text    | ❌          | -           | 'True' or 'False' |
-| AccountArchived | Whether the staff member "Exists"               | False   | Text    | ❌          | -           | 'True' or 'False' |
-
-### Roles
-| Column       | Description                                        | Example | Type    | Primary Key | Foreign Key    | Constraints       |
-|--------------|----------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:-----------------:|
-| StaffID      | The integer ID associated with the staff member    | 1       | Integer | ✅          | Staff(StaffID) | -                 |
-| SENCo        | Whether they are a member of the SENCo team        | False   | Text    | ❌          | -              | 'True' or 'False' |
-| Safeguarding | Whether they are a member of the safeguarding team | False   | Text    | ❌          | -              | 'True' or 'False' |
-| Admin        | Whether the staff member have admin access         | False   | Text    | ❌          | -              | 'True' or 'False' |
-
-### Login
-| Column   | Description                                     | Example | Type    | Primary Key | Foreign Key    |
-|----------|-------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| StaffID  | The integer ID associated with the staff member | 1       | Integer | ✅          | Staff(StaffID) |
-| PassHash | The hashed password                             | -       | Blob    | ❌          | -              |
-| PassSalt | The random salt used to hash the password       | -       | Blob    | ❌          | -              |
-
+| Column          | Description                                        | Example | Type    | Primary Key | Foreign Key    | Constraints       |
+|-----------------|----------------------------------------------------|---------|---------|:-----------:|:--------------:|:-----------------:|
+| StaffID         | The integer ID associated with the staff member    | 1       | Integer | ✅          | -              | -                 |
+| FirstName       | The staff member's first name                      | John    | Text    | ❌          | -              | -                 |
+| LastName        | The staff member's last name                       | Smith   | Text    | ❌          | -              | -                 |
+| Title           | The staff member's title                           | Mr      | Text    | ❌          | -              | -                 |
+| AccountEnabled  | Whether the staff member can login                 | True    | Text    | ❌          | -              | 'True' or 'False' |
+| AccountArchived | Whether the staff member "Exists"                  | False   | Text    | ❌          | -              | 'True' or 'False' |
+| PassHash        | The hashed password                                | -       | Blob    | ❌          | -              | -                 |
+| PassSalt        | The random salt used to hash the password          | -       | Blob    | ❌          | -              | -                 |
+| SENCo           | Whether they are a member of the SENCo team        | False   | Text    | ❌          | -              | 'True' or 'False' |
+| Safeguarding    | Whether they are a member of the safeguarding team | False   | Text    | ❌          | -              | 'True' or 'False' |
+| Admin           | Whether the staff member have admin access         | False   | Text    | ❌          | -              | 'True' or 'False' |
+   
 ### Messages
 | Column       | Description                                                           | Example | Type    | Primary Key | Foreign Key    | Constraints       |
 |--------------|-----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:-----------------:|
