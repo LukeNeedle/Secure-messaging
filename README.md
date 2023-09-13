@@ -32,6 +32,8 @@ The system should be run locally with ideally no access to the internet so that 
 8.  Read receipts
 9.  Session timeout
 
+These objectives aren't in any particular order and they are only numbered to help identify them inside the code.
+
 > ### Tip!
 >
 > When an objective is complete a comment will be made surrounding the block of code that fulfilled the objective.
