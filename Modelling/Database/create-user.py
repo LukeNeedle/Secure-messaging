@@ -12,27 +12,7 @@ SENCo = True
 safeguarding = False
 admin = False
 passwordHash = "Averysecurepasswordthathasbeenhashed".encode() # Will be passed in already encoded
-passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already encoded
-
-"""Staff table columns:
-    StaffID (integer): The integer id associated with the staff member. Example: 1
-    FirstName (string): The staff member's first name. Example: John
-    LastName (string): The staff member's last name. Example: Smith
-    Title (string): The staff member's title. Example: Mr
-    AccountEnabled (bool): Whether the staff member can login, True = Can login, False = Can't login. Example: True
-    AccountArchived (bool): Whether the staff member "exists", True = , False = Can't login. Example: False
-"""     
-"""Roles table columns:
-    StaffID (integer): The integer id associated with the staff member. Example: 1
-    SENCo (bool): Whether the staff member is a member of the SENco team. Example: False
-    Safeguarding (bool): Whether the staff member is a member of the safeguarding team. Example: False
-    Admin (bool): Whether the staff member has administator access to the program. Example: False
-"""     
-"""Login table columns:
-    StaffID (integer): The integer id associated with the staff member. Example: 1
-    PassHash (blob): The staff member's password hash.
-    PassSalt (blob): The staff member's password hash salt.
-"""     
+passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already encoded    
 #
 
 try:
