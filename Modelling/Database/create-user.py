@@ -15,14 +15,18 @@ passwordHash = "Averysecurepasswordthathasbeenhashed".encode() # Will be passed 
 passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already encoded    
 #
 
+cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
+                VALUES ('{firstName}', '{lastName}', '{title}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt.decode()}', '{SENCo}', '{safeguarding}', '{admin}');""")
+conn.commit()
+exit()
 try:
-    cur.execute(f"""INSERT INTO Staff (FirstName, LastName, Title, AccountEnabled, AccountArchived)
-                VALUES ('{firstName}', '{lastName}', '{title}', '{enabled}', 'False');""")
+    cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
+                VALUES ('{firstName}', '{lastName}', '{title}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt.decode()}', '{SENCo}', '{safeguarding}', '{admin}');""")
     conn.commit()
 except sqlite3.IntegrityError:
     print("Failed CHECK constraint")
 
-cur.execute(f"""SELECT StaffID FROM Staff WHERE FirstName='{firstName}' and LastName='{lastName}' and Title='{title}' and AccountEnabled='{enabled}'""")
+cur.execute(f"""SELECT StaffID FROM Staff WHERE FirstName='{firstName}' and LastName='{lastName}' and Title='{title}' and AccountEnabled='{enabled}' and SENCo='{SENCo}' and Safeguarding='{safeguarding}' and Admin='{admin}'""")
 results = cur.fetchall()
 
 if len(results) > 1:
@@ -33,18 +37,5 @@ elif len(results) == 1:
 elif len(results) == 0:
     raise "Error: Staff doesn't exist"
 
-try:
-    cur.execute(f"""INSERT INTO Roles (StaffID, SENCo, Safeguarding, Admin)
-                VALUES ('{staffID}','{SENCo}','{safeguarding}', '{admin}');""")
-    conn.commit()
-except sqlite3.IntegrityError:
-    print("Failed CHECK constraint")
-
-try:
-    cur.execute(f"""INSERT INTO Login (StaffID, PassHash, PassSalt)
-                VALUES ('{staffID}', '{passwordHash.decode()}', '{passwordSalt.decode()}');""")
-    conn.commit()
-except sqlite3.IntegrityError:
-    print("Failed CHECK constraint")
 
 conn.close()

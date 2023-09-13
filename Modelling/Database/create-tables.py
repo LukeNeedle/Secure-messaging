@@ -11,28 +11,14 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Staff" (
 	"LastLogin"	TEXT,
 	"AccountEnabled"	TEXT NOT NULL DEFAULT 'False',
 	"AccountArchived"	TEXT NOT NULL DEFAULT 'False',
-	PRIMARY KEY("StaffID" AUTOINCREMENT),
-	CHECK ("AccountEnabled"=='True' OR "AccountEnabled"=='False'),
-	CHECK ("AccountArchived"=='True' OR "AccountArchived"=='False')
-)""")
-conn.commit()
-
-cur.execute("""CREATE TABLE IF NOT EXISTS "Login" (
-	"StaffID"	INTEGER NOT NULL UNIQUE,
 	"PassHash"	BLOB NOT NULL UNIQUE,
 	"PassSalt"	BLOB NOT NULL UNIQUE,
-	PRIMARY KEY("StaffID"),
-	FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID")
-)""")
-conn.commit()
-
-cur.execute("""CREATE TABLE IF NOT EXISTS "Roles" (
-	"StaffID"	INTEGER NOT NULL UNIQUE,
 	"SENCo"	TEXT NOT NULL DEFAULT 'False',
 	"Safeguarding"	TEXT NOT NULL DEFAULT 'False',
 	"Admin"	TEXT NOT NULL DEFAULT 'False',
-	PRIMARY KEY("StaffID"),
-	FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
+	PRIMARY KEY("StaffID" AUTOINCREMENT),
+	CHECK ("AccountEnabled"=='True' OR "AccountEnabled"=='False'),
+	CHECK ("AccountArchived"=='True' OR "AccountArchived"=='False'),
 	CHECK ("SENCo"=='True' OR "SENCo"=='False'),
 	CHECK ("Safeguarding"=='True' OR "Safeguarding"=='False'),
 	CHECK ("Admin"=='True' OR "Admin"=='False')
