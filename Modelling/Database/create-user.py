@@ -15,10 +15,6 @@ passwordHash = "Averysecurepasswordthathasbeenhashed".encode() # Will be passed 
 passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already encoded    
 #
 
-cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
-                VALUES ('{firstName}', '{lastName}', '{title}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt.decode()}', '{SENCo}', '{safeguarding}', '{admin}');""")
-conn.commit()
-exit()
 try:
     cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
                 VALUES ('{firstName}', '{lastName}', '{title}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt.decode()}', '{SENCo}', '{safeguarding}', '{admin}');""")
