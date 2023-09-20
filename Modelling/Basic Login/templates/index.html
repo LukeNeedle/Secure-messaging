@@ -1,16 +1,25 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-{% block content %}
-<link rel="stylesheet" href="home.css">
-<div id="container">
-    <div vertical-layout id="vertical-layout">
-        <h1 class="title">
-            Welcome to CSuite!
-        </h1>
-        <p>
-            CSuite is a collection of programs written by <a class="link" href="https://github.com/Crazyplopl">Crazyplopl</a> and <a class="link" href="https://github.com/GalacticSquirel">GalacticSquirel.</a>
-        </p>
-    </div>
-</div>
+<body>
+    <a href="{{ url_for('index') }}">Home</a>
 
-{% endblock %}
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% endif %}
+
+    {% if not current_user.is_authenticated %}
+        <p><a href="{{ url_for('login') }}">Login</a></p>
+        <p>User is not authenticated</p>
+    {% endif %}
+
+    {% if current_user.is_authenticated %}
+        <p>User is authenticated</p>
+    {% endif %}
+</body>
+</html>
