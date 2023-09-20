@@ -74,7 +74,7 @@ These objectives aren't in any particular order and they are only numbered to he
 | FirstName       | The staff member's first name                      | John         | Text    | ❌          | -              | Not null                    |
 | LastName        | The staff member's last name                       | Smith        | Text    | ❌          | -              | Not null                    |
 | Title           | The staff member's title                           | Mr           | Text    | ❌          | -              | Not null                    |
-| Email           | The staff member's email address                   | JS@school.uk | Text    | ❌          | -              | Not null                    |
+| Email           | The staff member's email address                   | JS@school.uk | Text    | ❌          | -              | Not null, Unique            |
 | AccountEnabled  | Whether the staff member can login                 | True         | Text    | ❌          | -              | 'True' or 'False', Not null |
 | AccountArchived | Whether the staff member "Exists"                  | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
 | PassHash        | The hashed password                                | -            | Blob    | ❌          | -              | Not null, Unique            |
@@ -82,7 +82,7 @@ These objectives aren't in any particular order and they are only numbered to he
 | SENCo           | Whether they are a member of the SENCo team        | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
 | Safeguarding    | Whether they are a member of the safeguarding team | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
 | Admin           | Whether the staff member have admin access         | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
-   
+
 ### Messages
 | Column       | Description                                                           | Example | Type    | Primary Key | Foreign Key    | Constraints                 |
 |--------------|-----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:---------------------------:|

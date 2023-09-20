@@ -8,7 +8,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Staff" (
 	"FirstName"	TEXT NOT NULL,
 	"LastName"	TEXT NOT NULL,
 	"Title"	TEXT NOT NULL,
-	"Email" TEXT NOT NULL,
+	"Email" TEXT NOT NULL UNIQUE,
 	"AccountEnabled"	TEXT NOT NULL DEFAULT 'False',
 	"AccountArchived"	TEXT NOT NULL DEFAULT 'False',
 	"PassHash"	BLOB NOT NULL UNIQUE,
