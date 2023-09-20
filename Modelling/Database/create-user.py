@@ -7,6 +7,7 @@ cur = conn.cursor()
 firstName = "John"
 lastName = "Smith"
 title = "Mr"
+email = "JS@school.uk"
 enabled = "False"
 SENCo = True
 safeguarding = False
@@ -16,8 +17,8 @@ passwordSalt = "Arandomstringofcharacters".encode() # Will be passed in already 
 #
 
 try:
-    cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
-                VALUES ('{firstName}', '{lastName}', '{title}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt.decode()}', '{SENCo}', '{safeguarding}', '{admin}');""")
+    cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
+                VALUES ('{firstName}', '{lastName}', '{title}', '{email}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt.decode()}', '{SENCo}', '{safeguarding}', '{admin}');""")
     conn.commit()
 except sqlite3.IntegrityError:
     print("Failed CHECK constraint")

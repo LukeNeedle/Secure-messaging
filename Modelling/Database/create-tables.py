@@ -8,6 +8,7 @@ cur.execute("""CREATE TABLE IF NOT EXISTS "Staff" (
 	"FirstName"	TEXT NOT NULL,
 	"LastName"	TEXT NOT NULL,
 	"Title"	TEXT NOT NULL,
+	"Email" TEXT NOT NULL,
 	"AccountEnabled"	TEXT NOT NULL DEFAULT 'False',
 	"AccountArchived"	TEXT NOT NULL DEFAULT 'False',
 	"PassHash"	BLOB NOT NULL UNIQUE,
@@ -66,7 +67,7 @@ conn.commit()
 
 cur.execute("""CREATE TABLE IF NOT EXISTS "Files" (
 	"FileID"	INTEGER NOT NULL UNIQUE,
-	"OwnerID"	INTEGER NOT NULL UNIQUE,
+	"OwnerID"	INTEGER NOT NULL,
 	"FilePath"	BLOB NOT NULL UNIQUE,
 	"FileHash"	BLOB NOT NULL,
 	FOREIGN KEY("OwnerID") REFERENCES "Staff"("StaffID"),

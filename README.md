@@ -68,53 +68,54 @@ These objectives aren't in any particular order and they are only numbered to he
 ## Database Schema
 
 ### Staff
-| Column          | Description                                        | Example | Type    | Primary Key | Foreign Key    | Constraints       |
-|-----------------|----------------------------------------------------|---------|---------|:-----------:|:--------------:|:-----------------:|
-| StaffID         | The integer ID associated with the staff member    | 1       | Integer | ✅          | -              | -                 |
-| FirstName       | The staff member's first name                      | John    | Text    | ❌          | -              | -                 |
-| LastName        | The staff member's last name                       | Smith   | Text    | ❌          | -              | -                 |
-| Title           | The staff member's title                           | Mr      | Text    | ❌          | -              | -                 |
-| AccountEnabled  | Whether the staff member can login                 | True    | Text    | ❌          | -              | 'True' or 'False' |
-| AccountArchived | Whether the staff member "Exists"                  | False   | Text    | ❌          | -              | 'True' or 'False' |
-| PassHash        | The hashed password                                | -       | Blob    | ❌          | -              | -                 |
-| PassSalt        | The random salt used to hash the password          | -       | Blob    | ❌          | -              | -                 |
-| SENCo           | Whether they are a member of the SENCo team        | False   | Text    | ❌          | -              | 'True' or 'False' |
-| Safeguarding    | Whether they are a member of the safeguarding team | False   | Text    | ❌          | -              | 'True' or 'False' |
-| Admin           | Whether the staff member have admin access         | False   | Text    | ❌          | -              | 'True' or 'False' |
+| Column          | Description                                        | Example      | Type    | Primary Key | Foreign Key    | Constraints                 |
+|-----------------|----------------------------------------------------|--------------|---------|:-----------:|:--------------:|:---------------------------:|
+| StaffID         | The integer ID associated with the staff member    | 1            | Integer | ✅          | -              | Not null, Unique            |
+| FirstName       | The staff member's first name                      | John         | Text    | ❌          | -              | Not null                    |
+| LastName        | The staff member's last name                       | Smith        | Text    | ❌          | -              | Not null                    |
+| Title           | The staff member's title                           | Mr           | Text    | ❌          | -              | Not null                    |
+| Email           | The staff member's email address                   | JS@school.uk | Text    | ❌          | -              | Not null                    |
+| AccountEnabled  | Whether the staff member can login                 | True         | Text    | ❌          | -              | 'True' or 'False', Not null |
+| AccountArchived | Whether the staff member "Exists"                  | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
+| PassHash        | The hashed password                                | -            | Blob    | ❌          | -              | Not null, Unique            |
+| PassSalt        | The random salt used to hash the password          | -            | Blob    | ❌          | -              | Not null, Unique            |
+| SENCo           | Whether they are a member of the SENCo team        | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
+| Safeguarding    | Whether they are a member of the safeguarding team | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
+| Admin           | Whether the staff member have admin access         | False        | Text    | ❌          | -              | 'True' or 'False', Not null |
    
 ### Messages
-| Column       | Description                                                           | Example | Type    | Primary Key | Foreign Key    | Constraints       |
-|--------------|-----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:-----------------:|
-| MessageID    | The integer ID associated with the message                            | 1       | Integer | ✅          | -              | -                 |
-| SenderID     | The integer ID associated with the staff member sending the message   | 1       | Integer | ❌          | Staff(StaffID) | -                 |
-| RecipientID  | The integer ID associated with the staff member receiving the message | 1       | Integer | ❌          | Staff(StaffID) | -                 |
-| Message      | The encrypted message                                                 | -       | Blob    | ❌          | -              | -                 |
-| TimeStamp    | The timestamp that the message was sent                               | -       | Text    | ❌          | -              | -                 |
-| ReadReceipts | Whether the message has been read                                     | False   | Text    | ❌          | -              | 'True' or 'False' |
-| Archived     | Whether the message has been archived                                 | False   | Text    | ❌          | -              | 'True' or 'False' |
+| Column       | Description                                                           | Example | Type    | Primary Key | Foreign Key    | Constraints                 |
+|--------------|-----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:---------------------------:|
+| MessageID    | The integer ID associated with the message                            | 1       | Integer | ✅          | -              | Not null, Unique            |
+| SenderID     | The integer ID associated with the staff member sending the message   | 1       | Integer | ❌          | Staff(StaffID) | Not null                    |
+| RecipientID  | The integer ID associated with the staff member receiving the message | 1       | Integer | ❌          | Staff(StaffID) | Not null                    |
+| Message      | The encrypted message                                                 | -       | Blob    | ❌          | -              | Not null                    |
+| TimeStamp    | The timestamp that the message was sent                               | -       | Text    | ❌          | -              | Not null                    |
+| ReadReceipts | Whether the message has been read                                     | False   | Text    | ❌          | -              | 'True' or 'False', Not null |
+| Archived     | Whether the message has been archived                                 | False   | Text    | ❌          | -              | 'True' or 'False', Not null |
 
 ### Students
-| Column       | Description                                | Example | Type    | Primary Key | Foreign Key    |
-|--------------|--------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| StudentID    | The integer ID associated with the student | 1       | Integer | ✅          | -              |
-| FirstName    | The encrypted first name of the student    | John    | Text    | ❌          | -              |
-| LastName     | The encrypted last name of the student     | Smith   | Text    | ❌          | -              |
-| TutorID      | The ID of the student's form tutor         | 1       | Integer | ❌          | Staff(StaffID) |
-| HeadOfYearID | The ID of the student's head of year       | 1       | Integer | ❌          | Staff(StaffID) |
+| Column       | Description                                | Example | Type    | Primary Key | Foreign Key    | Constraints      |
+|--------------|--------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
+| StudentID    | The integer ID associated with the student | 1       | Integer | ✅          | -              | Not null, Unique |
+| FirstName    | The encrypted first name of the student    | John    | Text    | ❌          | -              | Not null         |
+| LastName     | The encrypted last name of the student     | Smith   | Text    | ❌          | -              | Not null         |
+| TutorID      | The ID of the student's form tutor         | 1       | Integer | ❌          | Staff(StaffID) | -                |
+| HeadOfYearID | The ID of the student's head of year       | 1       | Integer | ❌          | Staff(StaffID) | -                |
 
 ### Reporting
-| Column       | Description                                                          | Example | Type    | Primary Key | Foreign Key         |
-|--------------|----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|
-| ReportID     | The integer ID associated with the report                            | 1       | Integer | ✅          | -                   |
-| StudentID    | The integer ID associated with the student who is being reported     | 1       | Integer | ❌          | Students(StudentID) |
-| StaffID      | The integer ID associated with the staff member who filed the report | 1       | Integer | ❌          | Staff(StaffID)      |
-| Report       | The encrypted report                                                 | -       | Blob    | ❌          | -                   |
-| Timestamp    | The timestamp that the report was filed                              | -       | Text    | ❌          | -                   |
+| Column       | Description                                                          | Example | Type    | Primary Key | Foreign Key         | Constraints      |
+|--------------|----------------------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|:----------------:|
+| ReportID     | The integer ID associated with the report                            | 1       | Integer | ✅          | -                   | Not null, Unique |
+| StudentID    | The integer ID associated with the student who is being reported     | 1       | Integer | ❌          | Students(StudentID) | Not null         |
+| StaffID      | The integer ID associated with the staff member who filed the report | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
+| Report       | The encrypted report                                                 | -       | Blob    | ❌          | -                   | Not null         |
+| Timestamp    | The timestamp that the report was filed                              | -       | Text    | ❌          | -                   | Not null         |
 
 ### Files
-| Column   | Description                                                       | Example | Type    | Primary Key | Foreign Key    |
-|----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|
-| FileID   | The integer ID associated with the file                           | 1       | Integer | ✅          | -              |
-| OwnerID  | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) |
-| FilePath | The path on the server to the file                                | -       | Text    | ❌          | -              |
-| FileHash | The hash of the file (For integrity checks)                       | -       | Blob    | ❌          | -              |
+| Column   | Description                                                       | Example | Type    | Primary Key | Foreign Key    | Constraints      |
+|----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
+| FileID   | The integer ID associated with the file                           | 1       | Integer | ✅          | -              | Not null, Unique |
+| OwnerID  | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
+| FilePath | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
+| FileHash | The hash of the file (For integrity checks)                       | -       | Blob    | ❌          | -              | Not null         |
