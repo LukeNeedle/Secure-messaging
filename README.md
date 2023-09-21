@@ -119,3 +119,24 @@ These objectives aren't in any particular order and they are only numbered to he
 | OwnerID  | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
 | FilePath | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
 | FileHash | The hash of the file (For integrity checks)                       | -       | Blob    | ❌          | -              | Not null         |
+
+
+## Naming schema
+|           | Correct name       |
+|:---------:|:------------------:|
+| Variables | firstSecondThird   |
+| Files     | first-second-third |
+| Functions | first_second_third |
+
+Function documentation in code follows the google standard:
+```python
+"""
+_summary_
+
+Args:
+    _arg_ (_type_): _description_
+
+Returns:
+    _type_: _description_
+"""
+```
