@@ -15,7 +15,7 @@ def create_tables():
 		"AccountEnabled"	TEXT NOT NULL DEFAULT 'False',
 		"AccountArchived"	TEXT NOT NULL DEFAULT 'False',
 		"PassHash"	BLOB NOT NULL UNIQUE,
-		"PassSalt"	BLOB NOT NULL UNIQUE,
+		"PassSalt"	TEXT NOT NULL UNIQUE,
 		"SENCo"	TEXT NOT NULL DEFAULT 'False',
 		"Safeguarding"	TEXT NOT NULL DEFAULT 'False',
 		"Admin"	TEXT NOT NULL DEFAULT 'False',
@@ -82,7 +82,7 @@ def create_tables():
 
 def create_user(firstName:str, lastName:str, title:str, email:str,
                 enabled:bool, SENCo:bool, safeguarding:bool, admin:bool,
-                passwordHash, passwordSalt):
+                passwordHash, passwordSalt:str):
     """
     Creates the user from the data provided. Doesn't return anything.
 
@@ -126,4 +126,4 @@ def create_user(firstName:str, lastName:str, title:str, email:str,
 create_user(firstName="John", lastName="Smith", title="Mr", email = "JS@school.uk",
             enabled = "False", SENCo = True, safeguarding = False, admin = False,
             passwordHash = "Averysecurepasswordthathasbeenhashed".encode(),
-            passwordSalt = "Arandomstringofcharacters".encode())
+            passwordSalt = "Arandomstringofcharacters")
