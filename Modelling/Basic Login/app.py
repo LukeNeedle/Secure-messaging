@@ -16,11 +16,11 @@ def entryCleaner(entry, mode="sql"):
     mode = "password" --> Removes characters that could be used for sql injection and characters that could be used for sql injection as well as characters that aren't on the english keyboard.
 
     Args:
-    entry: The input that needs cleaning
-    mode: Selects how the entry should be cleaned
+        entry (string): The input that needs cleaning
+        mode (string, optional): Selects how the entry should be cleaned. Defaults to "sql".
 
     Returns:
-    string: The cleaned string
+        string: The cleaned string
     """
 
     if mode == "sql":
@@ -60,8 +60,8 @@ def myHashFunction(variable, mode="password"):
     return hashedVariable
 
 @login_manager.user_loader
-def user_loader():
-    email = request.form.get('email')
+def user_loader(email):
+    # email = request.form.get('email')
     cleanedEmail = entryCleaner(entry=email, mode="sql")
 
     connection = sqlite3.connect("database.db")
@@ -70,24 +70,27 @@ def user_loader():
     cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
     result = cursor.fetchone()
     if result == None:
-        connection.close()
-        return None
-    else:
-        userDetails = {
-            "id": result[0],
-            "title": result[1],
-            "firstName": result[2],
-            "lastName": result[3],
-            "email": result[4],
-            "accountEnabled": result[5],
-            "accountArchived": result[6],
-            "password": result[7],
-            "passhash": result[8],
-            "SENCo": result[9],
-            "safeguarding": result[10],
-            "admin": result[11]
-        }
-        user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
+        cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            return None
+    
+    userDetails = {
+        "id": result[0],
+        "title": result[1],
+        "firstName": result[2],
+        "lastName": result[3],
+        "email": result[4],
+        "accountEnabled": result[5],
+        "accountArchived": result[6],
+        "password": result[7],
+        "passhash": result[8],
+        "SENCo": result[9],
+        "safeguarding": result[10],
+        "admin": result[11]
+    }
+    user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
     connection.close()
     return user
 
@@ -107,6 +110,8 @@ def login():
         cleanedEmail = entryCleaner(email)
         cleanedPassword = entryCleaner(password)
 
+        print(cleanedPassword)
+        print(password)
         if cleanedEmail != email:
             # Invalid email
             return redirect(url_for('login'))
@@ -124,7 +129,7 @@ def login():
             # User not found
             return redirect(url_for('login'))
         
-        if result == myHashFunction(cleanedPassword):
+        if result[0].encode() == myHashFunction(cleanedPassword, "password"):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
