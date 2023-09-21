@@ -9,7 +9,7 @@ app.secret_key = 'super secret string'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-def entryCleaner(entry, mode="sql"):
+def entry_cleaner(entry, mode="sql"):
     """
     Remove unwanted characters from a string.
     mode = "sql" --> Removes characters that could be used for sql injection
@@ -36,7 +36,7 @@ def entryCleaner(entry, mode="sql"):
 
         return cleanedEntry
     elif mode == "password":
-        cleanedEntry = entryCleaner(entry, "sql")
+        cleanedEntry = entry_cleaner(entry, "sql")
 
         cleanedEntry = cleanedEntry.encode("ascii", "ignore").decode()
 
@@ -44,7 +44,7 @@ def entryCleaner(entry, mode="sql"):
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
-def myHashFunction(variable, mode="password"):
+def hash_function(variable, mode="password"):
     """
     Hashes the variable that is passed in.
 
@@ -62,7 +62,7 @@ def myHashFunction(variable, mode="password"):
 @login_manager.user_loader
 def user_loader(email):
     # email = request.form.get('email')
-    cleanedEmail = entryCleaner(entry=email, mode="sql")
+    cleanedEmail = entry_cleaner(entry=email, mode="sql")
 
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -107,8 +107,8 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        cleanedEmail = entryCleaner(email)
-        cleanedPassword = entryCleaner(password)
+        cleanedEmail = entry_cleaner(email)
+        cleanedPassword = entry_cleaner(password)
 
         print(cleanedPassword)
         print(password)
@@ -129,7 +129,7 @@ def login():
             # User not found
             return redirect(url_for('login'))
         
-        if result[0].encode() == myHashFunction(cleanedPassword, "password"):
+        if result[0].encode() == hash_function(cleanedPassword, "password"):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:

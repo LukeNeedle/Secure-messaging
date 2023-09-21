@@ -38,7 +38,7 @@ class User(UserMixin):
     def is_anonymous(self):
         return False
     
-    def getUser(userID):
+    def get_user(userID):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
