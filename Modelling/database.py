@@ -39,7 +39,7 @@ def create_tables():
 		FOREIGN KEY("SenderID") REFERENCES "Staff"("StaffID"),
 		FOREIGN KEY("RecipientID") REFERENCES "Staff"("StaffID"),
 		PRIMARY KEY("MessageID" AUTOINCREMENT),
-		CHECK ("ReadReceipts"=='True' OR "ReadReceipts"=='False')
+		CHECK ("ReadReceipts"=='True' OR "ReadReceipts"=='False'),
 		CHECK ("Archived"=='True' OR "Archived"=='False')
 	)""")
 	conn.commit()
