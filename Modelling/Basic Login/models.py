@@ -2,7 +2,9 @@ from flask_login import UserMixin
 import sqlite3
 
 class User(UserMixin):
-    def __init__(self, id, title, firstName, lastName, accountEnabled, accountArchived, password, passhash, SENCo, safeguarding, admin):
+    def __init__(self, id:int, title:str, firstName:str, lastName:str,
+                 accountEnabled:bool, accountArchived:bool, password:str,
+                 passhash:str, SENCo:bool, safeguarding:bool, admin:bool):
         self.id = id
         self.title = title
         self.fname = firstName
