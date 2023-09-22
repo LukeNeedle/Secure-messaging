@@ -153,17 +153,12 @@ def login():
                 user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
                 login_user(user, remember=True)
         connection.close()
-        return redirect(url_for('profile'))
+        return redirect(url_for('index'))
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return 'Logged out'
-
-@app.route('/profile')
-@login_required
-def profile():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
