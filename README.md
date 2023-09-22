@@ -125,7 +125,7 @@ These objectives aren't in any particular order and they are only numbered to he
 |           | Correct name       |
 |:---------:|:------------------:|
 | Variables | firstSecondThird   |
-| Files     | first-second-third |
+| Files     | first_second_third |
 | Functions | first_second_third |
 
 Function documentation in code follows the google standard:

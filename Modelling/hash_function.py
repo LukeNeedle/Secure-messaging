@@ -77,5 +77,3 @@ def hash_file(file):
 
     
     return file
-
-print(hash_variable("Averysecurepasswordthathasbeenhashed", "Arandomstringofcharacters"))
