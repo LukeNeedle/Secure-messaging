@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{url_for('style_css')}}">
+    </head>
+
+    <body>
+        <header>
+            <a href="{{ url_for('dashboard') }}">Secure Messaging</a>
+
+            <nav class="nav">
+                <ul class="menu">
+                    <li>
+                        <a href="{{ url_for('dashboard') }}">Home</a>
+                    </li>
+
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.admin %}
+                            <li>
+                                <a href="{{ url_for('admin') }}">Admin Dashboard</a>
+                            </li>
+                        {% endif %}
+                        <li>
+                            <a href="{{ url_for('account') }}">Account</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
+        </header>
+            
+        {% block content %}{% endblock %}
+    </body>
+</html>
