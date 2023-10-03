@@ -103,7 +103,7 @@ def create_user(firstName:str, lastName:str, title:str, email:str,
 
     try:
         cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
-                    VALUES ('{firstName}', '{lastName}', '{title}', '{email}', '{enabled}', 'False', '{passwordHash.decode()}', '{passwordSalt}', '{SENCo}', '{safeguarding}', '{admin}');""")
+                    VALUES ('{firstName}', '{lastName}', '{title}', '{email}', '{enabled}', 'False', '{passwordHash}', '{passwordSalt}', '{SENCo}', '{safeguarding}', '{admin}');""")
         conn.commit()
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
