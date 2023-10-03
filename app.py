@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for, render_template, request, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import User
 import sqlite3
+import hash_function
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
@@ -52,20 +53,23 @@ def entry_cleaner(entry, mode="sql"):
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
-def hash_function(variable, mode="password"):
+def hashing(variable, salt:str = None, mode:str="password"):
     """
-    Hashes the variable that is passed in.
+    Hashes the variable/file passed in.
 
     Args:
-        variable (string): Any variable that needs hashing.
-        mode (str, optional): _description_. Defaults to "password".
+        variable (string): The variable/file that needs cleaning
+        salt (string, optional): The salt to be applied to the variable/file.
+        mode (string, optional): Selects how the variable/file should be hashed. Defaults to "password".
 
     Returns:
-        The hashed variable
+        string: The hashed variable/file
     """
-
-    hashedVariable = variable.encode()
-    return hashedVariable
+    if mode == "password":
+        result = hash_function.hash_variable(variable, salt)
+    elif mode == "file":
+        result = hash_function.hash_file(variable)
+    return result
 
 
 #########################################################################
@@ -151,7 +155,7 @@ def login():
             # User not found
             return redirect(url_for('login'))
         
-        if result[0].encode() == hash_function(cleanedPassword, "password"):
+        if result[0].encode() == hashing(cleanedPassword, "password"):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
@@ -197,6 +201,7 @@ def logout():
 ####################              CSS               #####################
 #########################################################################
 #########################################################################
+
 
 @app.route('/static/css/style.css')
 def style_css():
