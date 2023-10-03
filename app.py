@@ -81,6 +81,16 @@ def hashing(variable, salt:str = None, mode:str="password"):
 
 @login_manager.user_loader
 def user_loader(email):
+    """
+    Generates the user object from the email address provided.
+
+    Args:
+        email (string): The 
+
+    Returns:
+        User: The user object
+    """
+
     cleanedEmail = entry_cleaner(entry=email, mode="sql")
 
     connection = sqlite3.connect("database.db")
