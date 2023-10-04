@@ -9,14 +9,13 @@
 
     <body>
         <header>
-            <a href="{{ url_for('dashboard') }}">Secure Messaging</a>
+            <a class="logo" href="{{ url_for('dashboard') }}">Secure Messaging</a>
 
             <nav class="nav">
                 <ul class="menu">
                     <li>
-                        <a href="{{ url_for('dashboard') }}">Home</a>
+                        <a href="{{ url_for('dashboard') }}">Dashboard</a>
                     </li>
-
                     
                     {% if current_user.is_authenticated %}
                         {% if current_user.admin %}
@@ -24,9 +23,6 @@
                                 <a href="{{ url_for('admin') }}">Admin Dashboard</a>
                             </li>
                         {% endif %}
-                        <li>
-                            <a href="{{ url_for('account') }}">Account</a>
-                        </li>
 
                         <li>
                             <a href="{{ url_for('logout') }}">Logout</a>
