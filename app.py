@@ -165,7 +165,7 @@ def login():
             # User not found
             return redirect(url_for('login'))
         
-        if result[0].encode() == hashing(cleanedPassword, "password"):
+        if result[0] == hashing(cleanedPassword, "password"):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
