@@ -11,8 +11,8 @@
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --text: #201316;
-        --background: #efe6e8;
+        --text: #efe6e8;
+        --background: #201316;
         --primary: #3a347e;
         --secondary: #2c1c16;
         --accent: #a4d0e0;
@@ -24,6 +24,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    color: var(--text);
 }
 
 body{
@@ -44,6 +45,7 @@ header{
     border-bottom-width: 2px;
     width: 100%;
     overflow: auto;
+    margin-bottom: 10px;
 }
 
 .logo{
@@ -62,29 +64,29 @@ header{
 
 .menu li{
     float: left;
+    border-color: var(--minor-border);
 }
 
 .menu a{
     display: block;
     color: var(--text);
-    /* background-color: var(--accent); */
+    background-color: var(--secondary);
     transition: all 0.5s;
-    padding: 5px;
+    padding: 10px;
+    padding-bottom: 7px;
+    padding-top: 7px;
     border: var(--minor-border);
-    border-radius: 10%;
+    border-radius: 10px;
 }
 
 .menu a:hover{
     color: var(--primary);
 }
 
-/* Menu Icon */
-.side-menu {
-    display: none;
+.content{
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    margin-top: 10%;
 }
 
-/* Toggle menu icon */
-
-.side-menu:checked ~ nav{
-    max-height: 100%;
-}
