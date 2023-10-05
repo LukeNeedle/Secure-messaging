@@ -137,7 +137,7 @@ def login():
         if type(current_user._get_current_object()) is User:
             return redirect(url_for('dashboard'))
         else:
-            return render_template("index.html")
+            return render_template("login.html")
     
     elif request.method == 'POST':
         email = request.form.get('email')
