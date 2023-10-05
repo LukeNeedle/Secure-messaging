@@ -112,3 +112,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Virtual env
+pyvenv.cfg
+Secure-messaging.code-workspace
+Scripts/
+.vscode/
