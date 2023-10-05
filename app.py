@@ -213,9 +213,9 @@ def logout():
 #########################################################################
 
 
-@app.route('/static/css/style.css')
-def style_css():
-    return send_file('templates//style.css')
+@app.route('/static/css/base.css')
+def base_css():
+    return send_file('templates//base.css')
 
 
 #########################################################################
