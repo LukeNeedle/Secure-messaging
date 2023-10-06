@@ -146,8 +146,6 @@ def login():
         cleanedEmail = entry_cleaner(email)
         cleanedPassword = entry_cleaner(password)
 
-        print(cleanedPassword)
-        print(password)
         if cleanedEmail != email:
             # Invalid email
             return redirect(url_for('login'))
@@ -164,8 +162,19 @@ def login():
             connection.close()
             # User not found
             return redirect(url_for('login'))
+        else:
+            passHash = result[0]
         
-        if result[0] == hashing(cleanedPassword, "password"):
+        cursor.execute(f"""SELECT passSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            # User not found
+            return redirect(url_for('login'))
+        else:
+            salt = result[0]
+        
+        if passHash == hashing(cleanedPassword, salt, "password"):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
