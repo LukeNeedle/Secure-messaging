@@ -50,6 +50,10 @@ def entry_cleaner(entry, mode="sql"):
         cleanedEntry = cleanedEntry.encode("ascii", "ignore").decode()
 
         return cleanedEntry
+    elif mode == "email":
+        cleanedEntry = entry_cleaner(entry, "sql").lower()
+        cleanedEmail = cleanedEntry # Todo: regex
+        return cleanedEmail
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
