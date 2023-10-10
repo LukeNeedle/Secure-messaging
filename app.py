@@ -154,6 +154,8 @@ def login():
         if cleanedEmail != email:
             # Invalid email
             return redirect(url_for('login'))
+        del email
+
         regexCode = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if not (regex.fullmatch(regexCode, cleanedEmail)):
             return redirect(url_for('login'))
@@ -161,7 +163,7 @@ def login():
         if cleanedPassword != password:
             # Invalid password
             return redirect(url_for('login'))
-        
+        del password
 
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
