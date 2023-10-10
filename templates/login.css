@@ -78,6 +78,10 @@ input:focus {
     outline: var(--primary);
 }
 
+input:hover{
+    cursor: text;
+}
+
 button {
     background-color: var(--primary);
     padding-top: 10px;
@@ -102,4 +106,8 @@ button {
     button {
         color: var(--text);
     }
+}
+
+button:hover {
+    cursor: pointer;
 }
