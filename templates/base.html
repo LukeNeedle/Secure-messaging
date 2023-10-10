@@ -13,11 +13,11 @@
 
             <nav class="nav">
                 <ul class="menu">
+                    {% if current_user.is_authenticated %}
                     <li>
                         <a href="{{ url_for('dashboard') }}">Dashboard</a>
                     </li>
                     
-                    {% if current_user.is_authenticated %}
                         {% if current_user.admin %}
                             <li>
                                 <a href="{{ url_for('admin') }}">Admin Dashboard</a>
