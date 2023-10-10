@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from models import User
 import sqlite3
 import hash_function
+import re as regex
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
@@ -152,6 +153,9 @@ def login():
 
         if cleanedEmail != email:
             # Invalid email
+            return redirect(url_for('login'))
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if not (regex.fullmatch(regex, email)):
             return redirect(url_for('login'))
         if cleanedPassword != password:
             # Invalid password
