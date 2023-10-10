@@ -226,6 +226,10 @@ def logout():
 def base_css():
     return send_file('templates//base.css')
 
+@app.route('/static/css/login.css')
+def login_css():
+    return send_file('templates//login.css')
+
 
 #########################################################################
 #########################################################################

@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link rel="stylesheet" href="{{url_for('login_css')}}">
 <form method="POST" action="{{url_for('login')}}">
+    <p class="title">
+        Login
+    </p>
     <div id="username">
-        <label for="email">Email</label>
         <input type="email" name="email" placeholder="Email" autofocus="">
     </div>
     <div id="password">
-        <label for="password">Password</label>
         <input type="password" name="password" placeholder="Password">
     </div>
     <div id="submit">
-        <button>Log In</button>
+        <button>Login</button>
     </div>
 </form>
 {% endblock %}
