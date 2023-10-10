@@ -242,7 +242,7 @@ def login_css():
 #########################################################################
 
 
-def handle_not_found():
+def handle_not_found(error):
     return redirect(url_for('login'))
 
 
