@@ -57,6 +57,7 @@ input {
     padding-left: 10px;
     width: 500px;
     height: 35px;
+    border-style: solid;
 }
 
 @media (prefers-color-scheme: light) {
