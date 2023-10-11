@@ -2,20 +2,19 @@ from flask_login import UserMixin
 import sqlite3
 
 class User(UserMixin):
-    def __init__(self, id:int, title:str, firstName:str, lastName:str,
-                 accountEnabled:bool, accountArchived:bool, password:str,
-                 passhash:str, SENCo:bool, safeguarding:bool, admin:bool):
-        self.id = id
-        self.title = title
-        self.fname = firstName
-        self.lname = lastName
-        self.enabled = accountEnabled
-        self.archived = accountArchived
-        self.password = password
-        self.passhash = passhash
-        self.senco = SENCo
-        self.safeguarding = safeguarding
-        self.admin = admin
+    def __init__(self, userDetails:dict):
+        self.id = userDetails['id']
+        self.title = userDetails['title']
+        self.fname = userDetails['firstName']
+        self.lname = userDetails['lastName']
+        self.email = userDetails['email']
+        self.enabled = userDetails['accountEnabled']
+        self.archived = userDetails['accountArchived']
+        self.passwordHash = userDetails['passhash']
+        self.passwordSalt = userDetails['passsalt']
+        self.senco = userDetails['SENCo']
+        self.safeguarding = userDetails['safeguarding']
+        self.admin = userDetails['admin']
 
     def is_authenticated(self):
         if self.id:
@@ -64,6 +63,6 @@ class User(UserMixin):
                 "safeguarding": result[10],
                 "admin": result[11]
             }
-            user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
+            user = User(userDetails)
             connection.close()
             return user

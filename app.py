@@ -201,14 +201,14 @@ def login():
                     "email": result[4],
                     "accountEnabled": result[5],
                     "accountArchived": result[6],
-                    "password": result[7],
-                    "passhash": result[8],
+                    "passhash": result[7],
+                    "passsalt": result[8],
                     "SENCo": result[9],
                     "safeguarding": result[10],
                     "admin": result[11]
                 }
-                user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
-                login_user(user, remember=True)
+
+                login_user(User(userDetails), remember=True)
         connection.close()
         return redirect(url_for('login'))
 
