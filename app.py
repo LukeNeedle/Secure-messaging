@@ -220,6 +220,13 @@ def dashboard():
     else:
         return redirect(url_for('login'))
 
+@app.route('/messages')
+def messages():
+    if type(current_user._get_current_object()) is User:
+        return render_template("dashboard.html")
+    else:
+        return redirect(url_for('login'))
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -241,6 +248,10 @@ def base_css():
 @app.route('/static/css/login.css')
 def login_css():
     return send_file('templates//login.css')
+
+@app.route('/static/css/dashboard.css')
+def dashboard_css():
+    return send_file('templates//dashboard.css')
 
 
 #########################################################################

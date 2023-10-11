@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('dashboard_css')}}">
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="notification">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<p class="welcome">
+    Hello {{current_user.title}} {{current_user.lname}}!
+</p>
+
+<div class="menu">
+    <div class="messages" href="{{url_for('messages')}}">
+        <p>
+            Messages
+        </p>
+    </div>
+</div>
+{% endblock %}
