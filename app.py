@@ -112,9 +112,9 @@ def user_loader(email):
     
     userDetails = {
         "id": result[0],
-        "title": result[1],
-        "firstName": result[2],
-        "lastName": result[3],
+        "firstName": result[1],
+        "lastName": result[2],
+        "title": result[3],
         "email": result[4],
         "accountEnabled": result[5],
         "accountArchived": result[6],
@@ -195,9 +195,9 @@ def login():
             else:
                 userDetails = {
                     "id": result[0],
-                    "title": result[1],
-                    "firstName": result[2],
-                    "lastName": result[3],
+                    "firstName": result[1],
+                    "lastName": result[2],
+                    "title": result[3],
                     "email": result[4],
                     "accountEnabled": result[5],
                     "accountArchived": result[6],

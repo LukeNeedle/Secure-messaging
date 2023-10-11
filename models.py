@@ -14,28 +14,28 @@ class User(UserMixin):
         else:
             self.enabled = False
 
-        if userDetails['accountArchived'] == "True":
-            self.archived = True
-        else:
+        if userDetails['accountArchived'] == "False":
             self.archived = False
+        else:
+            self.archived = True
 
         self.passwordHash = userDetails['passhash']
         self.passwordSalt = userDetails['passsalt']
 
-        if userDetails['SENCo'] == "True":
-            self.senco = True
-        else:
+        if userDetails['SENCo'] == "False":
             self.senco = False
-
-        if userDetails['safeguarding'] == "True":
-            self.safeguarding = True
         else:
+            self.senco = True
+
+        if userDetails['safeguarding'] == "False":
             self.safeguarding = False
-
-        if userDetails['admin'] == "True":
-            self.admin = True
         else:
+            self.safeguarding = True
+
+        if userDetails['admin'] == "False":
             self.admin = False
+        else:
+            self.admin = True
 
     def is_authenticated(self):
         if self.id:
@@ -72,9 +72,9 @@ class User(UserMixin):
         else:
             userDetails = {
                 "id": result[0],
-                "title": result[1],
-                "firstName": result[2],
-                "lastName": result[3],
+                "firstName": result[1],
+                "lastName": result[2],
+                "title": result[3],
                 "email": result[4],
                 "accountEnabled": result[5],
                 "accountArchived": result[6],
