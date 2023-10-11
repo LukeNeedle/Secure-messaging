@@ -147,18 +147,19 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
+        #Email validation
         cleanedEmail = entry_cleaner(email)
-        cleanedPassword = entry_cleaner(password)
-
         if cleanedEmail != email:
             # Invalid email
             return redirect(url_for('login'))
         del email
 
-        regexCode = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        if not (regex.fullmatch(regexCode, cleanedEmail)):
+        if not (regex.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cleanedEmail)):
+            # Invalid email
             return redirect(url_for('login'))
         
+        #Password Validation
+        cleanedPassword = entry_cleaner(password)
         if cleanedPassword != password:
             # Invalid password
             return redirect(url_for('login'))
