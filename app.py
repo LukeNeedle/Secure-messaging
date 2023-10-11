@@ -124,9 +124,8 @@ def user_loader(email):
         "safeguarding": result[10],
         "admin": result[11]
     }
-    user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
     connection.close()
-    return user
+    return User(userDetails)
 
 
 #########################################################################
