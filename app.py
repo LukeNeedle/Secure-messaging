@@ -118,8 +118,8 @@ def user_loader(email):
         "email": result[4],
         "accountEnabled": result[5],
         "accountArchived": result[6],
-        "password": result[7],
-        "passhash": result[8],
+        "passhash": result[7],
+        "passsalt": result[8],
         "SENCo": result[9],
         "safeguarding": result[10],
         "admin": result[11]
