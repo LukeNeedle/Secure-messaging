@@ -66,6 +66,7 @@ header{
 .menu li{
     float: left;
     border-color: var(--minor-border);
+    margin-left: 10px;
 }
 
 .menu a{
