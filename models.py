@@ -3,18 +3,39 @@ import sqlite3
 
 class User(UserMixin):
     def __init__(self, userDetails:dict):
-        self.id = userDetails['id']
+        self.id = int(userDetails['id'])
         self.title = userDetails['title']
         self.fname = userDetails['firstName']
         self.lname = userDetails['lastName']
         self.email = userDetails['email']
-        self.enabled = userDetails['accountEnabled']
-        self.archived = userDetails['accountArchived']
+
+        if userDetails['accountEnabled'] == "True":
+            self.enabled = True
+        else:
+            self.enabled = False
+
+        if userDetails['accountArchived'] == "True":
+            self.archived = True
+        else:
+            self.archived = False
+
         self.passwordHash = userDetails['passhash']
         self.passwordSalt = userDetails['passsalt']
-        self.senco = userDetails['SENCo']
-        self.safeguarding = userDetails['safeguarding']
-        self.admin = userDetails['admin']
+
+        if userDetails['SENCo'] == "True":
+            self.senco = True
+        else:
+            self.senco = False
+
+        if userDetails['safeguarding'] == "True":
+            self.safeguarding = True
+        else:
+            self.safeguarding = False
+
+        if userDetails['admin'] == "True":
+            self.admin = True
+        else:
+            self.admin = False
 
     def is_authenticated(self):
         if self.id:
