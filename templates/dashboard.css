@@ -36,6 +36,25 @@ a.messages {
     color: var(--background);
     text-align: center;
     padding: 10px;
+    width: 300px;
+    border-radius: 5px;
+    padding-left: 50px;
+    padding-right: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+
+a.messages:hover {
+    color: var(--background);
+}
+
+a.reporting {
+    background-color: var(--secondary);
+    color: var(--text);
+    text-align: center;
+    padding: 10px;
     width: fit-content;
     border-radius: 5px;
     padding-left: 50px;
@@ -43,4 +62,26 @@ a.messages {
     margin-left: auto;
     margin-right: auto;
     cursor: pointer;
+}
+
+a.reporting:hover {
+    color: var(--text);
+}
+
+a.user-settings {
+    background-color: var(--secondary);
+    color: var(--text);
+    text-align: center;
+    padding: 10px;
+    width: fit-content;
+    border-radius: 5px;
+    padding-left: 50px;
+    padding-right: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    cursor: pointer;
+}
+
+a.user-settings:hover {
+    color: var(--text);
 }

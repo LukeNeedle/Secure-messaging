@@ -225,6 +225,20 @@ def messages():
     else:
         return redirect(url_for('login'))
 
+@app.route('/reports')
+def reporting():
+    if type(current_user._get_current_object()) is User:
+        return render_template("dashboard.html")
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/settings')
+def user_settings():
+    if type(current_user._get_current_object()) is User:
+        return render_template("dashboard.html")
+    else:
+        return redirect(url_for('login'))
+
 @app.route('/logout')
 @login_required
 def logout():
