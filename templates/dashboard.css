@@ -28,10 +28,12 @@
     color: var(--accent);
     font-size: larger;
     font-weight: 200;
+    margin-bottom: 50px;
 }
 
-.messages {
+a.messages {
     background-color: var(--primary);
+    color: var(--background);
     text-align: center;
     padding: 10px;
     width: fit-content;
@@ -40,8 +42,5 @@
     padding-right: 50px;
     margin-left: auto;
     margin-right: auto;
-}
-
-.messages p{
-    color: var(--background);
+    cursor: pointer;
 }

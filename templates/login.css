@@ -95,6 +95,7 @@ button {
     display: inline-block;
     border-radius: 10px;
     font-size: larger;
+    cursor: pointer;
 }
 
 @media (prefers-color-scheme: light) {
@@ -106,8 +107,4 @@ button {
     button {
         color: var(--text);
     }
-}
-
-button:hover {
-    cursor: pointer;
 }
