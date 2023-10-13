@@ -94,7 +94,7 @@ header{
 
 .notification {
     background-color: #ff0000;
-    border-color: var(--text);
+    border-color: #f5f4ef;
     border-radius: 5px;
     border-width: 5px;
     width: fit-content;

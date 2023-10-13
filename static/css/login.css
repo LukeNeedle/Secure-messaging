@@ -29,24 +29,16 @@ form {
     border-radius: 15px;
 }
 
-@media (prefers-color-scheme: light) {
-    form p.title {
-        font-size: xx-large;
-        color: var(--text);
-        padding-bottom: 20px;
-        margin-top: 20px;
-    }
-}
-@media (prefers-color-scheme: dark) {
-    form p.title {
-        font-size: xx-large;
-        color: var(--background);
-        padding-bottom: 20px;
-        margin-top: 20px;
-    }
+form p.title {
+    color: #201316;
+    font-size: xx-large;
+    padding-bottom: 20px;
+    margin-top: 20px;
 }
 
 input {
+    border-color: #201316;
+    color: #201316;
     border-radius: 5px;
     margin-bottom: 4%;
     text-decoration: none;
@@ -60,19 +52,6 @@ input {
     border-style: solid;
 }
 
-@media (prefers-color-scheme: light) {
-    input {
-        border-color: var(--text);
-        color: var(--text);
-    }
-}
-@media (prefers-color-scheme: dark) {
-    input {
-        border-color: var(--background);
-        color: var(--background);
-    }
-}
-
 input:focus {
     border-color: var(--primary);
     outline: var(--primary);
@@ -84,6 +63,7 @@ input:hover{
 
 button {
     background-color: var(--primary);
+    color: #efe6e8;
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 50px;
@@ -96,15 +76,4 @@ button {
     border-radius: 10px;
     font-size: larger;
     cursor: pointer;
-}
-
-@media (prefers-color-scheme: light) {
-    button {
-        color: var(--background);
-    }
-}
-@media (prefers-color-scheme: dark) {
-    button {
-        color: var(--text);
-    }
 }
