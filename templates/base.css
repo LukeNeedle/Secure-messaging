@@ -92,3 +92,16 @@ header{
     margin-top: 10%;
 }
 
+.notification {
+    background-color: #ff0000;
+    border-color: var(--text);
+    border-radius: 5px;
+    border-width: 5px;
+    width: fit-content;
+    height: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 6px;
+    padding-left: 2%;
+    padding-right: 2%;
+}

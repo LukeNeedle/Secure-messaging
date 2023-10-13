@@ -32,6 +32,16 @@
                 </ul>
             </nav>
         </header>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="notification">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <div class="notification">
+            This is a test notification
+        </div>
         <div class="content">
             {% block content %}{% endblock %}
         </div>
