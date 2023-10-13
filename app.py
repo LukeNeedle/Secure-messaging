@@ -151,7 +151,7 @@ def login():
 
         #Email validation
         cleanedEmail = entry_cleaner(email)
-        if cleanedEmail != email:
+        if cleanedEmail != email.lower():
             # Invalid email
             return redirect(url_for('login'))
         del email
