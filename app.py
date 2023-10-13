@@ -53,8 +53,10 @@ def entry_cleaner(entry, mode="sql"):
         return cleanedEntry
     elif mode == "email":
         cleanedEntry = entry_cleaner(entry, "sql").lower()
-        cleanedEmail = cleanedEntry # Todo: regex
-        return cleanedEmail
+        if not regex.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cleanedEntry):
+            return None
+        else:
+            return cleanedEntry
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
@@ -153,10 +155,6 @@ def login():
             # Invalid email
             return redirect(url_for('login'))
         del email
-
-        if not (regex.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cleanedEmail)):
-            # Invalid email
-            return redirect(url_for('login'))
         
         #Password Validation
         cleanedPassword = entry_cleaner(password)
