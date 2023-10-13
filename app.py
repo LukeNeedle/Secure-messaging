@@ -255,15 +255,15 @@ def logout():
 
 @app.route('/static/css/base.css')
 def base_css():
-    return send_file('templates//base.css')
+    return send_file('static//css//base.css')
 
 @app.route('/static/css/login.css')
 def login_css():
-    return send_file('templates//login.css')
+    return send_file('static//css//login.css')
 
 @app.route('/static/css/dashboard.css')
 def dashboard_css():
-    return send_file('templates//dashboard.css')
+    return send_file('static//css//dashboard.css')
 
 
 #########################################################################
