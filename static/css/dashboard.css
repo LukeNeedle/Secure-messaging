@@ -33,8 +33,10 @@
 
 a.messages {
     background-color: var(--primary);
-    color: var(--background);
-    text-align: center;
+    color: #efe6e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px;
     width: 300px;
     border-radius: 5px;
@@ -47,41 +49,59 @@ a.messages {
 }
 
 a.messages:hover {
-    color: var(--background);
+    color: var(--text);
 }
 
 a.reporting {
     background-color: var(--secondary);
     color: var(--text);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px;
-    width: fit-content;
+    width: 300px;
     border-radius: 5px;
     padding-left: 50px;
     padding-right: 50px;
     margin-left: auto;
     margin-right: auto;
     cursor: pointer;
+    margin-bottom: 5px;
 }
 
 a.reporting:hover {
     color: var(--text);
 }
 
+a.reporting span {
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+}
+
 a.user-settings {
     background-color: var(--secondary);
     color: var(--text);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px;
-    width: fit-content;
+    width: 300px;
     border-radius: 5px;
     padding-left: 50px;
     padding-right: 50px;
     margin-left: auto;
     margin-right: auto;
     cursor: pointer;
+    margin-bottom: 5px;
 }
 
 a.user-settings:hover {
     color: var(--text);
+}
+
+a.user-settings span {
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
 }

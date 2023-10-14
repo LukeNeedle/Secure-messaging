@@ -79,6 +79,7 @@ header{
     padding-top: 7px;
     border: var(--minor-border);
     border-radius: 10px;
+    cursor: pointer;
 }
 
 .menu a:hover{
