@@ -12,10 +12,35 @@
         Messages
     </a>
     <a class="reporting" href="{{url_for('reporting')}}">
-        Reporting
+        <img class="reporting" width="20" height="20" src="/static/icon/flag"/>
+        <span>
+            Reporting
+        </span>
     </a>
     <a class="user-settings" href="{{url_for('user_settings')}}">
-        User Settings
+        <img class="user-settings" width="20" height="20" src="/static/icon/flag"/>
+        <span>
+            User Settings
+        </span>
     </a>
 </div>
+
+<script>
+    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function handleColorSchemeChange(event) {
+        if (event.matches) {
+            document.getElementsByClassName('img.reporting').src = "/static/icon/flag_dark";
+            document.getElementsByClassName('img.user-settings').src = "/static/icon/settings_dark";
+        } else {
+            document.getElementsByClassName('img.reporting').src = "/static/icon/flag";
+            document.getElementsByClassName('img.user-settings').src = "/static/icon/settings";
+        }
+    }
+
+    darkModeQuery.addListener(handleColorSchemeChange);
+
+    handleColorSchemeChange(darkModeQuery);
+</script>
+
 {% endblock %}
