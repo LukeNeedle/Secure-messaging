@@ -4,6 +4,7 @@ from models import User
 import sqlite3
 import hash_function
 import re as regex
+import os
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
@@ -264,6 +265,30 @@ def login_css():
 @app.route('/static/css/dashboard.css')
 def dashboard_css():
     return send_file('static//css//dashboard.css')
+
+
+#########################################################################
+#########################################################################
+####################             Images             #####################
+#########################################################################
+#########################################################################
+
+
+@app.route('/static/icon/<image_name>')
+def images(image_name: str):
+    """
+    Send the requested image file if it exists, otherwise send a placeholder image.
+
+    Args:
+    image_name: The name of the requested image file.
+
+    Returns:
+    Send file: The requested image file if it exists, otherwise the placeholder image file.
+    """
+    if image_name+".svg" in os.listdir("static//icons"):
+        return send_file(f"static//icons//{image_name}.svg")
+    else:
+        return send_file(f"static//icons//place_holder.png")
 
 
 #########################################################################
