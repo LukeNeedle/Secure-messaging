@@ -74,7 +74,7 @@ header{
     color: var(--text);
     background-color: var(--secondary);
     transition: all 0.5s;
-    padding: 10px;
+    padding: 20px;
     padding-bottom: 7px;
     padding-top: 7px;
     border: var(--minor-border);

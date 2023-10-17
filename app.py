@@ -274,21 +274,25 @@ def dashboard_css():
 #########################################################################
 
 
-@app.route('/static/icon/<image_name>')
-def images(image_name: str):
-    """
-    Send the requested image file if it exists, otherwise send a placeholder image.
+#                                                        #
+# This function is no longer in use after commit 275306d #
+#                                                        #
+#
+# @app.route('/static/icon/<image_name>')
+# def images(image_name: str):
+#     """
+#     Send the requested image file if it exists, otherwise send a placeholder image.
 
-    Args:
-    image_name: The name of the requested image file.
+#     Args:
+#     image_name: The name of the requested image file.
 
-    Returns:
-    Send file: The requested image file if it exists, otherwise the placeholder image file.
-    """
-    if image_name+".svg" in os.listdir("static//icons"):
-        return send_file(f"static//icons//{image_name}.svg")
-    else:
-        return send_file(f"static//icons//place_holder.png")
+#     Returns:
+#     Send file: The requested image file if it exists, otherwise the placeholder image file.
+#     """
+#     if image_name+".svg" in os.listdir("static//icons"):
+#         return send_file(f"static//icons//{image_name}.svg")
+#     else:
+#         return send_file(f"static//icons//place_holder.png")
 
 
 #########################################################################

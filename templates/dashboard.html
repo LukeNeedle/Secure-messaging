@@ -7,40 +7,34 @@
     Hello {{current_user.title}} {{current_user.lname}}!
 </p>
 
-<div class="menu">
+<div class="options">
     <a class="messages" href="{{url_for('messages')}}">
         Messages
     </a>
     <a class="reporting" href="{{url_for('reporting')}}">
-        <img class="reporting" width="20" height="20" src="/static/icon/flag"/>
+        <picture>
+            <source
+              srcset="/static/icons/flag_dark.svg"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img width="20" height="20" src="/static/icons/flag.svg"/>
+        </picture>
         <span>
             Reporting
         </span>
     </a>
     <a class="user-settings" href="{{url_for('user_settings')}}">
-        <img class="user-settings" width="20" height="20" src="/static/icon/flag"/>
+        <picture>
+            <source
+              srcset="/static/icons/settings_dark.svg"
+              media="(prefers-color-scheme: dark)"
+            />
+            <img width="20" height="20" src="/static/icons/settings.svg"/>
+        </picture>
         <span>
             User Settings
         </span>
     </a>
 </div>
-
-<script>
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    function handleColorSchemeChange(event) {
-        if (event.matches) {
-            document.getElementsByClassName('img.reporting').src = "/static/icon/flag_dark";
-            document.getElementsByClassName('img.user-settings').src = "/static/icon/settings_dark";
-        } else {
-            document.getElementsByClassName('img.reporting').src = "/static/icon/flag";
-            document.getElementsByClassName('img.user-settings').src = "/static/icon/settings";
-        }
-    }
-
-    darkModeQuery.addListener(handleColorSchemeChange);
-
-    handleColorSchemeChange(darkModeQuery);
-</script>
 
 {% endblock %}
