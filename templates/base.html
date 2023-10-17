@@ -28,20 +28,21 @@
                             <a href="{{ url_for('logout') }}">Logout</a>
                         </li>
                     {% endif %}
-
                 </ul>
             </nav>
         </header>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="notification">
-                    {{ messages[0] }}
-                </div>
-            {% endif %}
-        {% endwith %}
-        <div class="notification">
-            This is a test notification
-        </div>
+        {% if current_user.is_authenticated %}
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="notification">
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <div class="notification">
+                This is a test notification
+            </div>
+        {% endif %}
         <div class="content">
             {% block content %}{% endblock %}
         </div>
