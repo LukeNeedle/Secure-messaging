@@ -215,21 +215,21 @@ def login():
 # Objective 2 completed
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 def dashboard():
     if type(current_user._get_current_object()) is User:
         return render_template("dashboard.html")
     else:
         return redirect(url_for('login'))
 
-@app.route('/messages')
+@app.route('/messages', methods=['GET'])
 def messages():
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
-@app.route('/reports')
+@app.route('/reports', methods=['GET'])
 def reporting():
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
@@ -243,7 +243,7 @@ def user_settings():
     else:
         return redirect(url_for('login'))
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
@@ -271,6 +271,10 @@ def dashboard_css():
 
 @app.route('/static/css/under_construction.css')
 def under_construction_css():
+    return send_file('static//css//under_construction.css')
+
+@app.route('/static/css/under_construction.css')
+def four_zero_four_css():
     return send_file('static//css//under_construction.css')
 
 
@@ -310,7 +314,10 @@ def under_construction_css():
 
 
 def handle_not_found(error):
-    return redirect(url_for('login'))
+    if type(current_user._get_current_object()) is User:
+        return render_template("404.html")
+    else:
+        return redirect(url_for('login'))
 
 
 #########################################################################
