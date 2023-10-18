@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('user_settings_css')}}">
+
+<form class="change-password" method="POST" action="{{url_for('user_settings')}}">
+    <p class="title">
+        Change password
+    </p>
+    <div id="username">
+        <input type="email" name="email" placeholder="Email" autofocus="">
+    </div>
+    <div id="old-password">
+        <input type="password" name="old-password" placeholder="Old password">
+    </div>
+    <div id="new-password">
+        <input type="password" name="new-password" placeholder="New password">
+    </div>
+    <div id="confirm-new-password">
+        <input type="password" name="confirm-new-password" placeholder="Confirm new password">
+    </div>
+    <div id="submit">
+        <button>Update password</button>
+    </div>
+</form>
+
+{% endblock %}
