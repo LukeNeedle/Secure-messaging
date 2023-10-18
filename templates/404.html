@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('four_zero_four_css')}}">
+
+<img src="/static/icons/logistics.svg"/>
+
+<h1>
+    We searched far and wide for this page. Click <a class="redirect" href="{{url_for('dashboard')}}">Here</a> to go back to safety!
+</h1>
+
+{% endblock %}
