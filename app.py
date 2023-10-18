@@ -139,6 +139,7 @@ def user_loader(email):
 #########################################################################
 
 
+# Objective 2 started
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -211,6 +212,7 @@ def login():
                 login_user(User(userDetails), remember=True)
         connection.close()
         return redirect(url_for('login'))
+# Objective 2 completed
 
 
 @app.route('/dashboard')
