@@ -20,15 +20,16 @@ login_manager.init_app(app)
 #########################################################################
 
 
-def entry_cleaner(entry, mode="sql"):
+def entry_cleaner(entry, mode):
     """
     Remove unwanted characters from a string.
     mode = "sql" --> Removes characters that could be used for sql injection
-    mode = "password" --> Removes characters that could be used for sql injection and characters that could be used for sql injection as well as characters that aren't on the english keyboard.
+    mode = "password" --> Removes characters that could be used for sql injection as well as characters that aren't on the english keyboard.
+    mode = "email" --> Removes characters that could be used for sql injection and checks that it is a valid email.
 
     Args:
         entry (string): The input that needs cleaning
-        mode (string, optional): Selects how the entry should be cleaned. Defaults to "sql".
+        mode (string): Selects how the entry should be cleaned.
 
     Returns:
         string: The cleaned string
@@ -151,14 +152,14 @@ def login():
         password = request.form.get('password')
 
         #Email validation
-        cleanedEmail = entry_cleaner(email)
+        cleanedEmail = entry_cleaner(email, "email")
         if cleanedEmail != email.lower():
             # Invalid email
             return redirect(url_for('login'))
         del email
         
         #Password Validation
-        cleanedPassword = entry_cleaner(password)
+        cleanedPassword = entry_cleaner(password, "password")
         if cleanedPassword != password:
             # Invalid password
             return redirect(url_for('login'))
