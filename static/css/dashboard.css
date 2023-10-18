@@ -31,6 +31,10 @@
     margin-bottom: 50px;
 }
 
+.options *{
+    cursor: pointer;
+}
+
 .options a{
     background-color: var(--secondary);
     color: var(--text);
@@ -44,7 +48,6 @@
     padding-right: 50px;
     margin-left: auto;
     margin-right: auto;
-    cursor: pointer;
     margin-bottom: 5px;
 }
 
