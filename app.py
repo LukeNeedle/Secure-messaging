@@ -236,10 +236,88 @@ def reporting():
     else:
         return redirect(url_for('login'))
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 def user_settings():
     if type(current_user._get_current_object()) is User:
-        return render_template("under_construction.html")
+        if request.method == 'GET':
+            return render_template("user_settings.html")
+        elif request.method == 'POST':
+            email = request.form.get('email')
+            oldPassword = request.form.get('old-password')
+            newPassword = request.form.get('new-password')
+            confirmNewPassword = request.form.get('confirm-new-password')
+
+            #Email validation
+            cleanedEmail = entry_cleaner(email, "email")
+            if cleanedEmail != email.lower():
+                # Invalid email
+                return redirect(url_for('user_settings'))
+            del email
+            
+            #Password Validation
+            cleanedOldPassword = entry_cleaner(oldPassword, "password")
+            cleanedNewPassword = entry_cleaner(newPassword, "password")
+            cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
+            if cleanedOldPassword != oldPassword:
+                # Invalid password
+                return redirect(url_for('user_settings'))
+            if cleanedNewPassword != newPassword:
+                # Invalid password
+                return redirect(url_for('user_settings'))
+            if cleanedConfirmNewPassword != confirmNewPassword:
+                # Invalid password
+                return redirect(url_for('user_settings'))
+            del oldPassword
+            del newPassword
+            del confirmNewPassword
+
+            connection = sqlite3.connect("database.db")
+            cursor = connection.cursor()
+
+            # Checking email
+            cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{current_user.id}';""")
+            result = cursor.fetchone()
+            if result == None:
+                connection.close()
+                # User not found
+                return redirect(url_for('user_settings'))
+            elif result.lower() != cleanedEmail.lower():
+                connection.close()
+                # Invalid email
+                return redirect(url_for('user_settings'))
+            
+            # Getting user's password
+            cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
+            result = cursor.fetchone()
+            if result == None:
+                connection.close()
+                # User not found
+                return redirect(url_for('user_settings'))
+            else:
+                passHash = result[0]
+            
+            cursor.execute(f"""SELECT passSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+            result = cursor.fetchone()
+            if result == None:
+                connection.close()
+                # User not found
+                return redirect(url_for('user_settings'))
+            else:
+                salt = result[0]
+            
+            if passHash != hashing(cleanedOldPassword, salt, "password"):
+                connection.close()
+                return redirect(url_for('user_settings'))
+            
+            if cleanedNewPassword != cleanedConfirmNewPassword:
+                connection.close()
+                return redirect(url_for('user_settings'))
+            
+
+            userDetails = current_user.get_user_dictionary(current_user.id)
+            userDetails["passhash"] = hashing(cleanedNewPassword, salt, "password")
+            logout_user()
+            login_user(User(userDetails), remember=True)
     else:
         return redirect(url_for('login'))
 
@@ -269,6 +347,10 @@ def login_css():
 def dashboard_css():
     return send_file('static//css//dashboard.css')
 
+@app.route('/static/css/user_settings.css')
+def user_settings_css():
+    return send_file('static//css//user_settings.css')
+    
 @app.route('/static/css/under_construction.css')
 def under_construction_css():
     return send_file('static//css//under_construction.css')
