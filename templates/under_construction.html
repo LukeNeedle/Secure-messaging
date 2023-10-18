@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('under_construction_css')}}">
+
+<img src="/static/icons/under_construction.svg"/>
+
+<h1>
+    This page is under construction. Click <a class="redirect" href="{{url_for('dashboard')}}">Here</a> to go back to safety!
+</h1>
+
+{% endblock %}

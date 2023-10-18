@@ -223,21 +223,21 @@ def dashboard():
 @app.route('/messages')
 def messages():
     if type(current_user._get_current_object()) is User:
-        return render_template("dashboard.html")
+        return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
 @app.route('/reports')
 def reporting():
     if type(current_user._get_current_object()) is User:
-        return render_template("dashboard.html")
+        return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
 @app.route('/settings')
 def user_settings():
     if type(current_user._get_current_object()) is User:
-        return render_template("dashboard.html")
+        return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
@@ -266,6 +266,10 @@ def login_css():
 @app.route('/static/css/dashboard.css')
 def dashboard_css():
     return send_file('static//css//dashboard.css')
+
+@app.route('/static/css/under_construction.css')
+def under_construction_css():
+    return send_file('static//css//under_construction.css')
 
 
 #########################################################################
