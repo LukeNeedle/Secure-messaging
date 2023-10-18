@@ -118,7 +118,6 @@ These objectives aren't in any particular order and they are only numbered to he
 | FileID   | The integer ID associated with the file                           | 1       | Integer | ✅          | -              | Not null, Unique |
 | OwnerID  | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
 | FilePath | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
-| FileHash | The hash of the file (For integrity checks)                       | -       | Blob    | ❌          | -              | Not null         |
 
 
 ## Naming schema

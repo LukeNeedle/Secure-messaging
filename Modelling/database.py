@@ -72,7 +72,6 @@ def create_tables():
 		"FileID"	INTEGER NOT NULL UNIQUE,
 		"OwnerID"	INTEGER NOT NULL,
 		"FilePath"	BLOB NOT NULL UNIQUE,
-		"FileHash"	BLOB NOT NULL,
 		FOREIGN KEY("OwnerID") REFERENCES "Staff"("StaffID"),
 		PRIMARY KEY("FileID" AUTOINCREMENT)
 	)""")
