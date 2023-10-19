@@ -78,8 +78,8 @@ class User(UserMixin):
                 "email": result[4],
                 "accountEnabled": result[5],
                 "accountArchived": result[6],
-                "password": result[7],
-                "passhash": result[8],
+                "passhash": result[7],
+                "passsalt": result[8],
                 "SENCo": result[9],
                 "safeguarding": result[10],
                 "admin": result[11]
@@ -88,11 +88,11 @@ class User(UserMixin):
             connection.close()
             return user
 
-    def get_user_dictionary(userID):
+    def get_user_dictionary(self):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{userID}';""")
+        cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{self.id}';""")
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -106,8 +106,8 @@ class User(UserMixin):
                 "email": result[4],
                 "accountEnabled": result[5],
                 "accountArchived": result[6],
-                "password": result[7],
-                "passhash": result[8],
+                "passhash": result[7],
+                "passsalt": result[8],
                 "SENCo": result[9],
                 "safeguarding": result[10],
                 "admin": result[11]
