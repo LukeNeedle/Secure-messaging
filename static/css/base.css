@@ -96,7 +96,7 @@ header{
 .notification {
     background-color: #ff0000;
     color: #efe6e8;
-    border-color: #f5f4ef;
+    border-color: var(--minor-border);
     border-radius: 5px;
     border-width: 5px;
     width: fit-content;
