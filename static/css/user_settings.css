@@ -24,10 +24,6 @@
     margin-top: 0;
 }
 
-.notification {
-    margin-bottom: 2%;
-}
-
 .message {
     background-color: var(--accent);
     color: var(--secondary);
@@ -47,6 +43,7 @@ form {
     width: fit-content;
     height: fit-content;
     margin: auto;
+    margin-top: 2%;
     padding: 2%;
     border-radius: 15px;
 }

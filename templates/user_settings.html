@@ -5,38 +5,20 @@
 
 {% if msg != "" %}
     {% for id in entry %}
-        {% if id == "email" %}
+        {% if id != "submit" %}
             <style>
-                #email input{
-                    border-color: #ff0000;
-                }
-            </style>
-        {% endif %}
-        {% if id == "old-password" %}
-            <style>
-                #old-password input{
-                    border-color: #ff0000;
-                }
-            </style>
-        {% endif %}
-        {% if id == "new-password" %}
-            <style>
-                #new-password input{
-                    border-color: #ff0000;
-                }
-            </style>
-        {% endif %}
-        {% if id == "confirm-new-password" %}
-            <style>
-                #confirm-new-password input{
+                #{{id}} input{
                     border-color: #ff0000;
                 }
             </style>
         {% endif %}
         {% if id == "submit" %}
             <style>
-                #submit input{
-                    border-color: #008000;
+                #submit button{
+                    background-color: #008000;
+                }
+                p.message{
+                    color: #008000;
                 }
             </style>
         {% endif %}
