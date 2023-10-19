@@ -240,7 +240,7 @@ def reporting():
 def user_settings():
     if type(current_user._get_current_object()) is User:
         if request.method == 'GET':
-            return render_template("user_settings.html")
+            return render_template("user_settings.html", msg="", entry=[])
         elif request.method == 'POST':
             email = request.form.get('email')
             oldPassword = request.form.get('old-password')
@@ -251,7 +251,7 @@ def user_settings():
             cleanedEmail = entry_cleaner(email, "email")
             if cleanedEmail != email.lower():
                 # Invalid email
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="Invalid Email", entry=["email"])
             del email
             
             #Password Validation
@@ -260,13 +260,13 @@ def user_settings():
             cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
             if cleanedOldPassword != oldPassword:
                 # Invalid password
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"])
             if cleanedNewPassword != newPassword:
                 # Invalid password
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"])
             if cleanedConfirmNewPassword != confirmNewPassword:
                 # Invalid password
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
             del oldPassword
             del newPassword
             del confirmNewPassword
@@ -280,11 +280,11 @@ def user_settings():
             if result == None:
                 connection.close()
                 # User not found
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
             elif result[0].lower() != cleanedEmail.lower():
                 connection.close()
                 # Invalid email
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"])
             
             # Getting user's password
             cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
@@ -292,7 +292,7 @@ def user_settings():
             if result == None:
                 connection.close()
                 # User not found
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
             else:
                 passHash = result[0]
             
@@ -301,24 +301,28 @@ def user_settings():
             if result == None:
                 connection.close()
                 # User not found
-                return redirect(url_for('user_settings'))
+                return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
             else:
                 salt = result[0]
             
             if passHash != hashing(cleanedOldPassword, salt, "password"):
                 connection.close()
-                return redirect(url_for('user_settings'))
+                # Old password isn't valid
+                return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
             
             if cleanedNewPassword != cleanedConfirmNewPassword:
                 connection.close()
-                return redirect(url_for('user_settings'))
+                # New password and confirm new password aren't the same
+                return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
             
+            cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt, "password")}' WHERE StaffID = '{current_user.id}';""")
+            result = cursor.fetchone()
 
             userDetails = current_user.get_user_dictionary()
             userDetails["passhash"] = hashing(cleanedNewPassword, salt, "password")
             logout_user()
             login_user(User(userDetails), remember=True)
-            return redirect(url_for('user_settings'))
+            return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
     else:
         return redirect(url_for('login'))
 

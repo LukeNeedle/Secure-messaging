@@ -21,7 +21,25 @@
 }
 
 .content {
-    margin-top: 3%;
+    margin-top: 0;
+}
+
+.notification {
+    margin-bottom: 2%;
+}
+
+.message {
+    background-color: var(--accent);
+    color: var(--secondary);
+    margin-bottom: 2%;
+    padding: 7px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    border-color: var(--minor-border);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 form {
