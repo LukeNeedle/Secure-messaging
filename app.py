@@ -281,7 +281,7 @@ def user_settings():
                 connection.close()
                 # User not found
                 return redirect(url_for('user_settings'))
-            elif result.lower() != cleanedEmail.lower():
+            elif result[0].lower() != cleanedEmail.lower():
                 connection.close()
                 # Invalid email
                 return redirect(url_for('user_settings'))
@@ -314,10 +314,11 @@ def user_settings():
                 return redirect(url_for('user_settings'))
             
 
-            userDetails = current_user.get_user_dictionary(current_user.id)
+            userDetails = current_user.get_user_dictionary()
             userDetails["passhash"] = hashing(cleanedNewPassword, salt, "password")
             logout_user()
             login_user(User(userDetails), remember=True)
+            return redirect(url_for('user_settings'))
     else:
         return redirect(url_for('login'))
 
