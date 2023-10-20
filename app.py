@@ -183,7 +183,7 @@ def login():
         else:
             salt = result[0]
         
-        if passHash == hashing(cleanedPassword, salt, "password"):
+        if passHash == hashing(cleanedPassword, salt):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
@@ -301,7 +301,7 @@ def user_settings():
             else:
                 salt = result[0]
             
-            if passHash != hashing(cleanedOldPassword, salt, "password"):
+            if passHash != hashing(cleanedOldPassword, salt):
                 connection.close()
                 # Old password isn't valid
                 return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
@@ -311,11 +311,11 @@ def user_settings():
                 # New password and confirm new password aren't the same
                 return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
             
-            cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt, "password")}' WHERE StaffID = '{current_user.id}';""")
+            cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
             result = cursor.fetchone()
 
             userDetails = current_user.get_user_dictionary()
-            userDetails["passhash"] = hashing(cleanedNewPassword, salt, "password")
+            userDetails["passhash"] = hashing(cleanedNewPassword, salt)
             logout_user()
             login_user(User(userDetails), remember=True)
             return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
