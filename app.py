@@ -62,22 +62,18 @@ def entry_cleaner(entry, mode):
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
-def hashing(variable, salt:str = None, mode:str="password"):
+def hashing(variable:str, salt:str):
     """
     Hashes the variable/file passed in.
 
     Args:
-        variable (string): The variable/file that needs cleaning
-        salt (string, optional): The salt to be applied to the variable/file.
-        mode (string, optional): Selects how the variable/file should be hashed. Defaults to "password".
+        variable (string): The variable that needs cleaning
+        salt (string): The salt to be applied to the variable.
 
     Returns:
-        string: The hashed variable/file
+        string: The hashed variable
     """
-    if mode == "password":
-        result = hash_function.hash_variable(variable, salt)
-    elif mode == "file":
-        result = hash_function.hash_file(variable)
+    result = hash_function.hash_variable(variable, salt)
     return result
 
 
