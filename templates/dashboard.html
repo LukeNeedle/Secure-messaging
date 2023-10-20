@@ -35,6 +35,32 @@
             User Settings
         </span>
     </a>
+    {% if current_user.admin %}
+        <a class="manage-user" href="{{url_for('manage_user')}}">
+            <picture>
+                <source
+                srcset="/static/icons/user_dark.svg"
+                media="(prefers-color-scheme: dark)"
+                />
+                <img width="20" height="20" src="/static/icons/user.svg"/>
+            </picture>
+            <span>
+                Manage Users
+            </span>
+        </a>
+        <a class="app-settings" href="{{url_for('app_settings')}}">
+            <picture>
+                <source
+                srcset="/static/icons/settings_dark.svg"
+                media="(prefers-color-scheme: dark)"
+                />
+                <img width="20" height="20" src="/static/icons/settings.svg"/>
+            </picture>
+            <span>
+                App Settings
+            </span>
+        </a>
+    {% endif %}
 </div>
 
 {% endblock %}

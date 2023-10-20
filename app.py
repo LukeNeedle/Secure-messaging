@@ -322,6 +322,20 @@ def user_settings():
     else:
         return redirect(url_for('login'))
 
+@app.route('/app/users', methods=['GET'])
+def manage_user():
+    if type(current_user._get_current_object()) is User:
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/app/settings', methods=['GET'])
+def app_settings():
+    if type(current_user._get_current_object()) is User:
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('login'))
+
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():

@@ -84,6 +84,20 @@ div.options a.user-settings picture img{
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
+div.options a.app-settings picture img{
+    animation-name: spin-backwards;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@keyframes spin-backwards{
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(-360deg);
+    }
+}
 @keyframes spin{
     from {
         transform:rotate(0deg);
