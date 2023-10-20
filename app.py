@@ -90,10 +90,10 @@ def user_loader(email):
     Generates the user object from the email address provided.
 
     Args:
-        email (string): The 
+        email (string): The email to lookup.
 
     Returns:
-        User: The user object
+        User: The user object if the user exists, otherwise it returns None
     """
 
     cleanedEmail = entry_cleaner(entry=email, mode="sql")
