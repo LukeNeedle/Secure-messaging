@@ -11,26 +11,20 @@
         <header>
             <a class="logo" href="{{ url_for('dashboard') }}">Secure Messaging</a>
 
+            {% if current_user.is_authenticated %}
             <nav class="nav">
                 <ul class="menu">
-                    {% if current_user.is_authenticated %}
-                    <li>
-                        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                    </li>
-                    
-                        {% if current_user.admin %}
-                            <li>
-                                <a href="{{ url_for('admin') }}">Admin Dashboard</a>
-                            </li>
-                        {% endif %}
+                        <li>
+                            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                        </li>
 
                         <li>
                             <a href="{{ url_for('logout') }}">Logout</a>
                         </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </header>
+                    </ul>
+                </nav>
+            {% endif %}
+            </header>
         {% if current_user.is_authenticated %}
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
