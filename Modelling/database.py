@@ -64,8 +64,8 @@ def create_tables():
 		"Timestamp"	TEXT NOT NULL,
 		PRIMARY KEY("ReportID" AUTOINCREMENT),
 		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
-		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"))
-	""")
+		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID")
+	)""")
 	conn.commit()
 
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Files" (
