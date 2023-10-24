@@ -26,8 +26,8 @@
 
 
 img {
-    width: fit-content;
-    height: fit-content;
+    height: 500px;
+    width: auto;
 }
 
 .notification {
