@@ -234,93 +234,93 @@ def reporting():
 
 @app.route('/settings', methods=['GET', 'POST'])
 def user_settings():
-    if type(current_user._get_current_object()) is User:
-        if request.method == 'GET':
-            return render_template("user_settings.html", msg="", entry=[])
-        elif request.method == 'POST':
-            email = request.form.get('email')
-            oldPassword = request.form.get('old-password')
-            newPassword = request.form.get('new-password')
-            confirmNewPassword = request.form.get('confirm-new-password')
-
-            #Email validation
-            cleanedEmail = entry_cleaner(email, "email")
-            if cleanedEmail != email.lower():
-                # Invalid email
-                return render_template("user_settings.html", msg="Invalid Email", entry=["email"])
-            del email
-            
-            #Password Validation
-            cleanedOldPassword = entry_cleaner(oldPassword, "password")
-            cleanedNewPassword = entry_cleaner(newPassword, "password")
-            cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
-            if cleanedOldPassword != oldPassword:
-                # Invalid password
-                return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"])
-            if cleanedNewPassword != newPassword:
-                # Invalid password
-                return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"])
-            if cleanedConfirmNewPassword != confirmNewPassword:
-                # Invalid password
-                return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
-            del oldPassword
-            del newPassword
-            del confirmNewPassword
-
-            connection = sqlite3.connect("database.db")
-            cursor = connection.cursor()
-
-            # Checking email
-            cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{current_user.id}';""")
-            result = cursor.fetchone()
-            if result == None:
-                connection.close()
-                # User not found
-                return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
-            elif result[0].lower() != cleanedEmail.lower():
-                connection.close()
-                # Invalid email
-                return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"])
-            
-            # Getting user's password
-            cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
-            result = cursor.fetchone()
-            if result == None:
-                connection.close()
-                # User not found
-                return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
-            else:
-                passHash = result[0]
-            
-            cursor.execute(f"""SELECT passSalt FROM Staff WHERE Email='{cleanedEmail}';""")
-            result = cursor.fetchone()
-            if result == None:
-                connection.close()
-                # User not found
-                return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
-            else:
-                salt = result[0]
-            
-            if passHash != hashing(cleanedOldPassword, salt):
-                connection.close()
-                # Old password isn't valid
-                return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
-            
-            if cleanedNewPassword != cleanedConfirmNewPassword:
-                connection.close()
-                # New password and confirm new password aren't the same
-                return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
-            
-            cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
-            result = cursor.fetchone()
-
-            userDetails = current_user.get_user_dictionary()
-            userDetails["passhash"] = hashing(cleanedNewPassword, salt)
-            logout_user()
-            login_user(User(userDetails), remember=True)
-            return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
-    else:
+    if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
+    
+    if request.method == 'GET':
+        return render_template("user_settings.html", msg="", entry=[])
+    elif request.method == 'POST':
+        email = request.form.get('email')
+        oldPassword = request.form.get('old-password')
+        newPassword = request.form.get('new-password')
+        confirmNewPassword = request.form.get('confirm-new-password')
+
+        #Email validation
+        cleanedEmail = entry_cleaner(email, "email")
+        if cleanedEmail != email.lower():
+            # Invalid email
+            return render_template("user_settings.html", msg="Invalid Email", entry=["email"])
+        del email
+        
+        #Password Validation
+        cleanedOldPassword = entry_cleaner(oldPassword, "password")
+        cleanedNewPassword = entry_cleaner(newPassword, "password")
+        cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
+        if cleanedOldPassword != oldPassword:
+            # Invalid password
+            return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"])
+        if cleanedNewPassword != newPassword:
+            # Invalid password
+            return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"])
+        if cleanedConfirmNewPassword != confirmNewPassword:
+            # Invalid password
+            return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
+        del oldPassword
+        del newPassword
+        del confirmNewPassword
+
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+
+        # Checking email
+        cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{current_user.id}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            # User not found
+            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
+        elif result[0].lower() != cleanedEmail.lower():
+            connection.close()
+            # Invalid email
+            return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"])
+        
+        # Getting user's password
+        cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            # User not found
+            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
+        else:
+            passHash = result[0]
+        
+        cursor.execute(f"""SELECT passSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            # User not found
+            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
+        else:
+            salt = result[0]
+        
+        if passHash != hashing(cleanedOldPassword, salt):
+            connection.close()
+            # Old password isn't valid
+            return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
+        
+        if cleanedNewPassword != cleanedConfirmNewPassword:
+            connection.close()
+            # New password and confirm new password aren't the same
+            return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
+        
+        cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
+        result = cursor.fetchone()
+
+        userDetails = current_user.get_user_dictionary()
+        userDetails["passhash"] = hashing(cleanedNewPassword, salt)
+        logout_user()
+        login_user(User(userDetails), remember=True)
+        return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
 @app.route('/app/users', methods=['GET'])
 def manage_user():
