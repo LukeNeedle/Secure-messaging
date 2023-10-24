@@ -56,6 +56,16 @@ def create_tables():
 	)""")
 	conn.commit()
 
+	cur.execute("""CREATE TABLE IF NOT EXISTS "StudentToStaff" (
+		"RelationshipID"	INTEGER NOT NULL UNIQUE,
+		"StudentID" STRING NOT NULL,
+		"StaffID"  STRING NOT NULL,
+		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
+		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
+		PRIMARY KEY("RelationshipID" AUTOINCREMENT)
+	)""")
+	conn.commit()
+
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Reporting" (
 		"ReportID"	INTEGER NOT NULL UNIQUE,
 		"StudentID"	INTEGER NOT NULL,
