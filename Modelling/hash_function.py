@@ -63,17 +63,3 @@ def hash_variable(variable:str, salt:str):
         asciiHexCharacterList.append(hex((ord(letter) + (len(variable) * saltValue)) * len(variable))[2:])
 
     return ''.join(asciiHexCharacterList)
-
-def hash_file(file):
-    """
-    Hashes the file that has been given.
-
-    Args:
-        file (bytes): The variable that needs hashing
-
-    Returns:
-        bytes: The hashed file
-    """
-
-    
-    return file
