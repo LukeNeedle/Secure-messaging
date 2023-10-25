@@ -64,7 +64,7 @@ def entry_cleaner(entry, mode):
 
 def hashing(variable:str, salt:str):
     """
-    Hashes the variable/file passed in.
+    Hashes the variable passed in.
 
     Args:
         variable (string): The variable that needs cleaning
