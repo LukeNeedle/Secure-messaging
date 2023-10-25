@@ -100,8 +100,14 @@ These objectives aren't in any particular order and they are only numbered to he
 | StudentID    | The integer ID associated with the student | 1       | Integer | ✅          | -              | Not null, Unique |
 | FirstName    | The encrypted first name of the student    | John    | Text    | ❌          | -              | Not null         |
 | LastName     | The encrypted last name of the student     | Smith   | Text    | ❌          | -              | Not null         |
-| TutorID      | The ID of the student's form tutor         | 1       | Integer | ❌          | Staff(StaffID) | -                |
-| HeadOfYearID | The ID of the student's head of year       | 1       | Integer | ❌          | Staff(StaffID) | -                |
+
+### StudentRelationship
+| Column         | Description                                                  | Example | Type    | Primary Key | Foreign Key         | Constraints      |
+|----------------|--------------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|:----------------:|
+| RelationshipID | The integer ID associated with the relationship              | 1       | Integer | ✅          | -                   | Not null, Unique |
+| StudentID      | The integer ID associated with the student                   | 1       | Integer | ❌          | Students(StudentID) | Not null         |
+| StaffID        | The integer ID associated with the staff member              | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
+| Relationship   | The type of relationship: 1=teacher, 2=tutor, 3=head of year | 1       | Integer | ❌          | -                   | Not null         |
 
 ### Reporting
 | Column       | Description                                                          | Example | Type    | Primary Key | Foreign Key         | Constraints      |
