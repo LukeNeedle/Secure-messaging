@@ -2,22 +2,24 @@ from flask import Flask, redirect, url_for, render_template, request
 from flask_login import LoginManager, login_user, logout_user, login_required
 from models import User
 import sqlite3
+import re as regex
 
 app = Flask(__name__)
-app.secret_key = 'super secret string'
+app.secret_key = 'super-secret-string'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-def entry_cleaner(entry, mode="sql"):
+def entry_cleaner(entry, mode):
     """
     Remove unwanted characters from a string.
     mode = "sql" --> Removes characters that could be used for sql injection
-    mode = "password" --> Removes characters that could be used for sql injection and characters that could be used for sql injection as well as characters that aren't on the english keyboard.
+    mode = "password" --> Removes characters that could be used for sql injection as well as characters that aren't on the english keyboard.
+    mode = "email" --> Removes characters that could be used for sql injection and checks that it is a valid email.
 
     Args:
         entry (string): The input that needs cleaning
-        mode (string, optional): Selects how the entry should be cleaned. Defaults to "sql".
+        mode (string): Selects how the entry should be cleaned.
 
     Returns:
         string: The cleaned string
@@ -41,27 +43,42 @@ def entry_cleaner(entry, mode="sql"):
         cleanedEntry = cleanedEntry.encode("ascii", "ignore").decode()
 
         return cleanedEntry
+    elif mode == "email":
+        cleanedEntry = entry_cleaner(entry, "sql").lower()
+        if not regex.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cleanedEntry):
+            return None
+        else:
+            return cleanedEntry
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
-def hash_function(variable, mode="password"):
+def hashing(variable:str, salt:str):
     """
-    Hashes the variable that is passed in.
+    Hashes the variable passed in.
 
     Args:
-        variable (string): Any variable that needs hashing.
-        mode (str, optional): _description_. Defaults to "password".
+        variable (string): The variable that needs cleaning
+        salt (string): The salt to be applied to the variable.
 
     Returns:
-        The hashed variable
+        string: The hashed variable
     """
-
-    hashedVariable = variable.encode()
-    return hashedVariable
+    # result = hash_function.hash_variable(variable, salt)
+    # return result
+    return variable
 
 @login_manager.user_loader
 def user_loader(email):
-    # email = request.form.get('email')
+    """
+    Generates the user object from the email address provided.
+
+    Args:
+        email (string): The email to lookup.
+
+    Returns:
+        User: The user object if the user exists, otherwise it returns None
+    """
+
     cleanedEmail = entry_cleaner(entry=email, mode="sql")
 
     connection = sqlite3.connect("database.db")
@@ -78,21 +95,20 @@ def user_loader(email):
     
     userDetails = {
         "id": result[0],
-        "title": result[1],
-        "firstName": result[2],
-        "lastName": result[3],
+        "firstName": result[1],
+        "lastName": result[2],
+        "title": result[3],
         "email": result[4],
         "accountEnabled": result[5],
         "accountArchived": result[6],
-        "password": result[7],
-        "passhash": result[8],
+        "passhash": result[7],
+        "passsalt": result[8],
         "SENCo": result[9],
         "safeguarding": result[10],
         "admin": result[11]
     }
-    user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
     connection.close()
-    return user
+    return User(userDetails)
 
 
 @app.route('/', methods=['GET'])
@@ -110,8 +126,6 @@ def login():
         cleanedEmail = entry_cleaner(email)
         cleanedPassword = entry_cleaner(password)
 
-        print(cleanedPassword)
-        print(password)
         if cleanedEmail != email:
             # Invalid email
             return redirect(url_for('login'))
@@ -129,7 +143,7 @@ def login():
             # User not found
             return redirect(url_for('login'))
         
-        if result[0].encode() == hash_function(cleanedPassword, "password"):
+        if result[0].encode() == hashing(cleanedPassword, salt=None):
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
@@ -144,13 +158,13 @@ def login():
                     "email": result[4],
                     "accountEnabled": result[5],
                     "accountArchived": result[6],
-                    "password": result[7],
-                    "passhash": result[8],
+                    "passHash": result[7],
+                    "passSalt": result[8],
                     "SENCo": result[9],
                     "safeguarding": result[10],
                     "admin": result[11]
                 }
-                user = User(userDetails['id'], userDetails['title'], userDetails['firstName'], userDetails['lastName'], userDetails['accountEnabled'], userDetails['accountArchived'], userDetails['password'], userDetails['passhash'], userDetails['SENCo'], userDetails['safeguarding'], userDetails['admin'])
+                user = User(userDetails)
                 login_user(user, remember=True)
         connection.close()
         return redirect(url_for('index'))
