@@ -73,6 +73,7 @@ def hashing(variable:str, salt:str):
     Returns:
         string: The hashed variable
     """
+    
     result = hash_function.hash_variable(variable, salt)
     return result
 
