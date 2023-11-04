@@ -1,4 +1,6 @@
 from encryption import *
+import random
+import string
 
 
 print("===================================")
@@ -38,4 +40,20 @@ for key in badKeys:
         difference.append(int(key/badKeys.index(key)))
 
 print(difference)
+
+
+input("Vernam Cipher:")
+
+print("===================================")
+print("           Vernam Cipher           ")
+print("===================================")
+# Example usage
+plainText = "Confidential information 5464446"
+key = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(plainText)))
+
+encryptedData = vernam_encrypt(plainText, key)
+print("Encrypted data:", encryptedData)
+
+decryptedData = vernam_decrypt(encryptedData, key)
+print("Decrypted data:", decryptedData)
 
