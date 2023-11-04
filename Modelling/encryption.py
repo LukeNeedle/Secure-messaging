@@ -1,6 +1,6 @@
 import string
 
-def encrypt(plainText:str, key:int):
+def substitution_encrypt(plainText:str, key:int):
     """
     Implements a substitution cipher to encrypt the text passed in.
 
@@ -31,7 +31,7 @@ def encrypt(plainText:str, key:int):
     cipherText = ''.join(cipherText)
     return cipherText
 
-def decrypt(encryptedText:str, key:int):
+def substitution_decrypt(encryptedText:str, key:int):
     """
     Implements a substitution cipher to decrypt the text passed in.
 
