@@ -66,3 +66,9 @@ def vernam_encrypt(plainText, key):
     for i in range(len(plainText)):
         cipherText += chr(ord(plainText[i]) ^ ord(key[i]))
     return cipherText
+
+def vernam_decrypt(cipherText, key):
+    plainText = ""
+    for i in range(len(cipherText)):
+        plainText += chr(ord(cipherText[i]) ^ ord(key[i]))
+    return plainText
