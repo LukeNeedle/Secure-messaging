@@ -57,3 +57,18 @@ print("Encrypted data:", encryptedData)
 decryptedData = vernam_decrypt(encryptedData, key)
 print("Decrypted data:", decryptedData)
 
+
+input("Final implementation:")
+
+print("==================================")
+print("       Final implementation       ")
+print("==================================")
+# Example usage
+plainText = "Confidential information 5464446"
+key = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(plainText)))
+
+encryptedData = substitution_encrypt(vernam_encrypt(plainText, key), 55)
+print("Encrypted data:", encryptedData)
+
+decryptedData = vernam_decrypt(substitution_decrypt(encryptedData, 55), key)
+print("Decrypted data:", decryptedData)
