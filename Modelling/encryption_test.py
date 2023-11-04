@@ -2,7 +2,7 @@ from encryption import encrypt, decrypt
 
 # Example usage
 plainText = "Confidential information 5464446"
-key = input("Key: ")
+key = int(input("Key: "))
 # The key cannot be a multiple of 62, including 0
 
 encryptedText = encrypt(plainText, key)
