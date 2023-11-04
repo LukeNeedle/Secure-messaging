@@ -60,3 +60,9 @@ def substitution_decrypt(encryptedText:str, key:int):
     
     decryptedText = ''.join(decryptedText)
     return decryptedText
+
+def vernam_encrypt(plainText, key):
+    cipherText = ""
+    for i in range(len(plainText)):
+        cipherText += chr(ord(plainText[i]) ^ ord(key[i]))
+    return cipherText
