@@ -1,14 +1,18 @@
-from encryption import encrypt, decrypt
+from encryption import *
 
+
+print("===================================")
+print("        Substitution Cipher        ")
+print("===================================")
 # Example usage
 plainText = "Confidential information 5464446"
 key = int(input("Key: "))
 # The key cannot be a multiple of 62, including 0
 
-encryptedText = encrypt(plainText, key)
+encryptedText = substitution_encrypt(plainText, key)
 print(f"Cipher Text: {encryptedText}")
 
-decryptedText = decrypt(encryptedText, key)
+decryptedText = substitution_decrypt(encryptedText, key)
 print(f"Plain text: {decryptedText}")
 
 input("Finding a bad key:")
@@ -16,10 +20,10 @@ input("Finding a bad key:")
 badKeys = []
 
 for key in range(0, 5000):
-    encryptedText = encrypt(plainText, key)
+    encryptedText = substitution_encrypt(plainText, key)
     print(f"Cipher Text: {encryptedText}")
 
-    decryptedText = decrypt(encryptedText, key)
+    decryptedText = substitution_decrypt(encryptedText, key)
     print(f"Plain text: {decryptedText}")
     if encryptedText == plainText:
         badKeys.append(key)
@@ -34,3 +38,4 @@ for key in badKeys:
         difference.append(int(key/badKeys.index(key)))
 
 print(difference)
+
