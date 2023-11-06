@@ -67,8 +67,8 @@ print("==================================")
 plainText = "Confidential information 5464446"
 key = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(plainText)))
 
-encryptedData = substitution_encrypt(vernam_encrypt(plainText, key), 55)
+encryptedData = vernam_encrypt(substitution_encrypt(plainText, 55), key)
 print("Encrypted data:", encryptedData)
 
-decryptedData = vernam_decrypt(substitution_decrypt(encryptedData, 55), key)
+decryptedData = substitution_decrypt(vernam_decrypt(encryptedData, key), 55)
 print("Decrypted data:", decryptedData)
