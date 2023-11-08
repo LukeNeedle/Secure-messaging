@@ -231,14 +231,13 @@ def dashboard():
 def messages():
     if type(current_user._get_current_object()) is User:
         return render_template("messaging.html")
-        # return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
 @app.route('/messages/inbox', methods=['GET'])
 def messages_inbox():
     if type(current_user._get_current_object()) is User:
-        # return render_template("messaging.html")
+        # return render_template("inbox.html")
         return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
@@ -246,8 +245,8 @@ def messages_inbox():
 @app.route('/messages/compose', methods=['GET'])
 def messages_compose():
     if type(current_user._get_current_object()) is User:
-        # return render_template("messaging.html")
-        return render_template("under_construction.html")
+        return render_template("compose.html")
+        # return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
@@ -391,6 +390,14 @@ def dashboard_css():
 @app.route('/static/css/messaging.css')
 def messaging_css():
     return send_file('static//css//messaging.css')
+
+@app.route('/static/css/messaging_inbox.css')
+def messaging_inbox_css():
+    return send_file('static//css//messaging_inbox.css')
+
+@app.route('/static/css/messaging_compose.css')
+def messaging_compose_css():
+    return send_file('static//css//messaging_compose.css')
 
 @app.route('/static/css/user_settings.css')
 def user_settings_css():
