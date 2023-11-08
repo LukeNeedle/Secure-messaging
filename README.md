@@ -116,14 +116,15 @@ These objectives aren't in any particular order and they are only numbered to he
 | StudentID    | The integer ID associated with the student who is being reported     | 1       | Integer | ❌          | Students(StudentID) | Not null         |
 | StaffID      | The integer ID associated with the staff member who filed the report | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
 | Report       | The encrypted report                                                 | -       | Blob    | ❌          | -                   | Not null         |
-| Timestamp    | The timestamp that the report was filed                              | -       | Text    | ❌          | -                   | Not null         |
+| TimeStamp    | The timestamp that the report was filed                              | -       | Text    | ❌          | -                   | Not null         |
 
 ### Files
-| Column   | Description                                                       | Example | Type    | Primary Key | Foreign Key    | Constraints      |
-|----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
-| FileID   | The integer ID associated with the file                           | 1       | Integer | ✅          | -              | Not null, Unique |
-| OwnerID  | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
-| FilePath | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
+| Column    | Description                                                       | Example | Type    | Primary Key | Foreign Key    | Constraints      |
+|-----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
+| FileID    | The integer ID associated with the file                           | 1       | Integer | ✅          | -              | Not null, Unique |
+| OwnerID   | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
+| FilePath  | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
+| TimeStamp | The timestamp that the file was uploaded                          | -       | Text    | ❌          | -              | Not null         |
 
 
 ## Naming schema

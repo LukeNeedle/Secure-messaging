@@ -69,7 +69,7 @@ def create_tables():
 		"StudentID"	INTEGER NOT NULL,
 		"StaffID"	INTEGER NOT NULL,
 		"Report"	BLOB NOT NULL,
-		"Timestamp"	TEXT NOT NULL,
+		"TimeStamp"	TEXT NOT NULL,
 		PRIMARY KEY("ReportID" AUTOINCREMENT),
 		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
 		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID")
@@ -80,6 +80,7 @@ def create_tables():
 		"FileID"	INTEGER NOT NULL UNIQUE,
 		"OwnerID"	INTEGER NOT NULL,
 		"FilePath"	BLOB NOT NULL UNIQUE,
+		"TimeStamp"	TEXT NOT NULL,
 		FOREIGN KEY("OwnerID") REFERENCES "Staff"("StaffID"),
 		PRIMARY KEY("FileID" AUTOINCREMENT)
 	)""")
