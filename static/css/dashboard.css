@@ -31,6 +31,16 @@
     margin-bottom: 50px;
 }
 
+.options {
+    background-color: var(--minor-border);
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+    margin-top: 2%;
+    padding: 2%;
+    border-radius: 30px;
+}
+
 .options *{
     cursor: pointer;
 }
