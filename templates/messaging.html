@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('messaging_css')}}">
+
+<p class="welcome">
+    Hello {{current_user.title}} {{current_user.lname}}!
+</p>
+
+<div class="options">
+    <a class="inbox" href="{{url_for('messages')}}">
+        Inbox
+    </a>
+    <a class="compose" href="{{url_for('messages')}}">
+        Compose new message
+    </a>
+</div>
+
+{% endblock %}
