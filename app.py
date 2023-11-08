@@ -1,10 +1,18 @@
+# Flask libraries
 from flask import Flask, redirect, url_for, render_template, request, send_file
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+
+# Custom libraries
 from models import User
-import sqlite3
 import hash_function
+import encryption
+
+# Misc. libraries
+import sqlite3
 import re as regex
 import os
+import string
+import random
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
