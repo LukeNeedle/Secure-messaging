@@ -235,6 +235,19 @@ def messages():
     else:
         return redirect(url_for('login'))
 
+@app.route('/messages/inbox', methods=['GET'])
+def messages_inbox():
+    if type(current_user._get_current_object()) is User:
+        # return render_template("messaging.html")
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/messages/compose', methods=['GET'])
+def messages_compose():
+    if type(current_user._get_current_object()) is User:
+        # return render_template("messaging.html")
+        return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
