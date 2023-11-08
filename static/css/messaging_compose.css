@@ -23,3 +23,10 @@
 .content {
     margin-top: 2%;
 }
+
+.welcome {
+    color: var(--accent);
+    font-size: larger;
+    font-weight: 200;
+    margin-bottom: 50px;
+}
