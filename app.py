@@ -235,7 +235,7 @@ def messages():
         return redirect(url_for('login'))
 
 @app.route('/messages/inbox', methods=['GET'])
-def messages_inbox():
+def messages_inbox():# TODO
     if type(current_user._get_current_object()) is User:
         # return render_template("inbox.html")
         return render_template("under_construction.html")
@@ -243,7 +243,7 @@ def messages_inbox():
         return redirect(url_for('login'))
 
 @app.route('/messages/compose', methods=['GET'])
-def messages_compose():
+def messages_compose():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("compose.html")
         # return render_template("under_construction.html")
@@ -251,7 +251,7 @@ def messages_compose():
         return redirect(url_for('login'))
 
 @app.route('/reports', methods=['GET'])
-def reporting():
+def reporting():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
     else:
@@ -348,14 +348,14 @@ def user_settings():
         return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
 @app.route('/app/users', methods=['GET'])
-def manage_user():
+def manage_user():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
     else:
         return redirect(url_for('login'))
 
 @app.route('/app/settings', methods=['GET'])
-def app_settings():
+def app_settings():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
     else:
