@@ -219,8 +219,8 @@ def login():
         return redirect(url_for('login'))
 # Objective 2 completed
 
-
 @app.route('/dashboard', methods=['GET'])
+@login_required
 def dashboard():
     if type(current_user._get_current_object()) is User:
         return render_template("dashboard.html")
@@ -228,6 +228,7 @@ def dashboard():
         return redirect(url_for('login'))
 
 @app.route('/messages', methods=['GET'])
+@login_required
 def messages():
     if type(current_user._get_current_object()) is User:
         return render_template("messaging.html")
@@ -235,6 +236,7 @@ def messages():
         return redirect(url_for('login'))
 
 @app.route('/messages/inbox', methods=['GET'])
+@login_required
 def messages_inbox():# TODO
     if type(current_user._get_current_object()) is User:
         # return render_template("inbox.html")
@@ -251,6 +253,7 @@ def messages_compose():# TODO
         return redirect(url_for('login'))
 
 @app.route('/reports', methods=['GET'])
+@login_required
 def reporting():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
@@ -258,6 +261,7 @@ def reporting():# TODO
         return redirect(url_for('login'))
 
 @app.route('/settings', methods=['GET', 'POST'])
+@login_required
 def user_settings():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -348,6 +352,7 @@ def user_settings():
         return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
 @app.route('/app/users', methods=['GET'])
+@login_required
 def manage_user():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
@@ -355,6 +360,7 @@ def manage_user():# TODO
         return redirect(url_for('login'))
 
 @app.route('/app/settings', methods=['GET'])
+@login_required
 def app_settings():# TODO
     if type(current_user._get_current_object()) is User:
         return render_template("under_construction.html")
