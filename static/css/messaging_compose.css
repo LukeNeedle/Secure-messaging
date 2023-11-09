@@ -21,12 +21,94 @@
 }
 
 .content {
-    margin-top: 2%;
+    margin-top: 1%;
 }
 
 .welcome {
     color: var(--accent);
     font-size: larger;
     font-weight: 200;
-    margin-bottom: 50px;
+    margin-bottom: 1%;
+}
+
+.compose {
+    border-radius: 20px;
+    padding: 3%;
+    padding-left: 7%;
+    padding-right: 7%;
+    background-color: var(--secondary);
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+}
+
+p.title {
+    font-size: x-large;
+    color: var(--text);
+}
+
+div#upload-attachments{
+    border-style: solid;
+    border-width: 1px;
+    border-color: #201316;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+div#upload-attachments span {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--minor-border);
+}
+
+div#upload-attachments input{
+    margin-top: 1%;
+}
+
+div#submit button{
+    background-color: var(--primary);
+    color: #efe6e8;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 90%;
+    margin-bottom: 20px;
+    margin-top: 3%;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: larger;
+    cursor: pointer;
+}
+
+.compose input[type="email"] {
+    border-color: #201316;
+    color: #201316;
+    border-radius: 5px;
+    margin-bottom: 2%;
+    text-decoration: none;
+    display: inline-block;
+    outline: none;
+    background-color: var(--secondary);
+    padding: 2px;
+    padding-left: 10px;
+    width: 500px;
+    height: 35px;
+    border-style: solid;
+}
+
+.compose textarea {
+    border-color: #201316;
+    color: #201316;
+    border-radius: 5px;
+    margin-bottom: 2%;
+    text-decoration: none;
+    display: inline-block;
+    outline: none;
+    background-color: var(--secondary);
+    padding: 2px;
+    padding-left: 10px;
+    width: 500px;
+    height: 100px;
+    border-style: solid;
 }
