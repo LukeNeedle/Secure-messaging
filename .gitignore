@@ -118,3 +118,6 @@ pyvenv.cfg
 Secure-messaging.code-workspace
 Scripts/
 .vscode/
+
+# User uploads
+uploads/*
