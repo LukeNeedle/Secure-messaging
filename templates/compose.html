@@ -7,4 +7,35 @@
     Hello {{current_user.title}} {{current_user.lname}}!
 </p>
 
+<div class="compose">
+    <p class="title">
+        Compose a new message.
+    </p>
+    <form class="compose-message" method="POST" action="{{url_for('messages_compose')}}">
+        <div id="recipient">
+            <input type="email" name="recipient" placeholder="Recipient's email address" autofocus="" required>
+        </div>
+        <div id="message">
+            <textarea name="message" placeholder="Your message" cols="50" rows="5" required></textarea>
+        </div>
+        <div id="upload-attachments">
+            <span>
+                <picture>
+                    <source
+                    srcset="/static/icons/file_dark.svg"
+                    media="(prefers-color-scheme: dark)"
+                    />
+                    <img width="20" height="20" src="/static/icons/file.svg"/>
+                </picture>
+                Upload attachments
+            </span>
+            <br>
+            <input type="file" name="attachments" multiple=""/>
+        </div>
+        <div id="submit">
+            <button>Send</button>
+        </div>
+    </form>
+</div>
+
 {% endblock %}
