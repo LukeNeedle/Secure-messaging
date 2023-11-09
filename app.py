@@ -244,13 +244,16 @@ def messages_inbox():# TODO
     else:
         return redirect(url_for('login'))
 
-@app.route('/messages/compose', methods=['GET'])
+@app.route('/messages/compose', methods=['GET', 'POST'])
+@login_required
 def messages_compose():# TODO
-    if type(current_user._get_current_object()) is User:
+    if request.method == 'GET':
+        if type(current_user._get_current_object()) is not User:
+            return redirect(url_for('login'))
         return render_template("compose.html")
-        # return render_template("under_construction.html")
-    else:
-        return redirect(url_for('login'))
+    elif request.method == 'POST':
+        if type(current_user._get_current_object()) is not User:
+            return redirect(url_for('login'))
 
 @app.route('/reports', methods=['GET'])
 @login_required
