@@ -407,9 +407,9 @@ def user_settings_css():
 def under_construction_css():
     return send_file('static//css//under_construction.css')
 
-@app.route('/static/css/under_construction.css')
+@app.route('/static/css/404.css')
 def four_zero_four_css():
-    return send_file('static//css//under_construction.css')
+    return send_file('static//css//404.css')
 
 
 #########################################################################
