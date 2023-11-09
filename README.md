@@ -93,6 +93,7 @@ These objectives aren't in any particular order and they are only numbered to he
 | TimeStamp    | The timestamp that the message was sent                               | -       | Text    | ❌          | -              | Not null                    |
 | ReadReceipts | Whether the message has been read                                     | False   | Text    | ❌          | -              | 'True' or 'False', Not null |
 | Archived     | Whether the message has been archived                                 | False   | Text    | ❌          | -              | 'True' or 'False', Not null |
+| Attachments  | The list of keys for attachment files                                 | [1,2]   | Blob    | ❌          | -              |                             |
 
 ### Students
 | Column       | Description                                | Example | Type    | Primary Key | Foreign Key    | Constraints      |
