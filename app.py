@@ -13,6 +13,7 @@ import re as regex
 import os
 import string
 import random
+import datetime
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
@@ -254,6 +255,60 @@ def messages_compose():# TODO
     elif request.method == 'POST':
         if type(current_user._get_current_object()) is not User:
             return redirect(url_for('login'))
+        
+        currentUser = current_user.get_user_dictionary()
+        recipient = request.form.get('recipient')
+        message = request.form.get('message')
+        attachments = request.files.getlist('attachments')
+        
+        #Email validation
+        cleanedEmail = entry_cleaner(recipient, "email")
+        if cleanedEmail != recipient.lower():
+            # Invalid email
+            return redirect(url_for('messages_compose'))
+        del recipient
+        
+        #Message validation
+        cleanedMessage = entry_cleaner(message, "sql")
+        if cleanedMessage != message.lower():
+            # Invalid message
+            return redirect(url_for('messages_compose'))
+        del message
+
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+
+        cur.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cur.fetchone()
+        if result == None:
+            # Invalid message
+            return redirect(url_for('messages_compose'))
+        else:
+            recipientID = result
+
+        timeStamp = datetime.datetime.timestamp(datetime.datetime.now())
+
+        if len(attachments) > 0:
+            for file in attachments:
+                filePath = f"uploads/{currentUser['id']}/{timeStamp}/{file.filename}"
+                cur.execute(f"""INSERT INTO Files(OwnerID, FilePath, TimeStamp)
+                        VALUES ('{currentUser['id']}', '{filePath}', '{timeStamp}');""")
+                conn.commit()
+                
+                file.save(filePath)
+        
+        vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedMessage)))
+        subsitutionKey = random.randint(1, 61)
+
+        encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey="")
+
+        try:
+            cur.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Attachments)
+                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{readReceipts}', 'False', '{attachmentsList}');""")
+            conn.commit()
+        except sqlite3.IntegrityError:
+            print("Failed CHECK constraint")
+
 
 @app.route('/reports', methods=['GET'])
 @login_required
