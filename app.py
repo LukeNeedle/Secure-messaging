@@ -36,6 +36,7 @@ def entry_cleaner(entry, mode):
     mode = "sql" --> Removes characters that could be used for sql injection
     mode = "password" --> Removes characters that could be used for sql injection as well as characters that aren't on the english keyboard.
     mode = "email" --> Removes characters that could be used for sql injection and checks that it is a valid email.
+    mode = "message" --> Removes characters that could be used for sql injection but has support for multiple lines. 
 
     Args:
         entry (string): The input that needs cleaning
@@ -69,6 +70,18 @@ def entry_cleaner(entry, mode):
             return None
         else:
             return cleanedEntry
+    elif mode == "message":
+        allowedChars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '#', '$', '%', '&', '-', '.', '/', ':', '<', '>', '?', '@', '[', ']', '^',
+                        '_', '`', '|', '~', '\n']
+        cleanedEntry = ""
+        
+        for letter in entry:
+            if letter in allowedChars:
+                cleanedEntry += letter
+
+        return cleanedEntry
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
@@ -271,10 +284,7 @@ def messages_compose():# TODO
         del recipient
         
         #Message validation
-        cleanedMessage = entry_cleaner(message, "sql")
-        if cleanedMessage != message.lower():
-            # Invalid message
-            return redirect(url_for('messages_compose'))
+        cleanedMessage = entry_cleaner(message, "message")
         del message
         
         if readReceipts == "True":
@@ -282,59 +292,61 @@ def messages_compose():# TODO
         else:
             readReceipts = False
 
-        conn = sqlite3.connect("database.db")
-        cur = conn.cursor()
+        connection = sqlite3.connect("database.db")
+        cur = connection.cursor()
 
         cur.execute(f"""SELECT StaffID FROM Staff WHERE Email='{cleanedEmail}';""")
         result = cur.fetchone()
         if result == None:
             # Invalid email
+            connection.close()
             return redirect(url_for('messages_compose'))
         else:
             recipientID = result[0]
 
         timeStamp = datetime.timestamp(datetime.now())
 
-        if not os.path.exists(f"uploads/{currentUser['id']}"):
-            os.mkdir(f"uploads/{currentUser['id']}")
-        if not os.path.exists(f"uploads/{currentUser['id']}/{timeStamp}"):
-            os.mkdir(f"uploads/{currentUser['id']}/{timeStamp}")
-        
-        attachmentsList = []
-        if len(attachments) > 0:
+        attachmentsListString = ""
+        if attachments[0].filename != '':
+            attachmentsList = []
+            if not os.path.exists(f"uploads/{currentUser['id']}"):
+                os.mkdir(f"uploads/{currentUser['id']}")
+            if not os.path.exists(f"uploads/{currentUser['id']}/{timeStamp}"):
+                os.mkdir(f"uploads/{currentUser['id']}/{timeStamp}")
             for file in attachments:
                 filePath = f"uploads/{currentUser['id']}/{timeStamp}/{file.filename}"
                 cur.execute(f"""INSERT INTO Files(OwnerID, FilePath, TimeStamp)
-                        VALUES ('{currentUser['id']}', '{filePath}', '{timeStamp}');""")
-                conn.commit()
+                                VALUES ('{currentUser['id']}', '{filePath}', '{timeStamp}');""")
+                connection.commit()
                 cur.execute(f"""SELECT FileID FROM Files WHERE FilePath='{filePath}';""")
                 result = cur.fetchone()
                 if result == None:
                     # Invalid attachments
+                    connection.close()
                     return redirect(url_for('messages_compose'))
                 else:
                     attachmentsList.append(result[0])
-                file.save(filePath)
-        
-        attachmentsListString = "["
-        for attachment in attachmentsList:
-            attachmentsList += str(attachment)
-        attachmentsListString += "]"
+                    file.save(filePath)
+                    
+            attachmentsListString = "["
+            for attachment in attachmentsList:
+                attachmentsListString += str(attachment) + ", "
+            attachmentsListString = attachmentsListString[:-2] + "]"
         
         vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedMessage)))
         subsitutionKey = random.randint(1, 61)
 
         encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
-
         with open("secrets.json", "r") as f:
             key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
-        
         try:
             cur.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Attachments, Key)
-                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{readReceipts}', 'False', '{attachmentsListString}', '{key}');""")
-            conn.commit()
+                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{str(readReceipts)}', 'False', '{attachmentsListString}', '{key}');""")
+            connection.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
+        connection.close()
+        return redirect(url_for('messages_compose'))
 
 
 @app.route('/reports', methods=['GET'])

@@ -11,7 +11,7 @@
     <p class="title">
         Compose a new message.
     </p>
-    <form class="compose-message" method="POST" action="{{url_for('messages_compose')}}">
+    <form class="compose-message" method="POST" action="{{url_for('messages_compose')}}" enctype="multipart/form-data">
         <div id="recipient">
             <input type="email" name="recipient" placeholder="Recipient's email address" autofocus="" required>
         </div>
