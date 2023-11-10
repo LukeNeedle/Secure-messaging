@@ -121,3 +121,4 @@ Scripts/
 
 # User uploads
 uploads/*
+secrets.json

@@ -13,7 +13,8 @@ import re as regex
 import os
 import string
 import random
-import datetime
+import json
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
@@ -292,25 +293,45 @@ def messages_compose():# TODO
         else:
             recipientID = result[0]
 
-        timeStamp = datetime.datetime.timestamp(datetime.datetime.now())
+        timeStamp = datetime.timestamp(datetime.now())
 
+        if not os.path.exists(f"uploads/{currentUser['id']}"):
+            os.mkdir(f"uploads/{currentUser['id']}")
+        if not os.path.exists(f"uploads/{currentUser['id']}/{timeStamp}"):
+            os.mkdir(f"uploads/{currentUser['id']}/{timeStamp}")
+        
+        attachmentsList = []
         if len(attachments) > 0:
             for file in attachments:
                 filePath = f"uploads/{currentUser['id']}/{timeStamp}/{file.filename}"
                 cur.execute(f"""INSERT INTO Files(OwnerID, FilePath, TimeStamp)
                         VALUES ('{currentUser['id']}', '{filePath}', '{timeStamp}');""")
                 conn.commit()
-                
+                cur.execute(f"""SELECT FileID FROM Files WHERE FilePath='{filePath}';""")
+                result = cur.fetchone()
+                if result == None:
+                    # Invalid attachments
+                    return redirect(url_for('messages_compose'))
+                else:
+                    attachmentsList.append(result[0])
                 file.save(filePath)
+        
+        attachmentsListString = "["
+        for attachment in attachmentsList:
+            attachmentsList += str(attachment)
+        attachmentsListString += "]"
         
         vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedMessage)))
         subsitutionKey = random.randint(1, 61)
 
-        encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey="")
+        encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
 
+        with open("secrets.json", "r") as f:
+            key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
+        
         try:
-            cur.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Attachments)
-                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{readReceipts}', 'False', '{attachmentsList}');""")
+            cur.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Attachments, Key)
+                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{readReceipts}', 'False', '{attachmentsListString}', '{key}');""")
             conn.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
