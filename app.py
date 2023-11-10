@@ -284,13 +284,13 @@ def messages_compose():# TODO
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
 
-        cur.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+        cur.execute(f"""SELECT StaffID FROM Staff WHERE Email='{cleanedEmail}';""")
         result = cur.fetchone()
         if result == None:
-            # Invalid message
+            # Invalid email
             return redirect(url_for('messages_compose'))
         else:
-            recipientID = result
+            recipientID = result[0]
 
         timeStamp = datetime.datetime.timestamp(datetime.datetime.now())
 
