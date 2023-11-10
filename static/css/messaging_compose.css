@@ -51,8 +51,10 @@ div#upload-attachments{
     border-style: solid;
     border-width: 1px;
     border-color: #201316;
+    border-width: 2px;
     border-radius: 5px;
     padding: 5px;
+    margin-bottom: 2%;
 }
 
 div#upload-attachments span {
@@ -96,6 +98,10 @@ div#submit button{
     height: 35px;
     border-style: solid;
 }
+.compose input[type="email"]:focus {
+    border-color: var(--primary);
+    outline: var(--primary);
+}
 
 .compose textarea {
     border-color: #201316;
@@ -111,4 +117,21 @@ div#submit button{
     width: 500px;
     height: 100px;
     border-style: solid;
+    border-width: 2px;
+    cursor: text;
+}
+
+.compose div#read-receipts {
+    width: 100%;
+    border-color: #201316;
+    border-style: solid;
+    color: #201316;
+    border-radius: 5px;
+    border-width: 2px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.compose div#read-receipts input {
+    transform: translateY(2px);
 }
