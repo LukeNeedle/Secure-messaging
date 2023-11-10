@@ -259,6 +259,7 @@ def messages_compose():# TODO
         currentUser = current_user.get_user_dictionary()
         recipient = request.form.get('recipient')
         message = request.form.get('message')
+        readReceipts = request.form.get('read-receipts')
         attachments = request.files.getlist('attachments')
         
         #Email validation
@@ -274,6 +275,11 @@ def messages_compose():# TODO
             # Invalid message
             return redirect(url_for('messages_compose'))
         del message
+        
+        if readReceipts == "True":
+            readReceipts = True
+        else:
+            readReceipts = False
 
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
