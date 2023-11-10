@@ -37,6 +37,7 @@ def create_tables():
 		"ReadReceipts" TEXT NOT NULL DEFAULT 'False',
 		"Archived" TEXT NOT NULL DEFAULT 'False',
         "Attachments"	TEXT,
+        "Key"	TEXT NOT NULL,
 		FOREIGN KEY("SenderID") REFERENCES "Staff"("StaffID"),
 		FOREIGN KEY("RecipientID") REFERENCES "Staff"("StaffID"),
 		PRIMARY KEY("MessageID" AUTOINCREMENT),
