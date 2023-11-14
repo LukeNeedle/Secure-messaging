@@ -70,18 +70,6 @@ def entry_cleaner(entry, mode):
             return None
         else:
             return cleanedEntry
-    elif mode == "message":
-        allowedChars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '#', '$', '%', '&', '-', '.', '/', ':', '<', '>', '?', '@', '[', ']', '^',
-                        '_', '`', '|', '~', '\n']
-        cleanedEntry = ""
-        
-        for letter in entry:
-            if letter in allowedChars:
-                cleanedEntry += letter
-
-        return cleanedEntry
     else:
         raise f"Invalid mode: {mode} for entryCleaner"
 
@@ -216,7 +204,7 @@ def login():
         else:
             passHash = result[0]
         
-        cursor.execute(f"""SELECT passSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute(f"""SELECT PassSalt FROM Staff WHERE Email='{cleanedEmail}';""")
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -305,10 +293,6 @@ def messages_compose():
             return redirect(url_for('messages_compose'))
         del recipient
         
-        #Message validation
-        cleanedMessage = entry_cleaner(message, "message")
-        del message
-        
         if readReceipts == "True":
             readReceipts = True
         else:
@@ -328,10 +312,10 @@ def messages_compose():
 
         timeStamp = datetime.timestamp(datetime.now())
         
-        vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedMessage)))
+        vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
         subsitutionKey = random.randint(1, 61)
 
-        encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+        encryptedMessage = encryption.encrypt(message, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
         with open("secrets.json", "r") as f:
             key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
         try:
