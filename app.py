@@ -15,6 +15,7 @@ import string
 import random
 import json
 from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 app.secret_key = r"1/6,I'#`}n5]>ueon&H_zAAvfB%QQS>y?QwURVhF.WuPL+[<f@JC|olJ>0&X{'R5@eIyN(G~aplodH3qChmU0%A&,p2xugLP%d5VTXoR7^la4ypRA:=#xh~T7IWt,t\\%"
@@ -264,11 +265,65 @@ def messages():
 @app.route('/messages/inbox', methods=['GET'])
 @login_required
 def messages_inbox():# TODO
-    if type(current_user._get_current_object()) is not User:
-        print("User not logged in")
-        return redirect(url_for('login'))
-    # return render_template("inbox.html")
-    return render_template("under_construction.html")
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+
+    cursor.execute(f"""SELECT * FROM Messages WHERE RecipientID='{2}' and Archived='False';""")
+    result = cursor.fetchall()
+    if result == None:
+        # return render_template("inbox.html", msg="empty")
+        pass
+    else:
+        messages = result
+
+    response = [] # A list of messages
+
+    for message in messages:
+        tempResponse = [] # 0 = Sender email, 1 = timestamp as a readable time in a list, 2 = Url, 3 = First 10 characters of message
+        
+        # Example message
+        #(4, 2, 2, '\x02\x1c', '1699959519.800139', 'False', 'False', 'BiW')
+        #messageID, senderID, recipientID, message, timestamp, readreciepts, archived, key
+        
+        cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{message[1]}';""")
+        result = cursor.fetchall()
+        if result == None:
+            # return render_template("inbox.html", msg="empty")
+            pass
+        else:
+            tempResponse.append(result[0])
+        
+        timestamp = datetime.fromtimestamp(float(message[4]))
+        tempResponse.append([
+            timestamp.strftime('%a'), # day    eg:Wed
+            timestamp.strftime('%d'), # day    eg:21
+            timestamp.strftime('%b'), # month  eg:Dec
+            timestamp.strftime('%y'), # year   eg:23
+            timestamp.strftime('%I'), # hour   eg:12 (max 12)
+            timestamp.strftime('%M'), # minute eg:36
+            timestamp.strftime('%p')  # time   eg:PM
+        ])
+        
+        with open("secrets.json", "r") as f:
+            secrets = json.load(f)
+            tempResponse.append(
+                encryption.substitution_encrypt(
+                    plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(message[0]))),
+                    key=secrets['UrlKey']
+                    )
+                )
+            key = encryption.substitution_decrypt(encryptedText=message[7], key=secrets['MessageKey'])
+        del secrets
+        tempResponse.append(
+            encryption.decrypt(
+                cipherText=message[3],
+                vernamKey=str(key[:-2]),
+                subsitutionKey=int(key[-2:])
+                )
+            )
+        response.append(tempResponse)
+    return render_template("inbox.html", mail=response)
+    # return render_template("under_construction.html")
 
 @app.route('/messages/compose', methods=['GET', 'POST'])
 @login_required
@@ -316,6 +371,8 @@ def messages_compose():
         subsitutionKey = random.randint(1, 61)
 
         encryptedMessage = encryption.encrypt(message, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+        if subsitutionKey < 10:
+            subsitutionKey = "0" + str(subsitutionKey)
         with open("secrets.json", "r") as f:
             key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
         try:
