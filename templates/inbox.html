@@ -12,7 +12,19 @@
         Your inbox
     </p>
     {% if msg == "empty" %}
-    <p>It's awefully quiet in here...</p>
+        <p class="empty">It's awefully quiet in here...</p>
+    {% else %}
+        {% for message in mail %}
+            <div class="message" onclick="openMessage('{{message[0]}}')">
+                <p class="sender">{{message[1]}}</p>
+
+            </div>
+            {% endfor %}
+        <script>
+            function openMessage(messageID){
+                window.open("{{url_for('message', messageID=message[0])}};")
+               }
+        </script>
     {% endif %}
 </div>
 

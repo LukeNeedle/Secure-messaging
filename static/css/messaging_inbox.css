@@ -47,3 +47,7 @@ p.title {
     color: var(--text);
     margin-bottom: 1%;
 }
+
+.inbox p.empty {
+    margin-top: 4%;
+}
