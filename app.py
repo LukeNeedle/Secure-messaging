@@ -403,6 +403,14 @@ def messages_compose():
         connection.close()
         return redirect(url_for('messages_compose'))
 
+@app.route('/messages/inbox/<int:messageID>')
+@login_required
+def message(messageID: int):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    print(messageID)
+    return render_template("under_construction.html")
+
 @app.route('/reports', methods=['GET'])
 @login_required
 def reporting():# TODO
