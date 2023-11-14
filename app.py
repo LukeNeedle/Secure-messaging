@@ -163,26 +163,29 @@ def user_loader(email):
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        if type(current_user._get_current_object()) is User:
-            return redirect(url_for('dashboard'))
-        else:
+        if type(current_user._get_current_object()) is not User:
+            print("User not logged in")
             return render_template("login.html")
+        return redirect(url_for('dashboard'))
     
     elif request.method == 'POST':
+        if type(current_user._get_current_object()) is User:
+            print("User already logged in")
+            return redirect(url_for('dashboard'))
         email = request.form.get('email')
         password = request.form.get('password')
 
         #Email validation
         cleanedEmail = entry_cleaner(email, "email")
         if cleanedEmail != email.lower():
-            # Invalid email
+            print("Invalid email")
             return redirect(url_for('login'))
         del email
         
         #Password Validation
         cleanedPassword = entry_cleaner(password, "password")
         if cleanedPassword != password:
-            # Invalid password
+            print("Invalid password")
             return redirect(url_for('login'))
         del password
 
@@ -193,7 +196,7 @@ def login():
         result = cursor.fetchone()
         if result == None:
             connection.close()
-            # User not found
+            print("User not found")
             return redirect(url_for('login'))
         else:
             passHash = result[0]
@@ -202,74 +205,78 @@ def login():
         result = cursor.fetchone()
         if result == None:
             connection.close()
-            # User not found
+            print("User not found")
             return redirect(url_for('login'))
         else:
             salt = result[0]
         
-        if passHash == hashing(cleanedPassword, salt):
-            cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
-            result = cursor.fetchone()
-            if result == None:
-                connection.close()
-                return None
-            else:
-                userDetails = {
-                    "id": result[0],
-                    "firstName": result[1],
-                    "lastName": result[2],
-                    "title": result[3],
-                    "email": result[4],
-                    "accountEnabled": result[5],
-                    "accountArchived": result[6],
-                    "passhash": result[7],
-                    "passsalt": result[8],
-                    "SENCo": result[9],
-                    "safeguarding": result[10],
-                    "admin": result[11]
-                }
-
-                login_user(User(userDetails), remember=True)
+        if passHash != hashing(cleanedPassword, salt):
+            connection.close()
+            print("Password doesn't match stored password")
+            return redirect(url_for('login'))
+        
+        cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
         connection.close()
+        if result == None:
+            print("User not found")
+            return redirect(url_for('login'))
+        
+        userDetails = {
+            "id": result[0],
+            "firstName": result[1],
+            "lastName": result[2],
+            "title": result[3],
+            "email": result[4],
+            "accountEnabled": result[5],
+            "accountArchived": result[6],
+            "passhash": result[7],
+            "passsalt": result[8],
+            "SENCo": result[9],
+            "safeguarding": result[10],
+            "admin": result[11]
+        }
+
+        login_user(User(userDetails), remember=False)
+        print("Successfully logged in")
         return redirect(url_for('login'))
 # Objective 2 completed
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    if type(current_user._get_current_object()) is User:
-        return render_template("dashboard.html")
-    else:
+    if type(current_user._get_current_object()) is not User:
+        print("User not logged in")
         return redirect(url_for('login'))
+    return render_template("dashboard.html")
 
 @app.route('/messages', methods=['GET'])
 @login_required
 def messages():
-    if type(current_user._get_current_object()) is User:
-        return render_template("messaging.html")
-    else:
+    if type(current_user._get_current_object()) is not User:
+        print("User not logged in")
         return redirect(url_for('login'))
+    return render_template("messaging.html")
 
 @app.route('/messages/inbox', methods=['GET'])
 @login_required
 def messages_inbox():# TODO
-    if type(current_user._get_current_object()) is User:
-        # return render_template("inbox.html")
-        return render_template("under_construction.html")
-    else:
+    if type(current_user._get_current_object()) is not User:
+        print("User not logged in")
         return redirect(url_for('login'))
+    # return render_template("inbox.html")
+    return render_template("under_construction.html")
 
 @app.route('/messages/compose', methods=['GET', 'POST'])
 @login_required
-def messages_compose():# TODO
+def messages_compose():
+    if type(current_user._get_current_object()) is not User:
+        print("User not logged in")
+        return redirect(url_for('login'))
+    
     if request.method == 'GET':
-        if type(current_user._get_current_object()) is not User:
-            return redirect(url_for('login'))
         return render_template("compose.html")
     elif request.method == 'POST':
-        if type(current_user._get_current_object()) is not User:
-            return redirect(url_for('login'))
-        
         currentUser = current_user.get_user_dictionary()
         recipient = request.form.get('recipient')
         message = request.form.get('message')
@@ -279,7 +286,7 @@ def messages_compose():# TODO
         #Email validation
         cleanedEmail = entry_cleaner(recipient, "email")
         if cleanedEmail != recipient.lower():
-            # Invalid email
+            print("Invalid email")
             return redirect(url_for('messages_compose'))
         del recipient
         
@@ -298,7 +305,7 @@ def messages_compose():# TODO
         cursor.execute(f"""SELECT StaffID FROM Staff WHERE Email='{cleanedEmail}';""")
         result = cursor.fetchone()
         if result == None:
-            # Invalid email
+            print("Invalid email")
             connection.close()
             return redirect(url_for('messages_compose'))
         else:
@@ -323,8 +330,8 @@ def messages_compose():# TODO
         cursor.execute(f"""SELECT MessageID FROM Messages WHERE SenderID='{currentUser["id"]}' and RecipientID='{recipientID}' and Message='{encryptedMessage}' and TimeStamp='{timeStamp}' and ReadReceipts='{str(readReceipts)}' and Key='{key}';""")
         result = cursor.fetchone()
         if result == None:
-            # Failed to save message
             connection.close()
+            print("Failed to save message")
             return redirect(url_for('messages_compose'))
         else:
             messageID = result[0]
@@ -343,14 +350,12 @@ def messages_compose():# TODO
         connection.close()
         return redirect(url_for('messages_compose'))
 
-
 @app.route('/reports', methods=['GET'])
 @login_required
 def reporting():# TODO
-    if type(current_user._get_current_object()) is User:
-        return render_template("under_construction.html")
-    else:
+    if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
+    return render_template("under_construction.html")
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -369,7 +374,7 @@ def user_settings():
         #Email validation
         cleanedEmail = entry_cleaner(email, "email")
         if cleanedEmail != email.lower():
-            # Invalid email
+            print("Invalid email")
             return render_template("user_settings.html", msg="Invalid Email", entry=["email"])
         del email
         
@@ -378,13 +383,13 @@ def user_settings():
         cleanedNewPassword = entry_cleaner(newPassword, "password")
         cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
         if cleanedOldPassword != oldPassword:
-            # Invalid password
+            print("Invalid old password")
             return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"])
         if cleanedNewPassword != newPassword:
-            # Invalid password
+            print("Invalid new password")
             return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"])
         if cleanedConfirmNewPassword != confirmNewPassword:
-            # Invalid password
+            print("Invalid confirm new password")
             return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
         del oldPassword
         del newPassword
@@ -398,11 +403,11 @@ def user_settings():
         result = cursor.fetchone()
         if result == None:
             connection.close()
-            # User not found
+            print("User not found")
             return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
         elif result[0].lower() != cleanedEmail.lower():
             connection.close()
-            # Invalid email
+            print("Invalid email")
             return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"])
         
         # Getting user's password
@@ -410,7 +415,7 @@ def user_settings():
         result = cursor.fetchone()
         if result == None:
             connection.close()
-            # User not found
+            print("User not found")
             return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
         else:
             passHash = result[0]
@@ -419,19 +424,19 @@ def user_settings():
         result = cursor.fetchone()
         if result == None:
             connection.close()
-            # User not found
+            print("User not found")
             return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
         else:
             salt = result[0]
         
         if passHash != hashing(cleanedOldPassword, salt):
             connection.close()
-            # Old password isn't valid
+            print("Old password isn't valid")
             return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
         
         if cleanedNewPassword != cleanedConfirmNewPassword:
             connection.close()
-            # New password and confirm new password aren't the same
+            print("New password and confirm new password aren't the same")
             return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
         
         cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
@@ -446,18 +451,16 @@ def user_settings():
 @app.route('/app/users', methods=['GET'])
 @login_required
 def manage_user():# TODO
-    if type(current_user._get_current_object()) is User:
-        return render_template("under_construction.html")
-    else:
+    if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
+    return render_template("under_construction.html")
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
 def app_settings():# TODO
-    if type(current_user._get_current_object()) is User:
-        return render_template("under_construction.html")
-    else:
+    if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
+    return render_template("under_construction.html")
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
