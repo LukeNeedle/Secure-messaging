@@ -278,7 +278,7 @@ def messages_inbox():# TODO
     response = [] # A list of messages
 
     for message in messages:
-        tempResponse = [] # 0 = Sender email, 1 = timestamp as a readable time in a list, 2 = Url, 3 = First 10 characters of message
+        tempResponse = [message[1]] # 0 = Message ID, 1 = Sender email, 2 = timestamp as a readable time in a list, 3 = Url, 4 = First 10 characters of message
         
         # Example message
         #(4, 2, 2, '\x02\x1c', '1699959519.800139', 'False', 'False', 'BiW')
@@ -313,13 +313,19 @@ def messages_inbox():# TODO
                 )
             key = encryption.substitution_decrypt(encryptedText=message[7], key=secrets['MessageKey'])
         del secrets
-        tempResponse.append(
+        
+        mail = str(
             encryption.decrypt(
                 cipherText=message[3],
                 vernamKey=str(key[:-2]),
                 subsitutionKey=int(key[-2:])
                 )
-            )
+            ).strip().replace("\n", " ")
+        if len(int(mail)) > 30:
+            tempResponse.append(mail[:30])
+        elif len(int(mail)) <= 30:
+            tempResponse.append(mail)
+        
         response.append(tempResponse)
     return render_template("inbox.html", mail=response)
     # return render_template("under_construction.html")
