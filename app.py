@@ -436,7 +436,7 @@ def user_settings():
         userDetails = current_user.get_user_dictionary()
         userDetails["passhash"] = hashing(cleanedNewPassword, salt)
         logout_user()
-        login_user(User(userDetails), remember=True)
+        login_user(User(userDetails), remember=False)
         return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
 @app.route('/app/users', methods=['GET'])
