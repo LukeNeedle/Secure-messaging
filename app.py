@@ -270,9 +270,8 @@ def messages_inbox():# TODO
 
     cursor.execute(f"""SELECT * FROM Messages WHERE RecipientID='{current_user.id}' and Archived='False';""")
     result = cursor.fetchall()
-    if result == None:
-        # return render_template("inbox.html", msg="empty")
-        pass
+    if result == None or len(result) == 0:
+        return render_template("inbox.html", msg="empty")
     else:
         messages = result
 
