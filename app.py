@@ -100,6 +100,21 @@ def hashing(variable:str, salt:str):
     result = hash_function.hash_variable(variable, salt)
     return result
 
+def save_message_attachments(senderID, attachments, timeStamp, messageID):
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    if not os.path.exists(f"uploads/{senderID}"):
+        os.mkdir(f"uploads/{senderID}")
+    if not os.path.exists(f"uploads/{senderID}/{timeStamp}"):
+        os.mkdir(f"uploads/{senderID}/{timeStamp}")
+    for file in attachments:
+        filePath = f"uploads/{senderID}/{timeStamp}/{file.filename}"
+        cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, TimeStamp)
+                                VALUES ('{senderID}', 'M+{messageID}', '{filePath}', '{timeStamp}');""")
+        connection.commit()
+        file.save(filePath)
+    return connection
+
 
 #########################################################################
 #########################################################################
@@ -336,17 +351,9 @@ def messages_compose():
         else:
             messageID = result[0]
         
+        connection.close()
         if attachments[0].filename != '':
-            if not os.path.exists(f"uploads/{currentUser['id']}"):
-                os.mkdir(f"uploads/{currentUser['id']}")
-            if not os.path.exists(f"uploads/{currentUser['id']}/{timeStamp}"):
-                os.mkdir(f"uploads/{currentUser['id']}/{timeStamp}")
-            for file in attachments:
-                filePath = f"uploads/{currentUser['id']}/{timeStamp}/{file.filename}"
-                cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, TimeStamp)
-                                VALUES ('{currentUser['id']}', 'M+{messageID}', '{filePath}', '{timeStamp}');""")
-                connection.commit()
-                file.save(filePath)
+            connection = save_message_attachments(currentUser['id'], attachments, timeStamp, messageID)
         connection.close()
         return redirect(url_for('messages_compose'))
 
