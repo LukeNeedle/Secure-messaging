@@ -7,4 +7,13 @@
     Hello {{current_user.title}} {{current_user.lname}}!
 </p>
 
+<div class="inbox">
+    <p class="title">
+        Your inbox
+    </p>
+    {% if msg == "empty" %}
+    <p>It's awefully quiet in here...</p>
+    {% endif %}
+</div>
+
 {% endblock %}

@@ -30,3 +30,20 @@
     font-weight: 200;
     margin-bottom: 50px;
 }
+
+.inbox {
+    border-radius: 20px;
+    padding: 3%;
+    padding-left: 7%;
+    padding-right: 7%;
+    background-color: var(--secondary);
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+}
+
+p.title {
+    font-size: x-large;
+    color: var(--text);
+    margin-bottom: 1%;
+}
