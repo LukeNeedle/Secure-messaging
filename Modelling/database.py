@@ -36,7 +36,6 @@ def create_tables():
 		"TimeStamp"	TEXT NOT NULL,
 		"ReadReceipts" TEXT NOT NULL DEFAULT 'False',
 		"Archived" TEXT NOT NULL DEFAULT 'False',
-        "Attachments"	TEXT,
         "Key"	TEXT NOT NULL,
 		FOREIGN KEY("SenderID") REFERENCES "Staff"("StaffID"),
 		FOREIGN KEY("RecipientID") REFERENCES "Staff"("StaffID"),
@@ -81,6 +80,7 @@ def create_tables():
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Files" (
 		"FileID"	INTEGER NOT NULL UNIQUE,
 		"OwnerID"	INTEGER NOT NULL,
+		"Origin"	TEXT NOT NULL,
 		"FilePath"	BLOB NOT NULL UNIQUE,
 		"TimeStamp"	TEXT NOT NULL,
 		FOREIGN KEY("OwnerID") REFERENCES "Staff"("StaffID"),

@@ -293,10 +293,10 @@ def messages_compose():# TODO
             readReceipts = False
 
         connection = sqlite3.connect("database.db")
-        cur = connection.cursor()
+        cursor = connection.cursor()
 
-        cur.execute(f"""SELECT StaffID FROM Staff WHERE Email='{cleanedEmail}';""")
-        result = cur.fetchone()
+        cursor.execute(f"""SELECT StaffID FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
         if result == None:
             # Invalid email
             connection.close()
@@ -305,33 +305,6 @@ def messages_compose():# TODO
             recipientID = result[0]
 
         timeStamp = datetime.timestamp(datetime.now())
-
-        attachmentsListString = ""
-        if attachments[0].filename != '':
-            attachmentsList = []
-            if not os.path.exists(f"uploads/{currentUser['id']}"):
-                os.mkdir(f"uploads/{currentUser['id']}")
-            if not os.path.exists(f"uploads/{currentUser['id']}/{timeStamp}"):
-                os.mkdir(f"uploads/{currentUser['id']}/{timeStamp}")
-            for file in attachments:
-                filePath = f"uploads/{currentUser['id']}/{timeStamp}/{file.filename}"
-                cur.execute(f"""INSERT INTO Files(OwnerID, FilePath, TimeStamp)
-                                VALUES ('{currentUser['id']}', '{filePath}', '{timeStamp}');""")
-                connection.commit()
-                cur.execute(f"""SELECT FileID FROM Files WHERE FilePath='{filePath}';""")
-                result = cur.fetchone()
-                if result == None:
-                    # Invalid attachments
-                    connection.close()
-                    return redirect(url_for('messages_compose'))
-                else:
-                    attachmentsList.append(result[0])
-                    file.save(filePath)
-                    
-            attachmentsListString = "["
-            for attachment in attachmentsList:
-                attachmentsListString += str(attachment) + ", "
-            attachmentsListString = attachmentsListString[:-2] + "]"
         
         vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedMessage)))
         subsitutionKey = random.randint(1, 61)
@@ -340,11 +313,33 @@ def messages_compose():# TODO
         with open("secrets.json", "r") as f:
             key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
         try:
-            cur.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Attachments, Key)
-                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{str(readReceipts)}', 'False', '{attachmentsListString}', '{key}');""")
+            cursor.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Key)
+                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{str(readReceipts)}', 'False', '{key}');""")
             connection.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
+        
+
+        cursor.execute(f"""SELECT MessageID FROM Messages WHERE SenderID='{currentUser["id"]}' and RecipientID='{recipientID}' and Message='{encryptedMessage}' and TimeStamp='{timeStamp}' and ReadReceipts='{str(readReceipts)}' and Key='{key}';""")
+        result = cursor.fetchone()
+        if result == None:
+            # Failed to save message
+            connection.close()
+            return redirect(url_for('messages_compose'))
+        else:
+            messageID = result[0]
+        
+        if attachments[0].filename != '':
+            if not os.path.exists(f"uploads/{currentUser['id']}"):
+                os.mkdir(f"uploads/{currentUser['id']}")
+            if not os.path.exists(f"uploads/{currentUser['id']}/{timeStamp}"):
+                os.mkdir(f"uploads/{currentUser['id']}/{timeStamp}")
+            for file in attachments:
+                filePath = f"uploads/{currentUser['id']}/{timeStamp}/{file.filename}"
+                cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, TimeStamp)
+                                VALUES ('{currentUser['id']}', 'M+{messageID}', '{filePath}', '{timeStamp}');""")
+                connection.commit()
+                file.save(filePath)
         connection.close()
         return redirect(url_for('messages_compose'))
 
