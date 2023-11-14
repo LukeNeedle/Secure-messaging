@@ -71,7 +71,7 @@ def entry_cleaner(entry, mode):
         else:
             return cleanedEntry
     else:
-        raise f"Invalid mode: {mode} for entryCleaner"
+        raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
 def hashing(variable:str, salt:str):
     """
