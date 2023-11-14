@@ -51,3 +51,12 @@ p.title {
 .inbox p.empty {
     margin-top: 4%;
 }
+
+.inbox div.message{
+    background-color: var(--minor-border);
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-radius: 10px;
+}

@@ -14,17 +14,17 @@
     {% if msg == "empty" %}
         <p class="empty">It's awefully quiet in here...</p>
     {% else %}
-        {% for message in mail %}
-            <div class="message" onclick="openMessage('{{message[0]}}')">
-                <p class="sender">{{message[1]}}</p>
-
-            </div>
-            {% endfor %}
-        <script>
-            function openMessage(messageID){
-                window.open("{{url_for('message', messageID=message[0])}};")
-               }
-        </script>
+    {% for message in mail %}
+        <div class="message" onclick="openMessageWindow('{{ url_for('preview_message', messageID=message[3]) }}')">
+            <span>From: {{message[1]}}</span><span>{{message[2]}}</span>
+            <p class="msg">{{message[4]}}</p>
+        </div>
+    {% endfor %}
+    <script type="text/javascript">
+        function openMessageWindow(url){
+            window.open(url);
+        }
+    </script>
     {% endif %}
 </div>
 

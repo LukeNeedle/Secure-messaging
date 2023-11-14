@@ -285,7 +285,7 @@ def messages_inbox():# TODO
         #messageID, senderID, recipientID, message, timestamp, readreciepts, archived, key
         
         cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{message[1]}';""")
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         if result == None:
             # return render_template("inbox.html", msg="empty")
             pass
@@ -293,15 +293,7 @@ def messages_inbox():# TODO
             tempResponse.append(result[0])
         
         timestamp = datetime.fromtimestamp(float(message[4]))
-        tempResponse.append([
-            timestamp.strftime('%a'), # day    eg:Wed
-            timestamp.strftime('%d'), # day    eg:21
-            timestamp.strftime('%b'), # month  eg:Dec
-            timestamp.strftime('%y'), # year   eg:23
-            timestamp.strftime('%I'), # hour   eg:12 (max 12)
-            timestamp.strftime('%M'), # minute eg:36
-            timestamp.strftime('%p')  # time   eg:PM
-        ])
+        tempResponse.append(f"{timestamp.strftime('%d')} {timestamp.strftime('%a')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}")
         
         with open("secrets.json", "r") as f:
             secrets = json.load(f)
@@ -321,9 +313,9 @@ def messages_inbox():# TODO
                 subsitutionKey=int(key[-2:])
                 )
             ).strip().replace("\n", " ")
-        if len(int(mail)) > 30:
+        if len(mail) > 30:
             tempResponse.append(mail[:30])
-        elif len(int(mail)) <= 30:
+        elif len(mail) <= 30:
             tempResponse.append(mail)
         
         response.append(tempResponse)
@@ -403,9 +395,9 @@ def messages_compose():
         connection.close()
         return redirect(url_for('messages_compose'))
 
-@app.route('/messages/inbox/<int:messageID>')
+@app.route('/messages/inbox/<string:messageID>')
 @login_required
-def message(messageID: int):
+def preview_message(messageID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     print(messageID)
