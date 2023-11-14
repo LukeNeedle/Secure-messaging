@@ -268,7 +268,7 @@ def messages_inbox():# TODO
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
-    cursor.execute(f"""SELECT * FROM Messages WHERE RecipientID='{2}' and Archived='False';""")
+    cursor.execute(f"""SELECT * FROM Messages WHERE RecipientID='{current_user.id}' and Archived='False';""")
     result = cursor.fetchall()
     if result == None:
         # return render_template("inbox.html", msg="empty")
