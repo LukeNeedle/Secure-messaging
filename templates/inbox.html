@@ -12,19 +12,33 @@
         Your inbox
     </p>
     {% if msg == "empty" %}
-        <p class="empty">It's awefully quiet in here...</p>
+        <p class="empty">
+            It's awfully quiet in here...
+        </p>
     {% else %}
-    {% for message in mail %}
-        <div class="message" onclick="openMessageWindow('{{ url_for('preview_message', messageID=message[3]) }}')">
-            <span>From: {{message[1]}}</span><span>{{message[2]}}</span>
-            <p class="msg">{{message[4]}}</p>
-        </div>
-    {% endfor %}
-    <script type="text/javascript">
-        function openMessageWindow(url){
-            window.open(url);
-        }
-    </script>
+        {% for message in mail %}
+            <div class="message" onclick="openMessageWindow('{{ url_for('preview_message', messageID=message[3]) }}')">
+                <span class="sender">
+                    From: {{message[1]}}
+                </span>
+                <span class="timestamp">
+                    {{message[2]}}
+                </span>
+                <p class="msg">
+                    {{message[4]}}
+                </p>
+                <b>
+                    <p class="view-message">
+                        Click to view full message
+                    </p>
+                </b>
+            </div>
+        {% endfor %}
+        <script type="text/javascript">
+            function openMessageWindow(url){
+                window.open(url);
+            }
+        </script>
     {% endif %}
 </div>
 

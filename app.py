@@ -99,7 +99,8 @@ def save_message_attachments(senderID, attachments, timeStamp, messageID):
     for file in attachments:
         filePath = f"uploads/{senderID}/{timeStamp}/{file.filename}"
         cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, TimeStamp)
-                                VALUES ('{senderID}', 'M+{messageID}', '{filePath}', '{timeStamp}');""")
+                       VALUES (?, ?, ?, ?);
+                       """, (senderID, f'M+{messageID}', filePath, timeStamp))
         connection.commit()
         file.save(filePath)
     return connection
@@ -293,7 +294,8 @@ def messages_inbox():# TODO
             tempResponse.append(result[0])
         
         timestamp = datetime.fromtimestamp(float(message[4]))
-        tempResponse.append(f"{timestamp.strftime('%d')} {timestamp.strftime('%a')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}")
+        tempResponse.append(f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}")
+        
         
         with open("secrets.json", "r") as f:
             secrets = json.load(f)
@@ -306,13 +308,15 @@ def messages_inbox():# TODO
             key = encryption.substitution_decrypt(encryptedText=message[7], key=secrets['MessageKey'])
         del secrets
         
+        print(message[3])
+        print(message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"))
         mail = str(
             encryption.decrypt(
-                cipherText=message[3],
+                cipherText=message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
                 vernamKey=str(key[:-2]),
                 subsitutionKey=int(key[-2:])
-                )
-            ).strip().replace("\n", " ")
+                ).replace("\\S\\C", ';')
+            ).strip().replace("\n", ' ')
         if len(mail) > 30:
             tempResponse.append(mail[:30])
         elif len(mail) <= 30:
@@ -367,20 +371,68 @@ def messages_compose():
         vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
         subsitutionKey = random.randint(1, 61)
 
+        cleanedMessage = message.replace('\0', '')
+        
         encryptedMessage = encryption.encrypt(message, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
         if subsitutionKey < 10:
             subsitutionKey = "0" + str(subsitutionKey)
         with open("secrets.json", "r") as f:
             key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
+        
+        cleanedEncryptedMessage = ""
+        for character in encryptedMessage:
+            if character == '"':
+                print('Encrypted message includes "')
+                cleanedEncryptedMessage += "<Double_Quote>"
+            elif character == "'":
+                print("Encrypted message includes '")
+                cleanedEncryptedMessage += "<Single_Quote>"
+            elif character == "\\":
+                print("Encrypted message includes \\")
+                cleanedEncryptedMessage += "<Escape>"
+            elif character == "\n":
+                print("Encrypted message includes \\n")
+                cleanedEncryptedMessage += "<New_Line>"
+            elif character == "\t":
+                print("Encrypted message includes \\t")
+                cleanedEncryptedMessage += "<Tab>"
+            elif character == "\r":
+                print("Encrypted message includes \\r")
+                cleanedEncryptedMessage += "<Carriage_Return>"
+            elif character == "\0":
+                print("Encrypted message includes \\0")
+                cleanedEncryptedMessage += "<Null_Character>"
+            elif character == "\a":
+                print("Encrypted message includes \\a")
+                cleanedEncryptedMessage += "<ASCII_Bell>"
+            elif character == "\b":
+                print("Encrypted message includes \\b")
+                cleanedEncryptedMessage += "<ASCII_Backspace>"
+            elif character == "\f":
+                print("Encrypted message includes \\f")
+                cleanedEncryptedMessage += "<ASCII_Form_Feed>"
+            elif character == "\v":
+                print("Encrypted message includes \\v")
+                cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
+            else:
+                cleanedEncryptedMessage += character
+        
         try:
-            cursor.execute(f"""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Key)
-                            VALUES ('{currentUser["id"]}', '{recipientID}', '{encryptedMessage}', '{timeStamp}', '{str(readReceipts)}', 'False', '{key}');""")
+            print("======Debug info======")
+            print(currentUser["id"])
+            print(recipientID)
+            print(fr"""'{currentUser["id"]}', '{recipientID}', '{cleanedEncryptedMessage}', '{timeStamp}', '{str(readReceipts)}', 'False', '{key}'""")
+            print("======End of debug======")
+            cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Key)
+                            VALUES (?, ?, ?, ?, ?, 'False', ?);
+                            """, (currentUser["id"], recipientID, cleanedEncryptedMessage, timeStamp, str(readReceipts), key))
             connection.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
+            return redirect(url_for('messages_compose'))
         
 
-        cursor.execute(f"""SELECT MessageID FROM Messages WHERE SenderID='{currentUser["id"]}' and RecipientID='{recipientID}' and Message='{encryptedMessage}' and TimeStamp='{timeStamp}' and ReadReceipts='{str(readReceipts)}' and Key='{key}';""")
+        cursor.execute(f"""SELECT MessageID FROM Messages WHERE SenderID='{currentUser["id"]}' and RecipientID='{recipientID}' and Message='{cleanedEncryptedMessage}' and TimeStamp='{timeStamp}' and ReadReceipts='{str(readReceipts)}' and Key='{key}';""")
         result = cursor.fetchone()
         if result == None:
             connection.close()

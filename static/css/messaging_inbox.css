@@ -34,8 +34,8 @@
 .inbox {
     border-radius: 20px;
     padding: 3%;
-    padding-left: 7%;
-    padding-right: 7%;
+    padding-left: 5%;
+    padding-right: 5%;
     background-color: var(--secondary);
     width: fit-content;
     height: fit-content;
@@ -45,7 +45,7 @@
 p.title {
     font-size: x-large;
     color: var(--text);
-    margin-bottom: 1%;
+    margin-bottom: 2%;
 }
 
 .inbox p.empty {
@@ -53,10 +53,39 @@ p.title {
 }
 
 .inbox div.message{
+    width: 480px;
+    cursor: pointer;
     background-color: var(--minor-border);
     padding-left: 25px;
     padding-right: 25px;
-    padding-top: 20px;
+    padding-top: 10px;
     padding-bottom: 20px;
     border-radius: 10px;
+    margin-bottom: 3%;
+}
+
+.inbox div.message *{
+    cursor: pointer;
+}
+
+.inbox div.message span.sender{
+    margin-right: 7%;
+}
+
+.inbox div.message p.msg{
+    background-color: var(--background);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: fit-content;
+    border-radius: 5px;
+    margin-top: 2%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.inbox div.message p.view-message{
+    color: var(--primary);
+    margin-top: 2%;
 }

@@ -64,8 +64,10 @@ def substitution_decrypt(encryptedText:str, key:int):
 def vernam_encrypt(plainText, key):
     cipherText = ""
     for i in range(len(plainText)):
+        print(f"{plainText[i]} ^ {key[i]} = {ord(plainText[i]) ^ ord(key[i])}")
         cipherText += chr(ord(plainText[i]) ^ ord(key[i]))
     return cipherText
+
 
 def vernam_decrypt(cipherText, key):
     plainText = ""
