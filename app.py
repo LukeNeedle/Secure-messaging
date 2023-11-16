@@ -372,7 +372,7 @@ def messages_compose():
 
         cleanedMessage = message.replace('\0', '')
         
-        encryptedMessage = encryption.encrypt(message, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+        encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
         if subsitutionKey < 10:
             subsitutionKey = "0" + str(subsitutionKey)
         with open("secrets.json", "r") as f:
