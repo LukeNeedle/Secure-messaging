@@ -33,6 +33,7 @@ def create_tables():
 		"SenderID"	INTEGER NOT NULL,
 		"RecipientID"	INTEGER NOT NULL,
 		"Message"	BLOB NOT NULL,
+		"HashedUrl"	TEXT NOT NULL UNIQUE,	
 		"TimeStamp"	TEXT NOT NULL,
 		"ReadReceipts" TEXT NOT NULL DEFAULT 'False',
 		"Archived" TEXT NOT NULL DEFAULT 'False',
