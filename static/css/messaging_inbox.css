@@ -57,6 +57,8 @@ p.title {
 
 .inbox p.empty {
     margin-top: 4%;
+    margin-left: 75px;
+    margin-right: 75px;
 }
 
 .inbox div.message{
