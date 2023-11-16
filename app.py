@@ -313,7 +313,7 @@ def messages_inbox():# TODO
                 cipherText=message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
                 vernamKey=str(key[:-2]),
                 subsitutionKey=int(key[-2:])
-                ).replace("\\S\\C", ';')
+                )
             ).strip().replace("\n", ' ').replace("\0", '').replace("\a", '')
         
         if len(mail) > 30:
