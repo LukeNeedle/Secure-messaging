@@ -42,6 +42,14 @@
     margin: auto;
 }
 
+div.back a{
+    float: left;
+    margin-bottom: 3%;
+    cursor: pointer;
+    color: var(--accent);
+    padding-bottom: 10px;
+}
+
 p.title {
     font-size: x-large;
     color: var(--text);

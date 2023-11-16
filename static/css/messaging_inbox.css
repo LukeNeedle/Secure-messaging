@@ -34,12 +34,19 @@
 .inbox {
     border-radius: 20px;
     padding: 3%;
+    padding-top: 2%;
     padding-left: 5%;
     padding-right: 5%;
     background-color: var(--secondary);
     width: fit-content;
     height: fit-content;
     margin: auto;
+}
+
+div.back a{
+    float: left;
+    cursor: pointer;
+    color: var(--accent);
 }
 
 p.title {
