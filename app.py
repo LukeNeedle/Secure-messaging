@@ -266,6 +266,10 @@ def messages():
 @app.route('/messages/inbox', methods=['GET'])
 @login_required
 def messages_inbox():# TODO
+    if type(current_user._get_current_object()) is not User:
+        print("User not logged in")
+        return redirect(url_for('login'))
+    
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
@@ -288,25 +292,28 @@ def messages_inbox():# TODO
         cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{message[1]}';""")
         result = cursor.fetchone()
         if result == None:
-            # return render_template("inbox.html", msg="empty")
-            pass
+            connection.close()
+            print("Recipient not found")
+            return redirect(url_for('messages'))
         else:
             tempResponse.append(result[0])
         
         timestamp = datetime.fromtimestamp(float(message[4]))
-        tempResponse.append(f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}")
+        tempResponse.append(
+            f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
+            )
         
+        cursor.execute(f"""SELECT HashedUrl FROM Messages WHERE MessageID='{message[0]}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("URL not found")
+            return redirect(url_for('messages'))
+        else:
+            tempResponse.append(result[0])
         
         with open("secrets.json", "r") as f:
-            secrets = json.load(f)
-            tempResponse.append(
-                encryption.substitution_encrypt(
-                    plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(message[0]))),
-                    key=secrets['UrlKey']
-                    )
-                )
-            key = encryption.substitution_decrypt(encryptedText=message[7], key=secrets['MessageKey'])
-        del secrets
+            key = encryption.substitution_decrypt(encryptedText=message[7], key=json.load(f)['MessageKey'])
         
         mail = str(
             encryption.decrypt(
@@ -322,6 +329,8 @@ def messages_inbox():# TODO
             tempResponse.append(mail)
         
         response.append(tempResponse)
+    
+    connection.close()
     return render_template("inbox.html", mail=response)
     # return render_template("under_construction.html")
 
@@ -405,16 +414,16 @@ def messages_compose():
             else:
                 cleanedEncryptedMessage += character
         
+        cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
+                        VALUES (?, ?, ?, ?, ?, ?, 'False', ?);
+                        """, (currentUser["id"], recipientID, cleanedEncryptedMessage, str(uuid.uuid4()), timeStamp, str(readReceipts), key))
+        connection.commit()
         try:
-            cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Key)
-                            VALUES (?, ?, ?, ?, ?, 'False', ?);
-                            """, (currentUser["id"], recipientID, cleanedEncryptedMessage, timeStamp, str(readReceipts), key))
-            connection.commit()
+            pass
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             return redirect(url_for('messages_compose'))
         
-
         cursor.execute(f"""SELECT MessageID FROM Messages WHERE SenderID='{currentUser["id"]}' and RecipientID='{recipientID}' and Message='{cleanedEncryptedMessage}' and TimeStamp='{timeStamp}' and ReadReceipts='{str(readReceipts)}' and Key='{key}';""")
         result = cursor.fetchone()
         if result == None:
@@ -424,19 +433,51 @@ def messages_compose():
         else:
             messageID = result[0]
         
+        with open("secrets.json", "r") as f:
+            cursor.execute(f"""UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;""",
+                           (encryption.substitution_encrypt(
+                               plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                                key=json.load(f)['UrlKey']),
+                            messageID
+                            )
+                           )
+            connection.commit()
+            
+        
         connection.close()
         if attachments[0].filename != '':
             connection = save_message_attachments(currentUser['id'], attachments, timeStamp, messageID)
         connection.close()
         return redirect(url_for('messages_compose'))
 
-@app.route('/messages/inbox/<string:messageID>')
+@app.route('/messages/inbox/<string:encryptedMessageID>')
 @login_required
-def preview_message(messageID):
+def preview_message(encryptedMessageID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
-    print(messageID)
-    return render_template("under_construction.html")
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute(f"""SELECT MessageID FROM Messages WHERE HashedUrl='{encryptedMessageID}';""")
+    result = cursor.fetchone()
+    if result == None:
+        print("URL not found")
+        connection.close()
+        return redirect(url_for('messages_inbox'))
+    else:
+        messageID = result[0]
+    
+    cursor.execute(f"""SELECT * FROM Messages WHERE MessageID='{messageID}';""")
+    result = cursor.fetchone()
+    if result == None:
+        print("Message not found")
+        connection.close()
+        return redirect(url_for('messages_inbox'))
+    else:
+        messageID = result[0]
+    
+    connection.close()
 
 @app.route('/reports', methods=['GET'])
 @login_required
