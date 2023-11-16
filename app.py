@@ -308,8 +308,6 @@ def messages_inbox():# TODO
             key = encryption.substitution_decrypt(encryptedText=message[7], key=secrets['MessageKey'])
         del secrets
         
-        print(message[3])
-        print(message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"))
         mail = str(
             encryption.decrypt(
                 cipherText=message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
@@ -382,47 +380,31 @@ def messages_compose():
         cleanedEncryptedMessage = ""
         for character in encryptedMessage:
             if character == '"':
-                print('Encrypted message includes "')
                 cleanedEncryptedMessage += "<Double_Quote>"
             elif character == "'":
-                print("Encrypted message includes '")
                 cleanedEncryptedMessage += "<Single_Quote>"
             elif character == "\\":
-                print("Encrypted message includes \\")
                 cleanedEncryptedMessage += "<Escape>"
             elif character == "\n":
-                print("Encrypted message includes \\n")
                 cleanedEncryptedMessage += "<New_Line>"
             elif character == "\t":
-                print("Encrypted message includes \\t")
                 cleanedEncryptedMessage += "<Tab>"
             elif character == "\r":
-                print("Encrypted message includes \\r")
                 cleanedEncryptedMessage += "<Carriage_Return>"
             elif character == "\0":
-                print("Encrypted message includes \\0")
                 cleanedEncryptedMessage += "<Null_Character>"
             elif character == "\a":
-                print("Encrypted message includes \\a")
                 cleanedEncryptedMessage += "<ASCII_Bell>"
             elif character == "\b":
-                print("Encrypted message includes \\b")
                 cleanedEncryptedMessage += "<ASCII_Backspace>"
             elif character == "\f":
-                print("Encrypted message includes \\f")
                 cleanedEncryptedMessage += "<ASCII_Form_Feed>"
             elif character == "\v":
-                print("Encrypted message includes \\v")
                 cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
             else:
                 cleanedEncryptedMessage += character
         
         try:
-            print("======Debug info======")
-            print(currentUser["id"])
-            print(recipientID)
-            print(fr"""'{currentUser["id"]}', '{recipientID}', '{cleanedEncryptedMessage}', '{timeStamp}', '{str(readReceipts)}', 'False', '{key}'""")
-            print("======End of debug======")
             cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, TimeStamp, ReadReceipts, Archived, Key)
                             VALUES (?, ?, ?, ?, ?, 'False', ?);
                             """, (currentUser["id"], recipientID, cleanedEncryptedMessage, timeStamp, str(readReceipts), key))
