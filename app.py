@@ -265,7 +265,7 @@ def messages():
 
 @app.route('/messages/inbox', methods=['GET'])
 @login_required
-def messages_inbox():# TODO
+def messages_inbox():
     if type(current_user._get_current_object()) is not User:
         print("User not logged in")
         return redirect(url_for('login'))
