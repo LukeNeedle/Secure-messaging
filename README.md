@@ -90,10 +90,10 @@ These objectives aren't in any particular order and they are only numbered to he
 | SenderID     | The integer ID associated with the staff member sending the message   | 1       | Integer | ❌          | Staff(StaffID) | Not null                    |
 | RecipientID  | The integer ID associated with the staff member receiving the message | 1       | Integer | ❌          | Staff(StaffID) | Not null                    |
 | Message      | The encrypted message                                                 | -       | Blob    | ❌          | -              | Not null                    |
+| HashedUrl    | The hashed URL for the message                                        | -       | Text    | ❌          | -              | Not null, Unique            |
 | TimeStamp    | The timestamp that the message was sent                               | -       | Text    | ❌          | -              | Not null                    |
 | ReadReceipts | Whether the message has been read                                     | False   | Text    | ❌          | -              | 'True' or 'False', Not null |
 | Archived     | Whether the message has been archived                                 | False   | Text    | ❌          | -              | 'True' or 'False', Not null |
-| Attachments  | The list of keys for attachment files                                 | [1,2]   | Text    | ❌          | -              |                             |
 | Key          | The encrypted key to decrypt the message                              | -       | Text    | ❌          | -              | Not null                    |
 
 ### Students
@@ -125,6 +125,7 @@ These objectives aren't in any particular order and they are only numbered to he
 |-----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
 | FileID    | The integer ID associated with the file                           | 1       | Integer | ✅          | -              | Not null, Unique |
 | OwnerID   | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
+| Origin    | The message or report that the file is attached to                | M+1     | Text    | ❌          | -              | Not null         |
 | FilePath  | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
 | TimeStamp | The timestamp that the file was uploaded                          | -       | Text    | ❌          | -              | Not null         |
 
