@@ -24,7 +24,7 @@
         </p>
     {% else %}
         {% for message in mail %}
-            <div class="message" onclick="openMessageWindow('{{ url_for('preview_message', messageID=message[3]) }}')">
+            <div class="message" onclick="openMessageWindow('{{ url_for('preview_message', encryptedMessageID=message[3]) }}')">
                 <span class="sender">
                     From: {{message[1]}}
                 </span>
@@ -32,7 +32,7 @@
                     {{message[2]}}
                 </span>
                 <p class="msg">
-                    {{message[4]}}
+                    {{message[4]|safe}}
                 </p>
                 <b>
                     <p class="view-message">

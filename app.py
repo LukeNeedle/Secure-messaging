@@ -287,7 +287,7 @@ def messages_inbox():
         
         # Example message
         #(4, 2, 2, '\x02\x1c', '1699959519.800139', 'False', 'False', 'BiW')
-        #messageID, senderID, recipientID, message, timestamp, readreciepts, archived, key
+        #messageID, senderID, recipientID, message, URL, timestamp, readreciepts, archived, key
         
         cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{message[1]}';""")
         result = cursor.fetchone()
@@ -298,7 +298,7 @@ def messages_inbox():
         else:
             tempResponse.append(result[0])
         
-        timestamp = datetime.fromtimestamp(float(message[4]))
+        timestamp = datetime.fromtimestamp(float(message[5]))
         tempResponse.append(
             f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
             )
@@ -313,7 +313,7 @@ def messages_inbox():
             tempResponse.append(result[0])
         
         with open("secrets.json", "r") as f:
-            key = encryption.substitution_decrypt(encryptedText=message[7], key=json.load(f)['MessageKey'])
+            key = encryption.substitution_decrypt(encryptedText=message[8], key=json.load(f)['MessageKey'])
         
         mail = str(
             encryption.decrypt(
@@ -326,7 +326,7 @@ def messages_inbox():
         if len(mail) > 30:
             tempResponse.append(mail[:30])
         elif len(mail) <= 30:
-            tempResponse.append(mail)
+            tempResponse.append(mail.ljust(30).replace(" ", "&nbsp;"))
         
         response.append(tempResponse)
     
