@@ -374,7 +374,7 @@ def messages_compose():
         else:
             recipientID = result[0]
 
-        timeStamp = datetime.timestamp(datetime.now())
+        timeStamp = float(datetime.timestamp(datetime.now()))
         
         vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
         subsitutionKey = random.randint(1, 61)
@@ -424,8 +424,11 @@ def messages_compose():
             print("Failed CHECK constraint")
             return redirect(url_for('messages_compose'))
         
-        cursor.execute(f"""SELECT MessageID FROM Messages WHERE SenderID='{currentUser["id"]}' and RecipientID='{recipientID}' and Message='{cleanedEncryptedMessage}' and TimeStamp='{timeStamp}' and ReadReceipts='{str(readReceipts)}' and Key='{key}';""")
+        cursor.execute(f"""SELECT MessageID FROM Messages
+                        WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and ReadReceipts=? and Key=?;
+                        """, (currentUser["id"], recipientID, cleanedEncryptedMessage, timeStamp, str(readReceipts), key))
         result = cursor.fetchone()
+
         if result == None:
             connection.close()
             print("Failed to save message")
@@ -434,13 +437,12 @@ def messages_compose():
             messageID = result[0]
         
         with open("secrets.json", "r") as f:
-            cursor.execute(f"""UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;""",
-                           (encryption.substitution_encrypt(
-                               plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+            cursor.execute(f"""UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;
+                            """, (encryption.substitution_encrypt(
+                                plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
                                 key=json.load(f)['UrlKey']),
-                            messageID
-                            )
-                           )
+                                messageID
+                                ))
             connection.commit()
             
         
