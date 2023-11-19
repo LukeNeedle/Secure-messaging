@@ -374,9 +374,6 @@ def messages_inbox():
     response = [] # A list of messages
 
     for message in messages:
-        tempResponse = [message[1]] # 0 = Message ID, 1 = Sender email, 2 = timestamp as a readable time in a list, 3 = Url, 4 = First 10 characters of message
-        
-        # Example message
         #(4, 2, 2, '\x02\x1c', '1699959519.800139', 'False', 'False', 'BiW')
         #messageID, senderID, recipientID, message, URL, timestamp, readreciepts, archived, key
         
@@ -405,8 +402,7 @@ def messages_inbox():
         
         with open("secrets.json", "r") as f:
             key = encryption.substitution_decrypt(encryptedText=message[8], key=json.load(f)['MessageKey'])
-        print("Key" + key)
-        print("Key" + message[8])
+
         mail = str(
             encryption.decrypt(
                 cipherText=message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
