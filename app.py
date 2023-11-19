@@ -89,6 +89,7 @@ def hashing(variable:str, salt:str):
     result = hash_function.hash_variable(variable, salt)
     return result
 
+# Objective 4 started
 def save_message_attachments(senderID, attachments, timeStamp, messageID):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -120,7 +121,9 @@ def save_message_attachments(senderID, attachments, timeStamp, messageID):
         connection.commit()
         file.save(filePath)
     return connection
+# Objective 4 completed
 
+# Objective 8 started
 def send_read_receipt(messageID, data):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -211,6 +214,7 @@ def send_read_receipt(messageID, data):
                             messageID
                             ))
         connection.commit()
+# Objective 8 completed
 
 
 #########################################################################
@@ -436,6 +440,7 @@ def messages_inbox():
     connection.close()
     return render_template("inbox.html", mail=response)
 
+# Objective 3 started
 @app.route('/messages/compose', methods=['GET', 'POST'])
 @login_required
 def messages_compose():
@@ -546,13 +551,13 @@ def messages_compose():
                                 messageID
                                 ))
             connection.commit()
-            
         
         connection.close()
         if attachments[0].filename != '':
             connection = save_message_attachments(currentUser['id'], attachments, timeStamp, messageID)
         connection.close()
         return redirect(url_for('messages_compose'))
+# Objective 3 completed
 
 @app.route('/messages/inbox/<string:encryptedMessageID>', methods=['GET', 'POST'])
 @login_required
@@ -588,18 +593,6 @@ def preview_message(encryptedMessageID):
     else:
         data = result
     
-    # data
-    # (1, 2, 2, '\x10;<ASCII_Vertical_Tab>\x1eZ\x18Z*Xh`<ASCII_Bell>2\x0e2^<Carriage_Return>$', 'mjbnjqpq-lhii-gefb-jgqm-dnchdoigoqbe', '1700388449.11917', 'False', 'False', 'uts9XbXRV7cnQoC13GTY')
-    # 0 | MessageID
-    # 1 | SenderID
-    # 2 | RecipientID
-    # 3 | encryptedMessage
-    # 4 | Url
-    # 5 | timestamp
-    # 6 | readreceipts
-    # 7 | Archived
-    # 8 | Key
-    
     if data[2] != current_user.id:
         print("Recipient isn't current user")
         connection.close()
@@ -607,13 +600,6 @@ def preview_message(encryptedMessageID):
     
     if data[6] == "True":
         send_read_receipt(messageID, data)
-    
-    # mail
-    # 0 | Recipient email
-    # 1 | Decrypted message
-    # 2 | Readable timestamp
-    # 3 | Url
-    # 4 | Attachments
     
     cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{data[1]}';""")
     result = cursor.fetchone()
@@ -658,7 +644,7 @@ def preview_message(encryptedMessageID):
         if data[1] != attachment[1]:
             continue
         attachments.append(
-            (attachment[3].split('/')[-1], attachment[4])# Filename, link
+            (attachment[3].split('/')[-1], attachment[4])
         )
     
     mail.append(attachments)
