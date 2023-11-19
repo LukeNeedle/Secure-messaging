@@ -63,4 +63,33 @@ textarea.msg {
     border-style: none;
     border-radius: 5px;
     padding: 5px;
+    padding-left: 10px;
+    background-color: var(--secondary);
+}
+
+.attachments {
+    margin-top: 1%;
+    margin-bottom: 2%;
+    border-style: none;
+    border-radius: 5px;
+    background-color: var(--secondary);
+    padding: 3%;
+}
+
+.attachments .attachment{
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.attachments span{
+    transform: translateY(5px);
+}
+
+.attachments a{
+    background-color: var(--accent);
+    border-radius: 5px;
+    padding: 4px;
+    color: var(--background);
+    cursor: pointer;
 }

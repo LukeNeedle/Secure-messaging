@@ -98,9 +98,25 @@ def save_message_attachments(senderID, attachments, timeStamp, messageID):
         os.mkdir(f"uploads/{senderID}/{timeStamp}")
     for file in attachments:
         filePath = f"uploads/{senderID}/{timeStamp}/{file.filename}"
-        cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, TimeStamp)
-                       VALUES (?, ?, ?, ?);
-                       """, (senderID, f'M+{messageID}', filePath, timeStamp))
+        tempURL = str(uuid.uuid4())
+        cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, HashedUrl, TimeStamp)
+                       VALUES (?, ?, ?, ?, ?);
+                       """, (senderID, f'M+{messageID}', filePath, tempURL, timeStamp))
+        connection.commit()
+        
+        cursor.execute(f"""SELECT FileID FROM Files
+                    WHERE OwnerID=? and Origin=? and FilePath=? and HashedUrl=? and TimeStamp=?;
+                    """, (senderID, f'M+{messageID}', filePath, tempURL, timeStamp))
+        result = cursor.fetchone()
+        
+        with open("secrets.json", "r") as f:
+            cursor.execute(f"""UPDATE Files SET HashedUrl = ? WHERE FileID = ?;
+                            """, (encryption.substitution_encrypt(
+                                plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                                key=json.load(f)['UrlKey']),
+                                str(result)
+                                )
+                            )
         connection.commit()
         file.save(filePath)
     return connection
@@ -374,8 +390,7 @@ def messages_inbox():
     response = [] # A list of messages
 
     for message in messages:
-        #(4, 2, 2, '\x02\x1c', '1699959519.800139', 'False', 'False', 'BiW')
-        #messageID, senderID, recipientID, message, URL, timestamp, readreciepts, archived, key
+        tempResponse = [message[1]]
         
         cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{message[1]}';""")
         result = cursor.fetchone()
@@ -629,8 +644,42 @@ def preview_message(encryptedMessageID):
     
     mail.append(data[4])
     
+    cursor.execute(f"""SELECT * FROM Files WHERE Origin='M+{messageID}';""")
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        mail.append([])
+        connection.close()
+        print("No attachments")
+        return render_template("messages.html", mail=mail)
+    
+    attachments = []
+    
+    for attachment in result:
+        if data[1] != attachment[1]:
+            continue
+        attachments.append(
+            (attachment[3].split('/')[-1], attachment[4])# Filename, link
+        )
+    
+    mail.append(attachments)
+    
     connection.close()
     return render_template("messages.html", mail=mail)
+
+@app.route('/uploads/<string:encryptedAttachmentID>', methods=['GET'])
+@login_required
+def download_user_content(encryptedAttachmentID):
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    cursor.execute(f"""SELECT FilePath FROM Files WHERE HashedUrl='{encryptedAttachmentID}';""")
+    result = cursor.fetchone()
+    if result == None:
+        print("File not found")
+        connection.close()
+        return redirect(url_for('messages_inbox'))
+    print("Sending file")
+    connection.close()
+    return send_file(result[0], as_attachment=True)
 
 @app.route('/reports', methods=['GET'])
 @login_required
