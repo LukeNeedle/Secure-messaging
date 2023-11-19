@@ -105,6 +105,97 @@ def save_message_attachments(senderID, attachments, timeStamp, messageID):
         file.save(filePath)
     return connection
 
+def send_read_receipt(messageID, data):
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute(f"""UPDATE Messages SET ReadReceipts='False' WHERE MessageID='{messageID}';""")
+    connection.commit()
+    
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey'])
+    
+    message = f"{current_user.title} {current_user.lname} has read your message:\n"
+    message += str(
+        encryption.decrypt(
+            cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
+            vernamKey=str(key[:-2]),
+            subsitutionKey=int(key[-2:])
+        )
+    ).replace("\0", '').replace("\a", '')
+    
+    
+    timeStamp = float(datetime.timestamp(datetime.now()))
+    
+    vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
+    subsitutionKey = random.randint(1, 61)
+
+    cleanedMessage = message.replace('\0', '')
+    
+    encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+    if subsitutionKey < 10:
+        subsitutionKey = "0" + str(subsitutionKey)
+    
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
+    
+    cleanedEncryptedMessage = ""
+    for character in encryptedMessage:
+        if character == '"':
+            cleanedEncryptedMessage += "<Double_Quote>"
+        elif character == "'":
+            cleanedEncryptedMessage += "<Single_Quote>"
+        elif character == "\\":
+            cleanedEncryptedMessage += "<Escape>"
+        elif character == "\n":
+            cleanedEncryptedMessage += "<New_Line>"
+        elif character == "\t":
+            cleanedEncryptedMessage += "<Tab>"
+        elif character == "\r":
+            cleanedEncryptedMessage += "<Carriage_Return>"
+        elif character == "\0":
+            cleanedEncryptedMessage += "<Null_Character>"
+        elif character == "\a":
+            cleanedEncryptedMessage += "<ASCII_Bell>"
+        elif character == "\b":
+            cleanedEncryptedMessage += "<ASCII_Backspace>"
+        elif character == "\f":
+            cleanedEncryptedMessage += "<ASCII_Form_Feed>"
+        elif character == "\v":
+            cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
+        else:
+            cleanedEncryptedMessage += character
+    
+    try:
+        cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
+                    VALUES (?, ?, ?, ?, ?, 'False', 'False', ?);
+                    """, (data[2], data[1], cleanedEncryptedMessage, str(uuid.uuid4()), timeStamp, key))
+        connection.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        return redirect(url_for('messages_compose'))
+    
+    cursor.execute(f"""SELECT MessageID FROM Messages
+                    WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and Key=?;
+                    """, (data[2], data[1], cleanedEncryptedMessage, timeStamp, key))
+    result = cursor.fetchone()
+
+    if result == None:
+        connection.close()
+        print("Failed to save message")
+        return redirect(url_for('messages_compose'))
+    else:
+        messageID = result[0]
+    
+    with open("secrets.json", "r") as f:
+        cursor.execute(f"""UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;
+                        """, (encryption.substitution_encrypt(
+                            plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                            key=json.load(f)['UrlKey']),
+                            messageID
+                            ))
+        connection.commit()
+
 
 #########################################################################
 #########################################################################
@@ -314,7 +405,8 @@ def messages_inbox():
         
         with open("secrets.json", "r") as f:
             key = encryption.substitution_decrypt(encryptedText=message[8], key=json.load(f)['MessageKey'])
-        
+        print("Key" + key)
+        print("Key" + message[8])
         mail = str(
             encryption.decrypt(
                 cipherText=message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
@@ -332,7 +424,6 @@ def messages_inbox():
     
     connection.close()
     return render_template("inbox.html", mail=response)
-    # return render_template("under_construction.html")
 
 @app.route('/messages/compose', methods=['GET', 'POST'])
 @login_required
@@ -384,6 +475,7 @@ def messages_compose():
         encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
         if subsitutionKey < 10:
             subsitutionKey = "0" + str(subsitutionKey)
+            
         with open("secrets.json", "r") as f:
             key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
         
@@ -413,13 +505,12 @@ def messages_compose():
                 cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
             else:
                 cleanedEncryptedMessage += character
-        
-        cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
+
+        try:
+            cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
                         VALUES (?, ?, ?, ?, ?, ?, 'False', ?);
                         """, (currentUser["id"], recipientID, cleanedEncryptedMessage, str(uuid.uuid4()), timeStamp, str(readReceipts), key))
-        connection.commit()
-        try:
-            pass
+            connection.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             return redirect(url_for('messages_compose'))
@@ -452,7 +543,7 @@ def messages_compose():
         connection.close()
         return redirect(url_for('messages_compose'))
 
-@app.route('/messages/inbox/<string:encryptedMessageID>')
+@app.route('/messages/inbox/<string:encryptedMessageID>', methods=['GET', 'POST'])
 @login_required
 def preview_message(encryptedMessageID):
     if type(current_user._get_current_object()) is not User:
@@ -470,6 +561,13 @@ def preview_message(encryptedMessageID):
     else:
         messageID = result[0]
     
+    if request.method == 'POST':
+        cursor.execute(f"""UPDATE Messages SET Archived='True' WHERE MessageID='{messageID}';""")
+        connection.commit()
+        print("Message archived")
+        connection.close()
+        return redirect(url_for('messages_inbox'))
+    
     cursor.execute(f"""SELECT * FROM Messages WHERE MessageID='{messageID}';""")
     result = cursor.fetchone()
     if result == None:
@@ -477,9 +575,66 @@ def preview_message(encryptedMessageID):
         connection.close()
         return redirect(url_for('messages_inbox'))
     else:
-        messageID = result[0]
+        data = result
+    
+    # data
+    # (1, 2, 2, '\x10;<ASCII_Vertical_Tab>\x1eZ\x18Z*Xh`<ASCII_Bell>2\x0e2^<Carriage_Return>$', 'mjbnjqpq-lhii-gefb-jgqm-dnchdoigoqbe', '1700388449.11917', 'False', 'False', 'uts9XbXRV7cnQoC13GTY')
+    # 0 | MessageID
+    # 1 | SenderID
+    # 2 | RecipientID
+    # 3 | encryptedMessage
+    # 4 | Url
+    # 5 | timestamp
+    # 6 | readreceipts
+    # 7 | Archived
+    # 8 | Key
+    
+    if data[2] != current_user.id:
+        print("Recipient isn't current user")
+        connection.close()
+        return redirect(url_for('messages_inbox'))
+    
+    if data[6] == "True":
+        send_read_receipt(messageID, data)
+    
+    # mail
+    # 0 | Recipient email
+    # 1 | Decrypted message
+    # 2 | Readable timestamp
+    # 3 | Url
+    # 4 | Attachments
+    
+    cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{data[1]}';""")
+    result = cursor.fetchone()
+    if result == None:
+        print("Sender not found")
+        connection.close()
+        return redirect(url_for('messages_inbox'))
+    else:
+        mail = [result[0]]
+        
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey'])
+            
+    mail.append(
+        str(
+            encryption.decrypt(
+                cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
+                vernamKey=str(key[:-2]),
+                subsitutionKey=int(key[-2:])
+            )
+        ).replace("\0", '').replace("\a", '')
+    )
+    
+    timestamp = datetime.fromtimestamp(float(data[5]))
+    mail.append(
+        f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
+    )
+    
+    mail.append(data[4])
     
     connection.close()
+    return render_template("messages.html", mail=mail)
 
 @app.route('/reports', methods=['GET'])
 @login_required
@@ -630,6 +785,10 @@ def messaging_inbox_css():
 @app.route('/static/css/messaging_compose.css')
 def messaging_compose_css():
     return send_file('static//css//messaging_compose.css')
+
+@app.route('/static/css/messaging_messages.css')
+def messaging_messages_css():
+    return send_file('static//css//messaging_messages.css')
 
 @app.route('/static/css/user_settings.css')
 def user_settings_css():

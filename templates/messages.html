@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('messaging_messages_css')}}">
+
+<p class="welcome">
+    Hello {{current_user.title}} {{current_user.lname}}!
+</p>
+
+<div class="message">
+    <div class="back">
+        <a href="{{url_for('messages_inbox')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <p class="sender">
+        From: {{mail[0]}}
+    </p>
+    <p class="timestamp">
+        Sent: {{mail[2]}}
+    </p>
+    <p>
+        Message contents:
+    </p>
+    <textarea class="msg" cols="50" rows="5" readonly>{{mail[1]}}</textarea>
+    <form method="POST" action="{{ url_for('preview_message', encryptedMessageID=mail[3]) }}">
+        <button>Archive</button>
+    </form>
+</div>
+
+{% endblock %}
