@@ -807,14 +807,103 @@ def analytics():# TODO
 def manage_user():# TODO
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
-    return render_template("under_construction.html")
+    
+    if current_user.admin:
+        return render_template("manage_users.html")
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/app/users/students', methods=['GET'])
+@login_required
+def manage_users_students():# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if current_user.admin:
+        # return render_template("manage_students.html")
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/app/users/staff', methods=['GET'])
+@login_required
+def manage_users_staff():
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if current_user.admin:
+        return render_template("manage_staff.html")
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/app/users/staff/create', methods=['GET', 'POST'])
+def create_staff():# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'GET':
+        return render_template("create_staff.html")
+    
+    email = request.form.get('email')
+    fName = request.form.get('first-name')
+    lName = request.form.get('last-name')
+    title = request.form.get('title')
+    senco = request.form.get('senco')
+    safeguarding = request.form.get('safeguarding')
+    admin = request.form.get('admin')
+    password = request.form.get('password')
+    
+    if senco == "True":
+        senco = True
+    else:
+        senco = False
+    
+    if safeguarding == "True":
+        safeguarding = True
+    else:
+        safeguarding = False
+    
+    if admin == "True":
+        admin = True
+    else:
+        admin = False
+
+@app.route('/app/users/staff/edit')
+def edit_staff():# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if current_user.admin:
+        # return render_template("edit_staff.html")
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/app/users/staff/delete')
+def delete_staff():# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if current_user.admin:
+        # return render_template("delete_staff.html")
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('dashboard'))
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
 def app_settings():# TODO
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
-    return render_template("under_construction.html")
+    
+    if current_user.admin:
+        # return render_template("app_settings.html")
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('dashboard'))
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -861,6 +950,34 @@ def messaging_messages_css():
 @app.route('/static/css/user_settings.css')
 def user_settings_css():
     return send_file('static//css//user_settings.css')
+
+@app.route('/static/css/app_settings.css')
+def app_settings_css():
+    return send_file('static//css//app_settings.css')
+
+@app.route('/static/css/manage_users.css')
+def manage_users_css():
+    return send_file('static//css//manage_users.css')
+
+@app.route('/static/css/manage_staff.css')
+def manage_staff_css():
+    return send_file('static//css//manage_staff.css')
+
+@app.route('/static/css/create_staff.css')
+def create_staff_css():
+    return send_file('static//css//create_staff.css')
+
+@app.route('/static/css/edit_staff.css')
+def edit_staff_css():
+    return send_file('static//css//edit_staff.css')
+
+@app.route('/static/css/delete_staff.css')
+def delete_staff_css():
+    return send_file('static//css//delete_staff.css')
+
+@app.route('/static/css/manage_students.css')
+def manage_students_css():
+    return send_file('static//css//manage_students.css')
     
 @app.route('/static/css/under_construction.css')
 def under_construction_css():

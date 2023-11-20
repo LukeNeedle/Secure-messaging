@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('manage_staff_css')}}">
+
+<p class="welcome">
+    Hello {{current_user.title}} {{current_user.lname}}!
+</p>
+
+<div class="options">
+    <a class="create" href="{{url_for('create_staff')}}">
+        Create a staff account
+    </a>
+    <a class="edit" href="{{url_for('edit_staff')}}">
+        Edit a staff account
+    </a>
+    <a class="delete" href="{{url_for('delete_staff')}}">
+        Delete a staff account
+    </a>
+</div>
+
+{% endblock %}
