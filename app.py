@@ -117,12 +117,18 @@ def save_message_attachments(senderID, attachments, timeStamp, messageID):
 # Objective 4 completed
 
 # Objective 8 started
-def send_read_receipt(messageID, data):
+def send_read_receipt(data):
+    """
+    Handles storing read receipts when a message has been read.
+
+    Args:
+        data (list): The data from the sent message
+
+    Returns:
+        nothing: Returns nothing if there is an error in storing a read receipt
+    """    
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
-    
-    cursor.execute(f"""UPDATE Messages SET ReadReceipts='False' WHERE MessageID='{messageID}';""")
-    connection.commit()
     
     with open("secrets.json", "r") as f:
         key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey'])
@@ -185,7 +191,7 @@ def send_read_receipt(messageID, data):
         connection.commit()
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
-        return redirect(url_for('messages_compose'))
+        return
     
     cursor.execute(f"""SELECT MessageID FROM Messages
                     WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and Key=?;
@@ -195,7 +201,7 @@ def send_read_receipt(messageID, data):
     if result == None:
         connection.close()
         print("Failed to save message")
-        return redirect(url_for('messages_compose'))
+        return
     else:
         messageID = result[0]
     
@@ -207,6 +213,10 @@ def send_read_receipt(messageID, data):
                             messageID
                             ))
         connection.commit()
+    
+    cursor.execute(f"""UPDATE Messages SET ReadReceipts='False' WHERE MessageID='{messageID}';""")
+    connection.commit()
+    connection.close()
 # Objective 8 completed
 
 
@@ -592,7 +602,7 @@ def preview_message(encryptedMessageID):
         return redirect(url_for('messages_inbox'))
     
     if data[6] == "True":
-        send_read_receipt(messageID, data)
+        send_read_receipt(data)
     
     cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{data[1]}';""")
     result = cursor.fetchone()
