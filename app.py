@@ -327,7 +327,7 @@ def login():
             return redirect(url_for('login'))
         del password
         
-        if not check_password_strength(password):
+        if not check_password_strength(cleanedPassword):
             print("Insecure password")
             return redirect(url_for('login'))
 
