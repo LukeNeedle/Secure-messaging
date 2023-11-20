@@ -791,6 +791,17 @@ def user_settings():
         login_user(User(userDetails), remember=False)
         return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
+@app.route('/app/analytics', methods=['GET'])
+@login_required
+def analytics():# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if current_user.admin:
+        return render_template("under_construction.html")
+    else:
+        return redirect(url_for('dashboard'))
+
 @app.route('/app/users', methods=['GET'])
 @login_required
 def manage_user():# TODO
