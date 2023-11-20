@@ -214,7 +214,7 @@ def send_read_receipt(data):
                             ))
         connection.commit()
     
-    cursor.execute(f"""UPDATE Messages SET ReadReceipts='False' WHERE MessageID='{messageID}';""")
+    cursor.execute(f"""UPDATE Messages SET ReadReceipts='False' WHERE MessageID='{data[0]}';""")
     connection.commit()
     connection.close()
 # Objective 8 completed
