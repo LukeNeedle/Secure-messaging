@@ -31,7 +31,7 @@ login_manager.init_app(app)
 #########################################################################
 
 
-def entry_cleaner(entry, mode):
+def entry_cleaner(entry:str, mode:str):
     """
     Remove unwanted characters from a string.
     mode = "sql" --> Removes characters that could be used for sql injection
@@ -75,7 +75,7 @@ def entry_cleaner(entry, mode):
         raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
 # Objective 4 started
-def save_message_attachments(senderID, attachments, timeStamp, messageID):
+def save_message_attachments(senderID:int, attachments, timeStamp:float, messageID:int):
     """
     Saves attachments from a message being sent.
 
