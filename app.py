@@ -219,6 +219,25 @@ def send_read_receipt(data):
     connection.close()
 # Objective 8 completed
 
+def check_password_strength(password:str):
+    """
+    Checks the strength of a password
+
+    Args:
+        password (string): The password to be checked
+
+    Returns:
+        boolean: If the password strength is valid
+    """
+    # Sequential characters
+    if regex.search(r'(\d)\1*', password) or regex.search(r'([a-z])\1*', password):
+        return False
+    
+    # Repetitive characters
+    if regex.search(r'(\w)\1\1+', password):
+        return False
+    return True
+
 
 #########################################################################
 #########################################################################
@@ -307,6 +326,10 @@ def login():
             print("Invalid password")
             return redirect(url_for('login'))
         del password
+        
+        if not check_password_strength(password):
+            print("Insecure password")
+            return redirect(url_for('login'))
 
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
