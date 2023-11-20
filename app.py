@@ -91,6 +91,15 @@ def hashing(variable:str, salt:str):
 
 # Objective 4 started
 def save_message_attachments(senderID, attachments, timeStamp, messageID):
+    """
+    Saves attachments from a message being sent.
+
+    Args:
+        senderID (integer): _description_
+        attachments (list of files): _description_
+        timeStamp (float): _description_
+        messageID (integer): _description_
+    """
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     if not os.path.exists(f"uploads/{senderID}"):
@@ -120,7 +129,6 @@ def save_message_attachments(senderID, attachments, timeStamp, messageID):
                             )
         connection.commit()
         file.save(filePath)
-    return connection
 # Objective 4 completed
 
 # Objective 8 started
@@ -554,7 +562,7 @@ def messages_compose():
         
         connection.close()
         if attachments[0].filename != '':
-            connection = save_message_attachments(currentUser['id'], attachments, timeStamp, messageID)
+            save_message_attachments(currentUser['id'], attachments, timeStamp, messageID)
         connection.close()
         return redirect(url_for('messages_compose'))
 # Objective 3 completed
