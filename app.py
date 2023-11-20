@@ -74,21 +74,6 @@ def entry_cleaner(entry, mode):
     else:
         raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
-def hashing(variable:str, salt:str):
-    """
-    Hashes the variable passed in.
-
-    Args:
-        variable (string): The variable that needs cleaning
-        salt (string): The salt to be applied to the variable.
-
-    Returns:
-        string: The hashed variable
-    """
-    
-    result = hash_function.hash_variable(variable, salt)
-    return result
-
 # Objective 4 started
 def save_message_attachments(senderID, attachments, timeStamp, messageID):
     """
@@ -334,7 +319,7 @@ def login():
         else:
             salt = result[0]
         
-        if passHash != hashing(cleanedPassword, salt):
+        if passHash != hash_function.hash_variable(cleanedPassword, salt):
             connection.close()
             print("Password doesn't match stored password")
             return redirect(url_for('login'))
@@ -754,7 +739,7 @@ def user_settings():
         else:
             salt = result[0]
         
-        if passHash != hashing(cleanedOldPassword, salt):
+        if passHash != hash_function.hash_variable(cleanedOldPassword, salt):
             connection.close()
             print("Old password isn't valid")
             return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
@@ -764,11 +749,11 @@ def user_settings():
             print("New password and confirm new password aren't the same")
             return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
         
-        cursor.execute(f"""UPDATE Staff SET PassHash = '{hashing(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
+        cursor.execute(f"""UPDATE Staff SET PassHash = '{hash_function.hash_variable(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
         result = cursor.fetchone()
 
         userDetails = current_user.get_user_dictionary()
-        userDetails["passhash"] = hashing(cleanedNewPassword, salt)
+        userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
         logout_user()
         login_user(User(userDetails), remember=False)
         return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
