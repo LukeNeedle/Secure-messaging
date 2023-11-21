@@ -808,7 +808,7 @@ def analytics():# TODO
 
 @app.route('/app/users', methods=['GET'])
 @login_required
-def manage_user():# TODO
+def manage_user():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
@@ -841,7 +841,7 @@ def manage_users_staff():
         return redirect(url_for('dashboard'))
 
 @app.route('/app/users/staff/create', methods=['GET', 'POST'])
-def create_staff():# TODO
+def create_staff():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
@@ -849,7 +849,7 @@ def create_staff():# TODO
         return redirect(url_for('dashboard'))
     
     if request.method == 'GET':
-        return render_template("create_staff.html", created=False)
+        return render_template("create_staff.html", msg="")
     
     email = request.form.get('email')
     fName = request.form.get('first-name')
@@ -877,63 +877,63 @@ def create_staff():# TODO
     if email == "" or email == None:
         print("Invalid email")
         data = [email, fName, lName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Email is invalid", entry=["email"])
     cleanedEmail = entry_cleaner(email, "email")
     if cleanedEmail != email:
         print("Invalid email")
         data = [email, fName, lName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Email is invalid", entry=["email"])
     del email
     
     if fName == "" or fName == None:
         print("Invalid first name")
         data = [cleanedEmail, fName, lName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
     cleanedFName = entry_cleaner(fName, "sql")
     if cleanedFName != fName:
         print("Invalid first name")
         data = [cleanedEmail, fName, lName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
     del fName
     
     if lName == "" or lName == None:
         print("Invalid last name")
         data = [cleanedEmail, cleanedFName, lName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
     cleanedLName = entry_cleaner(lName, "sql")
     if cleanedLName != lName:
         print("Invalid last name")
         data = [cleanedEmail, cleanedFName, lName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
     del lName
     
     if title == "" or title == None:
         print("Invalid title")
         data = [cleanedEmail, cleanedFName, cleanedLName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Title is invalid", entry=["title"])
     cleanedTitle = entry_cleaner(title, "sql")
     if cleanedTitle != title:
         print("Invalid title")
         data = [cleanedEmail, cleanedFName, cleanedLName, title, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Title is invalid", entry=["title"])
     del title
     
     if password == "" or password == None:
         print("Invalid password")
         data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Password is invalid", entry=["password"])
     cleanedPassword = entry_cleaner(password, "password")
     if cleanedPassword != password:
         print("Invalid old password")
         data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, password]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Password is invalid", entry=["password"])
     del password
     
     if cleanedPassword != "ChangeMe":
         if not check_password_strength(cleanedPassword):
             print("Insecure password")
             data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, cleanedPassword]
-            return render_template("create_staff.html", created=False, data=data)
+            return render_template("create_staff.html", data=data, msg="Password is insecure", entry=["password"])
 
     passwordSalt = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedPassword)))
     passwordHash = hash_function.hash_variable(cleanedPassword, passwordSalt)
@@ -950,10 +950,10 @@ def create_staff():# TODO
         print("Failed CHECK constraint")
         conn.close()
         data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, cleanedPassword]
-        return render_template("create_staff.html", created=False, data=data)
+        return render_template("create_staff.html", data=data, msg="Server Error")
 
     conn.close()
-    return render_template("create_staff.html", created=True)
+    return render_template("create_staff.html", msg="Created user account", entry=["submit"])
 
 @app.route('/app/users/staff/edit')
 def edit_staff():# TODO

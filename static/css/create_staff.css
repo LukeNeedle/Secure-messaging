@@ -24,6 +24,21 @@
     margin-top: 0;
 }
 
+.message {
+    background-color: var(--accent);
+    color: var(--secondary);
+    margin-bottom: 2%;
+    padding: 7px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    border-color: var(--minor-border);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 1%;
+}
+
 .create-staff {
     border-radius: 20px;
     padding: 3%;
@@ -33,6 +48,7 @@
     width: fit-content;
     height: fit-content;
     margin: auto;
+    margin-top: 2%;
 }
 
 div.back a{
