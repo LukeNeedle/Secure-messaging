@@ -722,7 +722,7 @@ def user_settings():
         cleanedEmail = entry_cleaner(email, "email")
         if cleanedEmail != email.lower():
             print("Invalid email")
-            return render_template("user_settings.html", msg="Invalid Email", entry=["email"])
+            return render_template("user_settings.html", msg="Invalid Email", entry=["email"], savedEmail=cleanedEmail)
         del email
         
         #Password Validation
@@ -731,13 +731,13 @@ def user_settings():
         cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
         if cleanedOldPassword != oldPassword:
             print("Invalid old password")
-            return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"])
+            return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"], savedEmail=cleanedEmail)
         if cleanedNewPassword != newPassword:
             print("Invalid new password")
-            return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"])
+            return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"], savedEmail=cleanedEmail)
         if cleanedConfirmNewPassword != confirmNewPassword:
             print("Invalid confirm new password")
-            return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
+            return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"], savedEmail=cleanedEmail)
         del oldPassword
         del newPassword
         del confirmNewPassword
@@ -751,11 +751,11 @@ def user_settings():
         if result == None:
             connection.close()
             print("User not found")
-            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
+            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
         elif result[0].lower() != cleanedEmail.lower():
             connection.close()
             print("Invalid email")
-            return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"])
+            return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"], savedEmail=cleanedEmail)
         
         # Getting user's password
         cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
@@ -763,7 +763,7 @@ def user_settings():
         if result == None:
             connection.close()
             print("User not found")
-            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
+            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
         else:
             passHash = result[0]
         
@@ -772,19 +772,19 @@ def user_settings():
         if result == None:
             connection.close()
             print("User not found")
-            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"])
+            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
         else:
             salt = result[0]
         
         if passHash != hash_function.hash_variable(cleanedOldPassword, salt):
             connection.close()
             print("Old password isn't valid")
-            return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"])
+            return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"], savedEmail=cleanedEmail)
         
         if cleanedNewPassword != cleanedConfirmNewPassword:
             connection.close()
             print("New password and confirm new password aren't the same")
-            return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
+            return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
         
         cursor.execute(f"""UPDATE Staff SET PassHash = '{hash_function.hash_variable(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
         result = cursor.fetchone()

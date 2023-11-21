@@ -42,28 +42,28 @@
         </p>
         <div id="email">
             {% if data %}
-                <input type="email" name="email" placeholder="Email" autofocus="" value={{data[0]}} required>
+                <input type="email" name="email" placeholder="Email" autofocus="" value="{{data[0]}}" required>
             {% else %}
                 <input type="email" name="email" placeholder="Email" autofocus="" required>
             {% endif %}
         </div>
         <div id="first-name">
             {% if data %}
-                <input type="text" name="first-name" placeholder="First Name" value={{data[1]}} required>
+                <input type="text" name="first-name" placeholder="First Name" value="{{data[1]}}" required>
             {% else %}
                 <input type="text" name="first-name" placeholder="First Name" required>
             {% endif %}
         </div>
         <div id="last-name">
             {% if data %}
-                <input type="text" name="last-name" placeholder="Last Name" value={{data[2]}} required>
+                <input type="text" name="last-name" placeholder="Last Name" value="{{data[2]}}" required>
             {% else %}
                 <input type="text" name="last-name" placeholder="Last Name" required>
             {% endif %}
         </div>
         <div id="title">
             {% if data %}
-                <input type="text" name="title" placeholder="Title (eg: Mr)" value={{data[3]}} required>
+                <input type="text" name="title" placeholder="Title (eg: Mr)" value="{{data[3]}}" required>
             {% else %}
                 <input type="text" name="title" placeholder="Title (eg: Mr)" required>
             {% endif %}
@@ -121,7 +121,7 @@
                 <label for="password">User's password:</label>
             </div>
             {% if data %}
-                <input type="text" name="password" value={{data[8]}} required>
+                <input type="text" name="password" value="{{data[8]}}" required>
             {% else %}
                 <input type="text" name="password" value="ChangeMe" required>
             {% endif %}

@@ -48,6 +48,14 @@ form {
     border-radius: 15px;
 }
 
+div.back a{
+    float: left;
+    margin-bottom: 3%;
+    cursor: pointer;
+    color: var(--accent);
+    padding-bottom: 10px;
+}
+
 form p.title {
     color: #201316;
     font-size: xx-large;

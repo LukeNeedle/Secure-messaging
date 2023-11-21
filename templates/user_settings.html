@@ -29,11 +29,21 @@
 {% endif %}
 
 <form class="change-password" method="POST" action="{{url_for('user_settings')}}">
+    <div class="back">
+        <a href="{{url_for('dashboard')}}">
+            Back
+        </a>
+        <br>
+    </div>
     <p class="title">
         Change password
     </p>
     <div id="email">
-        <input type="email" name="email" placeholder="Email" autofocus="" required>
+        {% if savedEmail %}
+            <input type="email" name="email" placeholder="Email" value="{{savedEmail}}" autofocus="" required>
+        {% else %}
+            <input type="email" name="email" placeholder="Email" autofocus="" required>
+        {% endif %}
     </div>
     <div id="old-password">
         <input type="password" name="old-password" placeholder="Old password" required>
