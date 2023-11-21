@@ -229,6 +229,10 @@ def check_password_strength(password:str):
     Returns:
         boolean: If the password strength is valid
     """
+    
+    if len(password) <= 8:
+        return False
+    
     # Sequential characters
     if regex.search(r'(\d)\1*', password) or regex.search(r'([a-z])\1*', password):
         return False
@@ -327,9 +331,9 @@ def login():
             return redirect(url_for('login'))
         del password
         
-        if not check_password_strength(cleanedPassword):
-            print("Insecure password")
-            return redirect(url_for('login'))
+        # if not check_password_strength(cleanedPassword):
+        #     print("Insecure password")
+        #     return redirect(url_for('login'))
 
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
@@ -845,7 +849,7 @@ def create_staff():# TODO
         return redirect(url_for('dashboard'))
     
     if request.method == 'GET':
-        return render_template("create_staff.html")
+        return render_template("create_staff.html", created=False)
     
     email = request.form.get('email')
     fName = request.form.get('first-name')
@@ -854,22 +858,102 @@ def create_staff():# TODO
     senco = request.form.get('senco')
     safeguarding = request.form.get('safeguarding')
     admin = request.form.get('admin')
+    enabled = request.form.get('enabled')
     password = request.form.get('password')
     
-    if senco == "True":
-        senco = True
-    else:
-        senco = False
     
-    if safeguarding == "True":
-        safeguarding = True
-    else:
-        safeguarding = False
+    if senco != "True":
+        senco = "False"
     
-    if admin == "True":
-        admin = True
-    else:
-        admin = False
+    if safeguarding != "True":
+        safeguarding = "False"
+    
+    if admin != "True":
+        admin = "False"
+    
+    if enabled != "True":
+        enabled = "False"
+    
+    if email == "" or email == None:
+        print("Invalid email")
+        data = [email, fName, lName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    cleanedEmail = entry_cleaner(email, "email")
+    if cleanedEmail != email:
+        print("Invalid email")
+        data = [email, fName, lName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    del email
+    
+    if fName == "" or fName == None:
+        print("Invalid first name")
+        data = [cleanedEmail, fName, lName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    cleanedFName = entry_cleaner(fName, "sql")
+    if cleanedFName != fName:
+        print("Invalid first name")
+        data = [cleanedEmail, fName, lName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    del fName
+    
+    if lName == "" or lName == None:
+        print("Invalid last name")
+        data = [cleanedEmail, cleanedFName, lName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    cleanedLName = entry_cleaner(lName, "sql")
+    if cleanedLName != lName:
+        print("Invalid last name")
+        data = [cleanedEmail, cleanedFName, lName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    del lName
+    
+    if title == "" or title == None:
+        print("Invalid title")
+        data = [cleanedEmail, cleanedFName, cleanedLName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    cleanedTitle = entry_cleaner(title, "sql")
+    if cleanedTitle != title:
+        print("Invalid title")
+        data = [cleanedEmail, cleanedFName, cleanedLName, title, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    del title
+    
+    if password == "" or password == None:
+        print("Invalid password")
+        data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    cleanedPassword = entry_cleaner(password, "password")
+    if cleanedPassword != password:
+        print("Invalid old password")
+        data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, password]
+        return render_template("create_staff.html", created=False, data=data)
+    del password
+    
+    if cleanedPassword != "ChangeMe":
+        if not check_password_strength(cleanedPassword):
+            print("Insecure password")
+            data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, cleanedPassword]
+            return render_template("create_staff.html", created=False, data=data)
+
+    passwordSalt = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedPassword)))
+    passwordHash = hash_function.hash_variable(cleanedPassword, passwordSalt)
+    
+    conn = sqlite3.connect("database.db")
+    cur = conn.cursor()
+    
+    try:
+        cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
+                    VALUES (?, ?, ?, ?, ?, 'False', ?, ?, ?, ?, ?);
+                    """, (cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, passwordHash, passwordSalt, senco, safeguarding, admin))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        conn.close()
+        data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, cleanedPassword]
+        return render_template("create_staff.html", created=False, data=data)
+
+    conn.close()
+    return render_template("create_staff.html", created=True)
 
 @app.route('/app/users/staff/edit')
 def edit_staff():# TODO

@@ -3,9 +3,17 @@
 {% block content %}
 <link rel="stylesheet" href="{{url_for('create_staff_css')}}">
 
+{% if created %}
+<style>
+    #submit button{
+        background-color: #008000;
+    }
+</style>
+{% endif %}
+
 <div class="create-staff">
     <div class="back">
-        <a href="{{url_for('messages')}}">
+        <a href="{{url_for('manage_users_staff')}}">
             Back
         </a>
         <br>
@@ -16,10 +24,18 @@
             Create a staff account
         </p>
         <div id="email">
-            <input type="email" name="email" placeholder="Email" autofocus="" required>
+            {% if data %}
+                <input type="email" name="email" placeholder="Email" autofocus="" value={{data[0]}} required>
+            {% else %}
+                <input type="email" name="email" placeholder="Email" autofocus="" required>
+            {% endif %}
         </div>
         <div id="first-name">
-            <input type="text" name="first-name" placeholder="First Name" required>
+            {% if data %}
+                <input type="text" name="first-name" placeholder="First Name" value={{data[1]}} required>
+            {% else %}
+                <input type="text" name="first-name" placeholder="First Name" value={{data[1]}} required>
+            {% endif %}
         </div>
         <div id="last-name">
             <input type="text" name="last-name" placeholder="Last Name" required>
@@ -29,15 +45,19 @@
         </div>
         <div id="senco">
             <label for="senco">SENCo team privileges:</label>
-            <input type="checkbox" name="senco" value="True" required>
+            <input type="checkbox" name="senco" value="True">
         </div>
         <div id="safeguarding">
             <label for="safeguarding">Safeguarding team privileges:</label>
-            <input type="checkbox" name="safeguarding" value="True" required>
+            <input type="checkbox" name="safeguarding" value="True">
         </div>
         <div id="admin">
             <label for="admin">Admin team privileges:</label>
-            <input type="checkbox" name="admin" value="True" required>
+            <input type="checkbox" name="admin" value="True">
+        </div>
+        <div id="enabled">
+            <label for="enabled">Enable account:</label>
+            <input type="checkbox" name="enabled" value="True">
         </div>
         <div id="password">
             <div>
@@ -46,7 +66,7 @@
             <input type="text" name="password" value="ChangeMe" required>
         </div>
         <div id="submit">
-            <button>Update password</button>
+            <button>Create Account</button>
         </div>
     </form>
 </div>
