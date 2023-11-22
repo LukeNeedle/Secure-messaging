@@ -330,10 +330,6 @@ def login():
             print("Invalid password")
             return redirect(url_for('login'))
         del password
-        
-        # if not check_password_strength(cleanedPassword):
-        #     print("Insecure password")
-        #     return redirect(url_for('login'))
 
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
