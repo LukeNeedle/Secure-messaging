@@ -476,7 +476,7 @@ def messages_compose():
         return redirect(url_for('login'))
     
     if request.method == 'GET':
-        return render_template("compose.html")
+        return render_template("compose.html", msg="")
     elif request.method == 'POST':
         currentUser = current_user.get_user_dictionary()
         recipient = request.form.get('recipient')
@@ -488,7 +488,8 @@ def messages_compose():
         cleanedEmail = entry_cleaner(recipient, "email")
         if cleanedEmail != recipient.lower():
             print("Invalid email")
-            return redirect(url_for('messages_compose'))
+            data = [recipient, message, readReceipts]
+            return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
         del recipient
         
         if readReceipts == "True":
@@ -504,7 +505,8 @@ def messages_compose():
         if result == None:
             print("Invalid email")
             connection.close()
-            return redirect(url_for('messages_compose'))
+            data = [cleanedEmail, message, readReceipts]
+            return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
         else:
             recipientID = result[0]
 
@@ -520,7 +522,10 @@ def messages_compose():
             subsitutionKey = "0" + str(subsitutionKey)
             
         with open("secrets.json", "r") as f:
-            key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
+            key = encryption.substitution_encrypt(
+                plainText=(vernamKey + str(subsitutionKey)),
+                key=json.load(f)['MessageKey']
+                )
         
         cleanedEncryptedMessage = ""
         for character in encryptedMessage:
@@ -556,7 +561,8 @@ def messages_compose():
             connection.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
-            return redirect(url_for('messages_compose'))
+            data = [cleanedEmail, message, readReceipts]
+            return render_template("compose.html", data=data, msg="Server Error")
         
         cursor.execute(f"""SELECT MessageID FROM Messages
                         WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and ReadReceipts=? and Key=?;
@@ -566,7 +572,8 @@ def messages_compose():
         if result == None:
             connection.close()
             print("Failed to save message")
-            return redirect(url_for('messages_compose'))
+            data = [cleanedEmail, message, readReceipts]
+            return render_template("compose.html", data=data, msg="Server Error")
         else:
             messageID = result[0]
         

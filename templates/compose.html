@@ -7,6 +7,32 @@
     Hello {{current_user.title}} {{current_user.lname}}!
 </p>
 
+{% if msg != "" %}
+    {% for id in entry %}
+        {% if id != "submit" %}
+            <style>
+                #{{id}} input{
+                    border-color: #ff0000;
+                }
+            </style>
+        {% endif %}
+        {% if id == "submit" %}
+            <style>
+                #submit button{
+                    background-color: #008000;
+                }
+                p.message{
+                    color: #008000;
+                }
+            </style>
+        {% endif %}
+    {% endfor %}
+    <p class="message">
+        {{msg}}
+    </p>
+{% endif %}
+
+
 <div class="compose">
     <div class="back">
         <a href="{{url_for('messages')}}">
@@ -19,10 +45,18 @@
     </p>
     <form class="compose-message" method="POST" action="{{url_for('messages_compose')}}" enctype="multipart/form-data">
         <div id="recipient">
-            <input type="email" name="recipient" placeholder="Recipient's email address" autofocus="" required>
+            {% if data %}
+                <input type="email" name="recipient" placeholder="Recipient's email address" value="{{data[0]}}" autofocus="" required>
+            {% else %}
+                <input type="email" name="recipient" placeholder="Recipient's email address" autofocus="" required>
+            {% endif %}
         </div>
         <div id="message">
-            <textarea name="message" placeholder="Your message" cols="50" rows="5" required></textarea>
+            {% if data %}
+                <textarea name="message" placeholder="Your message" cols="50" rows="5" required>{{data[1]}}</textarea>
+            {% else %}
+                <textarea name="message" placeholder="Your message" cols="50" rows="5" required></textarea>
+            {% endif %}
         </div>
         <div id="upload-attachments">
             <span>
@@ -40,7 +74,15 @@
         </div>
         <div id="read-receipts">
             <label for="read-receipts">Read receipts</label>
-            <input type="checkbox" name="read-receipts" value="True">
+            {% if data %}
+                {% if data[2] %}
+                    <input type="checkbox" name="read-receipts" checked value="True">
+                {% else %}
+                    <input type="checkbox" name="read-receipts" value="True">
+                {% endif %}
+            {% else %}
+                <input type="checkbox" name="read-receipts" value="True">
+            {% endif %}
         </div>
         <div id="submit">
             <button>Send</button>
