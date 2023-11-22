@@ -86,6 +86,10 @@ header{
     color: var(--primary);
 }
 
+a.account-box {
+    cursor: context-menu;
+}
+
 span.account-email {
     font-size: small;
 }
