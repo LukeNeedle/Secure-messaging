@@ -3,10 +3,6 @@
 {% block content %}
 <link rel="stylesheet" href="{{url_for('manage_users_css')}}">
 
-<p class="welcome">
-    Hello {{current_user.title}} {{current_user.lname}}!
-</p>
-
 <div class="options">
     <a class="staff" href="{{url_for('manage_users_staff')}}">
         Staff

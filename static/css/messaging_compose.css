@@ -38,13 +38,6 @@
     margin-right: auto;
 }
 
-.welcome {
-    color: var(--accent);
-    font-size: larger;
-    font-weight: 200;
-    margin-bottom: 1%;
-}
-
 .compose {
     border-radius: 20px;
     padding: 3%;
