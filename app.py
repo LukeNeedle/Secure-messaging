@@ -718,7 +718,7 @@ def user_settings():
         cleanedEmail = entry_cleaner(email, "email")
         if cleanedEmail != email.lower():
             print("Invalid email")
-            return render_template("user_settings.html", msg="Invalid Email", entry=["email"], savedEmail=cleanedEmail)
+            return render_template("user_settings.html", msg="Invalid Email", entry=["email"], savedEmail=email)
         del email
         
         #Password Validation
