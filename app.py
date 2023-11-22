@@ -37,7 +37,9 @@ def entry_cleaner(entry:str, mode:str):
     mode = "sql" --> Removes characters that could be used for sql injection
     mode = "password" --> Removes characters that could be used for sql injection as well as characters that aren't on the english keyboard.
     mode = "email" --> Removes characters that could be used for sql injection and checks that it is a valid email.
-    mode = "message" --> Removes characters that could be used for sql injection but has support for multiple lines. 
+    mode = "message" --> Removes characters that could be used for sql injection but has support for multiple lines.
+    mode = "url" --> Removed characters that cannot be used in a URL
+    mode = "lru" --> Undoes URL cleaning
 
     Args:
         entry (string): The input that needs cleaning
@@ -71,6 +73,31 @@ def entry_cleaner(entry:str, mode:str):
             return None
         else:
             return cleanedEntry
+    # elif mode == "url":
+    #     cleanedEntry = ""
+    #     for character in entry:
+    #         if character == " ":
+    #             cleanedEntry += "%20"
+    #         elif character == "+":
+    #             cleanedEntry += "%2B"
+    #         elif character == "@":
+    #             cleanedEntry += "%40"
+    #         else:
+    #             cleanedEntry += character
+    #     return cleanedEntry
+    # elif mode == "lru":
+    #     cleanedEntry = ""
+    #     for character in entry:
+    #         if character == "%20":
+    #             cleanedEntry += " "
+    #         elif character == "%2B":
+    #             cleanedEntry += "+"
+    #         elif character == "%40":
+    #             cleanedEntry += "@"
+    #         else:
+    #             cleanedEntry += character
+    #         print(character)
+    #     return cleanedEntry
     else:
         raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
@@ -845,6 +872,7 @@ def manage_users_staff():
         return redirect(url_for('dashboard'))
 
 @app.route('/app/users/staff/create', methods=['GET', 'POST'])
+@login_required
 def create_staff():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -922,35 +950,73 @@ def create_staff():
     passwordSalt = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedPassword)))
     passwordHash = hash_function.hash_variable(cleanedPassword, passwordSalt)
     
-    conn = sqlite3.connect("database.db")
-    cur = conn.cursor()
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
     
     try:
-        cur.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
+        cursor.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
                     VALUES (?, ?, ?, ?, ?, 'False', ?, ?, ?, ?, ?);
                     """, (cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, passwordHash, passwordSalt, senco, safeguarding, admin))
-        conn.commit()
+        connection.commit()
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
-        conn.close()
+        connection.close()
         data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, cleanedPassword]
         return render_template("create_staff.html", data=data, msg="Server Error")
 
-    conn.close()
+    connection.close()
     return render_template("create_staff.html", msg="Created user account", entry=["submit"])
 
-@app.route('/app/users/staff/edit')
-def edit_staff():# TODO
+@app.route('/app/users/staff/lookup', methods=['GET', 'POST'])
+@login_required
+def search_staff():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
-    if current_user.admin:
-        # return render_template("edit_staff.html")
-        return render_template("under_construction.html")
-    else:
+    if not current_user.admin:
         return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email-list')
+        if email:
+            return redirect(url_for('edit_staff', staffEmail=email))
+        else:
+            return redirect(url_for('search_staff'))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute(f"""SELECT Email FROM Staff WHERE AccountArchived='False';""")
+    result = cursor.fetchall()
+    if result == None:
+        print("No accounts found")
+        connection.close()
+        return render_template("manage_staff_lookup.html", msg="empty")
+    else:
+        data = result
+    
+    emails = []
+    for email in data:
+        emails.append(email[0])
+    
+    return render_template("manage_staff_lookup.html", emails=emails)
+
+@app.route('/app/users/staff/edit/<string:staffEmail>', methods=['GET', 'POST'])
+@login_required
+def edit_staff(staffEmail):# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    print(staffEmail)
+    
+    # return render_template("edit_staff.html")
+    return render_template("under_construction.html")
 
 @app.route('/app/users/staff/delete')
+@login_required
 def delete_staff():# TODO
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -1034,6 +1100,10 @@ def manage_staff_css():
 @app.route('/static/css/create_staff.css')
 def create_staff_css():
     return send_file('static//css//create_staff.css')
+
+@app.route('/static/css/manage_staff_lookup.css')
+def manage_staff_lookup_css():
+    return send_file('static//css//manage_staff_lookup.css')
 
 @app.route('/static/css/edit_staff.css')
 def edit_staff_css():

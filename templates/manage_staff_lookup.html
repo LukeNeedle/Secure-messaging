@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('manage_staff_lookup_css')}}">
+
+<div class="staff">
+    <div class="back">
+        <a href="{{url_for('manage_users_staff')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    
+    <p class="title">
+        Search staff
+    </p>
+    {% if msg == "empty" %}
+        <p class="empty">
+            No staff accounts were found, <a href="{{url_for('create_staff')}}">Click Here</a> to create one.
+        </p>
+    {% else %}
+        <form method="POST" action="{{url_for('search_staff')}}">
+            <select name="email-list" id="email-list">
+                <option value="_" selected disabled>Choose One</option>
+                {% for email in emails %}
+                    <option value="{{email}}">{{email}}</option>
+                {% endfor %}
+            </select>
+            <div id="submit">
+                <button>Search</button>
+            </div>
+        </form>
+    {% endif %}
+</div>
+
+{% endblock %}
