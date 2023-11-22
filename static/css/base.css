@@ -86,6 +86,10 @@ header{
     color: var(--primary);
 }
 
+span.account-email {
+    font-size: small;
+}
+
 .content{
     text-align: center;
     width: 100%;
