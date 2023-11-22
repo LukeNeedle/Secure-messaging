@@ -307,13 +307,14 @@ def login():
     if request.method == 'GET':
         if type(current_user._get_current_object()) is not User:
             print("User not logged in")
-            return render_template("login.html")
+            return render_template("login.html", msg="")
         return redirect(url_for('dashboard'))
     
     elif request.method == 'POST':
         if type(current_user._get_current_object()) is User:
             print("User already logged in")
             return redirect(url_for('dashboard'))
+        
         email = request.form.get('email')
         password = request.form.get('password')
 
@@ -321,14 +322,14 @@ def login():
         cleanedEmail = entry_cleaner(email, "email")
         if cleanedEmail != email.lower():
             print("Invalid email")
-            return redirect(url_for('login'))
+            return render_template("login.html", msg="Invalid Credentials", savedEmail=email)
         del email
         
         #Password Validation
         cleanedPassword = entry_cleaner(password, "password")
         if cleanedPassword != password:
             print("Invalid password")
-            return redirect(url_for('login'))
+            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
         del password
 
         connection = sqlite3.connect("database.db")
@@ -339,7 +340,7 @@ def login():
         if result == None:
             connection.close()
             print("User not found")
-            return redirect(url_for('login'))
+            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
         else:
             passHash = result[0]
         
@@ -348,21 +349,21 @@ def login():
         if result == None:
             connection.close()
             print("User not found")
-            return redirect(url_for('login'))
+            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
         else:
             salt = result[0]
         
         if passHash != hash_function.hash_variable(cleanedPassword, salt):
             connection.close()
             print("Password doesn't match stored password")
-            return redirect(url_for('login'))
+            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
         
         cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
         result = cursor.fetchone()
         connection.close()
         if result == None:
             print("User not found")
-            return redirect(url_for('login'))
+            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
         
         userDetails = {
             "id": result[0],
@@ -381,7 +382,7 @@ def login():
 
         login_user(User(userDetails), remember=False)
         print("Successfully logged in")
-        return redirect(url_for('login'))
+        return redirect(url_for('dashboard'))
 # Objective 2 completed
 
 @app.route('/dashboard', methods=['GET'])
