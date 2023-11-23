@@ -38,8 +38,6 @@ def entry_cleaner(entry:str, mode:str):
     mode = "password" --> Removes characters that could be used for sql injection as well as characters that aren't on the english keyboard.
     mode = "email" --> Removes characters that could be used for sql injection and checks that it is a valid email.
     mode = "message" --> Removes characters that could be used for sql injection but has support for multiple lines.
-    mode = "url" --> Removed characters that cannot be used in a URL
-    mode = "lru" --> Undoes URL cleaning
 
     Args:
         entry (string): The input that needs cleaning
@@ -73,18 +71,6 @@ def entry_cleaner(entry:str, mode:str):
             return None
         else:
             return cleanedEntry
-    elif mode == "url":
-        cleanedEntry = ""
-        for character in entry:
-            if character == " ":
-                cleanedEntry += "%20"
-            elif character == "+":
-                cleanedEntry += "%2B"
-            elif character == "@":
-                cleanedEntry += "%40"
-            else:
-                cleanedEntry += character
-        return cleanedEntry
     else:
         raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
@@ -980,10 +966,7 @@ def search_staff():
     if request.method == 'POST':
         email = request.form.get('email-list')
         if email:
-            cleanedEmail = entry_cleaner(email, "url")
-            print(email)
-            print(cleanedEmail)
-            return redirect(url_for('edit_staff', staffEmail=cleanedEmail))
+            return redirect(url_for('edit_staff', staffEmail=email))
         else:
             return redirect(url_for('search_staff'))
     
