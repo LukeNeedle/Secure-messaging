@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('edit_staff_css')}}">
+
+{% if msg != "" %}
+    {% for id in entry %}
+        {% if id != "submit" %}
+            <style>
+                #{{id}} input{
+                    border-color: #ff0000;
+                }
+            </style>
+        {% endif %}
+        {% if id == "submit" %}
+            <style>
+                #submit button{
+                    background-color: #008000;
+                }
+                p.message{
+                    color: #008000;
+                }
+            </style>
+        {% endif %}
+    {% endfor %}
+    <p class="message">
+        {{msg}}
+    </p>
+{% endif %}
+
+<div class="edit-staff">
+    <div class="back">
+        <a href="{{url_for('manage_users_staff')}}">
+            Back
+        </a>
+        <br>
+    </div>
+
+    <form class="edit-staff-form" method="POST" action="{{url_for('edit_staff')}}">
+        <p class="title">
+            Edit a staff account
+        </p>
+        <div id="email">
+            <input type="email" name="email" placeholder="Email" autofocus="" value="{{data[0]}}" required>
+        </div>
+        <div id="first-name">
+            <input type="text" name="first-name" placeholder="First Name" value="{{data[1]}}" required>
+        </div>
+        <div id="last-name">
+            <input type="text" name="last-name" placeholder="Last Name" value="{{data[2]}}" required>
+        </div>
+        <div id="title">
+            <input type="text" name="title" placeholder="Title (eg: Mr)" value="{{data[3]}}" required>
+        </div>
+        <div id="senco">
+            <label for="senco">SENCo team privileges:</label>
+            {% if data[4] == "True" %}
+                <input type="checkbox" name="senco" value="True" checked>
+            {% else %}
+                <input type="checkbox" name="senco" value="True">
+            {% endif %}
+        </div>
+        <div id="safeguarding">
+            <label for="safeguarding">Safeguarding team privileges:</label>
+            {% if data[5] == "True" %}
+                <input type="checkbox" name="safeguarding" value="True" checked>
+            {% else %}
+                <input type="checkbox" name="safeguarding" value="True">
+            {% endif %}
+        </div>
+        <div id="admin">
+            <label for="admin">Admin team privileges:</label>
+            {% if data[6] == "True" %}
+                <input type="checkbox" name="admin" value="True" checked>
+            {% else %}
+                <input type="checkbox" name="admin" value="True">
+            {% endif %}
+        </div>
+        <div id="enabled">
+            <label for="enabled">Enable account:</label>
+            {% if data[7] == "True" %}
+                <input type="checkbox" name="enabled" value="True" checked>
+            {% else %}
+                <input type="checkbox" name="enabled" value="True">
+            {% endif %}
+        </div>
+        <div id="password">
+            <div>
+                <label for="password">Reset password:</label>
+            </div>
+            <input type="checkbox" name="enabled" value="True">
+        </div>
+        {% if data[8] == "True" %}
+            <div id="delete">
+                <div>
+                    <label for="delete">Delete account:</label>
+                </div>
+                <input type="checkbox" name="delete" value="True">
+            </div>
+        {% else %}
+            <div class="delete">
+                <p>To delete an admin account, first-name</p>
+            </div>
+        {% endif %}
+        <div id="submit">
+            <button>Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

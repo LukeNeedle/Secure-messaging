@@ -73,31 +73,18 @@ def entry_cleaner(entry:str, mode:str):
             return None
         else:
             return cleanedEntry
-    # elif mode == "url":
-    #     cleanedEntry = ""
-    #     for character in entry:
-    #         if character == " ":
-    #             cleanedEntry += "%20"
-    #         elif character == "+":
-    #             cleanedEntry += "%2B"
-    #         elif character == "@":
-    #             cleanedEntry += "%40"
-    #         else:
-    #             cleanedEntry += character
-    #     return cleanedEntry
-    # elif mode == "lru":
-    #     cleanedEntry = ""
-    #     for character in entry:
-    #         if character == "%20":
-    #             cleanedEntry += " "
-    #         elif character == "%2B":
-    #             cleanedEntry += "+"
-    #         elif character == "%40":
-    #             cleanedEntry += "@"
-    #         else:
-    #             cleanedEntry += character
-    #         print(character)
-    #     return cleanedEntry
+    elif mode == "url":
+        cleanedEntry = ""
+        for character in entry:
+            if character == " ":
+                cleanedEntry += "%20"
+            elif character == "+":
+                cleanedEntry += "%2B"
+            elif character == "@":
+                cleanedEntry += "%40"
+            else:
+                cleanedEntry += character
+        return cleanedEntry
     else:
         raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
@@ -268,6 +255,20 @@ def check_password_strength(password:str):
     if regex.search(r'(\w)\1\1+', password):
         return False
     return True
+
+@app.before_request 
+def check_for_reset_password(): 
+    if current_user.is_authenticated and request.method == 'GET':
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+
+        cursor.execute(f"""SELECT PassHash, PassSalt FROM Staff WHERE StaffID='{current_user.id}';""")
+        result = cursor.fetchone()
+        
+        if result != None:
+            if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
+                # return redirect(url_for("reset_password"))
+                pass
 
 
 #########################################################################
@@ -979,7 +980,10 @@ def search_staff():
     if request.method == 'POST':
         email = request.form.get('email-list')
         if email:
-            return redirect(url_for('edit_staff', staffEmail=email))
+            cleanedEmail = entry_cleaner(email, "url")
+            print(email)
+            print(cleanedEmail)
+            return redirect(url_for('edit_staff', staffEmail=cleanedEmail))
         else:
             return redirect(url_for('search_staff'))
     
@@ -1012,20 +1016,8 @@ def edit_staff(staffEmail):# TODO
     
     print(staffEmail)
     
-    # return render_template("edit_staff.html")
-    return render_template("under_construction.html")
-
-@app.route('/app/users/staff/delete')
-@login_required
-def delete_staff():# TODO
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        # return render_template("delete_staff.html")
-        return render_template("under_construction.html")
-    else:
-        return redirect(url_for('dashboard'))
+    return render_template("edit_staff.html")
+    # return render_template("under_construction.html")
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
@@ -1108,10 +1100,6 @@ def manage_staff_lookup_css():
 @app.route('/static/css/edit_staff.css')
 def edit_staff_css():
     return send_file('static//css//edit_staff.css')
-
-@app.route('/static/css/delete_staff.css')
-def delete_staff_css():
-    return send_file('static//css//delete_staff.css')
 
 @app.route('/static/css/manage_students.css')
 def manage_students_css():
