@@ -39,7 +39,7 @@
     margin-top: 1%;
 }
 
-.create-staff {
+.edit-staff {
     border-radius: 20px;
     padding: 3%;
     padding-left: 5%;
@@ -101,6 +101,13 @@ input:hover {
     cursor: text;
 }
 
+.edit-staff .text-entries label{
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
 button {
     background-color: var(--primary);
     color: #efe6e8;
@@ -123,9 +130,4 @@ form div input[type="checkbox"] {
     height: 25px;
     transform: translateY(7px);
     cursor: pointer;
-}
-
-form div#password div {
-    text-align: left;
-    margin-bottom: 1%;
 }

@@ -255,6 +255,7 @@ def check_for_reset_password():
             if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
                 # return redirect(url_for("reset_password"))
                 pass
+        connection.close()
 
 
 #########################################################################
@@ -997,11 +998,109 @@ def edit_staff(staffEmail):# TODO
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
-    print(staffEmail)
-    
-    return render_template("edit_staff.html")
-    # return render_template("under_construction.html")
+    if request.method == 'GET':
+        cleanedEmail = entry_cleaner(staffEmail, "email")
+        if staffEmail != cleanedEmail:
+            print("Invalid Email")
+            return redirect(url_for("search_staff"))
+        del staffEmail
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Target user not found")
+            return redirect(url_for("search_staff"))
+        
+        data = [
+            result[1],  #FirstName
+            result[2],  #LastName
+            result[3],  #Title
+            result[4],  #Email
+            result[5],  #Enabled
+            result[9],  #SENCo
+            result[10], #Safeguarding
+            result[11]  #Admin
+            ]
 
+        return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg="")
+    
+    elif request.method == 'POST':
+        return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg=f"Successfully updated {staffEmail}")
+# <form class="edit-staff-form" method="POST" action="{{url_for('edit_staff', staffEmail=staffEmail)}}">
+    # <p class="title">
+    #     Edit a staff account
+    # </p>
+    # <div class="text-entries">
+    #     <div id="email">
+    #         <label for="email">Email Address:</label>
+    #         <input type="email" name="email" placeholder="Email" autofocus="" value="{{data[3]}}" required>
+    #     </div>
+    #     <div id="title">
+    #         <label for="title">Title:</label>
+    #         <input type="text" name="title" placeholder="Title (eg: Mr)" value="{{data[2]}}" required>
+    #     </div>
+    #     <div id="first-name">
+    #         <label for="first-name">First Name:</label>
+    #         <input type="text" name="first-name" placeholder="First Name" value="{{data[0]}}" required>
+    #     </div>
+    #     <div id="last-name">
+    #         <label for="last-name">Last Name:</label>
+    #         <input type="text" name="last-name" placeholder="Last Name" value="{{data[1]}}" required>
+    #     </div>
+    # </div>
+
+    # <div id="senco">
+    #     <label for="senco">SENCo team privileges:</label>
+    #     {% if data[5] == "True" %}
+    #         <input type="checkbox" name="senco" value="True" checked>
+    #     {% else %}
+    #         <input type="checkbox" name="senco" value="True">
+    #     {% endif %}
+    # </div>
+    # <div id="safeguarding">
+    #     <label for="safeguarding">Safeguarding team privileges:</label>
+    #     {% if data[6] == "True" %}
+    #         <input type="checkbox" name="safeguarding" value="True" checked>
+    #     {% else %}
+    #         <input type="checkbox" name="safeguarding" value="True">
+    #     {% endif %}
+    # </div>
+    # <div id="admin">
+    #     <label for="admin">Admin team privileges:</label>
+    #     {% if data[7] == "True" %}
+    #         <input type="checkbox" name="admin" value="True" checked>
+    #     {% else %}
+    #         <input type="checkbox" name="admin" value="True">
+    #     {% endif %}
+    # </div>
+    # <div id="enabled">
+    #     <label for="enabled">Enable account:</label>
+    #     {% if data[4] == "True" %}
+    #         <input type="checkbox" name="enabled" value="True" checked>
+    #     {% else %}
+    #         <input type="checkbox" name="enabled" value="True">
+    #     {% endif %}
+    # </div>
+    # <div id="password">
+    #     <label for="password">Reset password:</label>
+    #     <input type="checkbox" name="password" value="True">
+    # </div>
+    # {% if data[7] == "False" %}
+    #     <div id="delete">
+    #         <label for="delete">Delete account:</label>
+    #         <input type="checkbox" name="delete" value="True">
+    #     </div>
+    # {% else %}
+    #     <div class="delete">
+    #         <p>To delete an admin account, first remove their admin status</p>
+    #     </div>
+    # {% endif %}
+    # <div id="submit">
+    #     <button>Save</button>
+    # </div>
 @app.route('/app/settings', methods=['GET'])
 @login_required
 def app_settings():# TODO
