@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('edit_student_css')}}">
+
+{% if msg != "" %}
+    {% for id in entry %}
+        {% if id != "submit" %}
+            <style>
+                #{{id}} input{
+                    border-color: #ff0000;
+                }
+            </style>
+        {% endif %}
+        {% if id == "submit" %}
+            <style>
+                #submit button{
+                    background-color: #008000;
+                }
+                p.message{
+                    color: #008000;
+                }
+            </style>
+        {% endif %}
+    {% endfor %}
+    <p class="message">
+        {{msg}}
+    </p>
+{% endif %}
+
+<div class="edit-student">
+    <div class="back">
+        <a href="{{url_for('manage_users_students')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <form class="edit-student-form" method="POST" action="{{url_for('edit_student', studentID=data[0])}}">
+        <p class="title">
+            Edit a student
+        </p>
+        <div class="text-entries">
+            <div id="first-name">
+                <label for="first-name">First Name:</label>
+                <input type="text" name="first-name" placeholder="First Name" value="{{data[1]}}" required>
+            </div>
+            <div id="last-name">
+                <label for="last-name">Last Name:</label>
+                <input type="text" name="last-name" placeholder="Last Name" value="{{data[2]}}" required>
+            </div>
+            <div class="date">
+                <label for="date-of-birth">Date of Birth:</label>
+                <input type="date" name="date-of-birth" value="{{data[3]}}" required>
+            </div>
+        </div>
+
+        <div id="delete">
+            <label for="delete">Delete account:</label>
+            <input type="checkbox" name="delete" value="True">
+            <p class="warning">WARNING! This action cannot be undone.</p>
+        </div>
+        <div id="submit">
+            <button>Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

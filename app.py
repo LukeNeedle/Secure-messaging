@@ -1229,7 +1229,208 @@ def edit_staff(staffEmail):
         if current_user.get_user_dictionary()["admin"] == "False":
             return redirect(url_for("dashboard"))
         data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
-        return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg=f"Successfully updated {staffEmail}'s account")
+        return render_template("edit_staff.html", data=data, msg=f"Successfully updated {staffEmail}'s account")
+
+@app.route('/app/users/students/create', methods=['GET', 'POST'])
+@login_required
+def create_student():
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'GET':
+        return render_template("create_students.html", msg="")
+    
+    fName = request.form.get('first-name')
+    lName = request.form.get('last-name')
+    date = request.form.get('date')
+    
+    cleanedFName = entry_cleaner(fName, "sql")
+    if cleanedFName != fName:
+        print("Invalid first name")
+        data = [fName, lName, date]
+        return render_template("create_students.html", data=data, msg="First name is invalid", entry=["first-name"])
+    del fName
+    
+    cleanedLName = entry_cleaner(lName, "sql")
+    if cleanedLName != lName:
+        print("Invalid last name")
+        data = [cleanedFName, lName, date]
+        return render_template("create_students.html", data=data, msg="Last name is invalid", entry=["last-name"])
+    del lName
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    try:
+        cursor.execute(f"""INSERT INTO Students(FirstName, LastName, DateOfBirth)
+                    VALUES (?, ?, ?);
+                    """, (cleanedFName, cleanedLName, date))
+        connection.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        connection.close()
+        data = [cleanedFName, cleanedLName, date]
+        return render_template("create_students.html", data=data, msg="Server Error")
+
+    connection.close()
+    return render_template("create_students.html", msg="Created user account", entry=["submit"])
+
+@app.route('/app/users/students/lookup', methods=['GET', 'POST'])
+@login_required
+def search_students():
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        dataString = request.form.get('email-list')
+        if not dataString:
+            return redirect(url_for('search_students'))
+        
+        data = dataString.split("|")
+        if len(data) != 3:
+            return redirect(url_for('search_students'))
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("""SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;
+                       """, (data[0], data[1], data[2]))
+        result = cursor.fetchone()
+        if result == None:
+            print("No accounts found")
+            connection.close()
+            return redirect(url_for("search_students"))
+        else:
+            return redirect(url_for('edit_student', studentID=result[0]))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute(f"""SELECT FirstName, LastName, DateOfBirth FROM Students;""")
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        print("No accounts found")
+        connection.close()
+        return redirect(url_for("create_student"))
+    else:
+        data = result
+    
+    names = []
+    for name in data:
+        names.append((f"{name[0]} {name[1]}", f"{name[0]}|{name[1]}|{name[2]}"))
+    
+    return render_template("manage_student_lookup.html", names=names)
+
+@app.route('/app/users/students/edit/<string:studentID>', methods=['GET', 'POST'])
+@login_required
+def edit_student(studentID):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'GET':
+        cleanedID = entry_cleaner(studentID, "sql")
+        if studentID != cleanedID:
+            print("Invalid ID")
+            return redirect(url_for("search_students"))
+        del studentID
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute(f"""SELECT * FROM Students WHERE StudentID='{cleanedID}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Target user not found")
+            return redirect(url_for("search_students"))
+        
+        data = [
+            str(result[0]), #ID
+            result[1],      #FirstName
+            result[2],      #LastName
+            result[3],      #DateOfBirth
+            ]
+
+        return render_template("edit_student.html", data=data, msg="")
+    
+    elif request.method == 'POST':
+        cleanedID = entry_cleaner(studentID, "sql")
+        if studentID != cleanedID:
+            print("Invalid ID")
+            return redirect(url_for("search_students"))
+        del studentID
+        
+        firstName = request.form.get('first-name')
+        lastName = request.form.get('last-name')
+        dateOfBirth = request.form.get('date-of-birth')
+        delete = request.form.get('delete')
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        
+        if delete == "True":
+            cursor.execute("""DELETE FROM Reporting WHERE StudentID = ?;
+                           """, (cleanedID))
+            connection.commit()
+            cursor.execute("""DELETE FROM StudentRelationship WHERE StudentID = ?;
+                           """, (cleanedID))
+            connection.commit()
+            cursor.execute("""DELETE FROM Students WHERE StudentID = ?;
+                           """, (cleanedID))
+            connection.commit()
+            
+            cursor.execute(f"""SELECT * FROM Students;""")
+            result = cursor.fetchall()
+            connection.close()
+            if result == None or len(result) == 0:
+                return redirect(url_for("manage_users_students"))
+            return redirect(url_for('search_students'))
+
+        cleanedFName = entry_cleaner(firstName, "sql")
+        if cleanedFName != firstName:
+            print("Invalid first name")
+            data = [cleanedID, firstName, lastName, dateOfBirth]
+            return render_template("edit_student.html", data=data, msg="First name is invalid", entry=["first-name"])
+        del firstName
+        
+        cleanedLName = entry_cleaner(lastName, "sql")
+        if cleanedLName != lastName:
+            print("Invalid last name")
+            data = [cleanedID, cleanedFName, lastName, dateOfBirth]
+            return render_template("edit_student.html", data=data, msg="Last name is invalid", entry=["last-name"])
+        del lastName
+
+        try:
+            cursor.execute("""UPDATE Student SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?
+                           """, (cleanedFName, cleanedLName, dateOfBirth, cleanedID)
+                           )
+            connection.commit()
+        except sqlite3.IntegrityError:
+            print("Failed CHECK constraint")
+            connection.close()
+            data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
+            return render_template("edit_student.html", data=data, msg="Server Error")
+        
+        data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
+        return render_template("edit_student.html", data=data, msg="Successfully updated!")
+
+@app.route('/app/users/students/Links', methods=['GET', 'POST'])
+@login_required
+def staff_student_relationships():# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    # return render_template("staff_student_relationships.html")
+    return render_template("under_construction.html")
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
@@ -1320,7 +1521,19 @@ def edit_staff_css():
 @app.route('/static/css/manage_students.css')
 def manage_students_css():
     return send_file('static//css//manage_students.css')
-    
+
+@app.route('/static/css/create_student.css')
+def create_student_css():
+    return send_file('static//css//create_student.css')
+
+@app.route('/static/css/manage_student_lookup.css')
+def manage_student_lookup_css():
+    return send_file('static//css//manage_student_lookup.css')
+
+@app.route('/static/css/edit_student.css')
+def edit_student_css():
+    return send_file('static//css//edit_student.css')
+
 @app.route('/static/css/under_construction.css')
 def under_construction_css():
     return send_file('static//css//under_construction.css')

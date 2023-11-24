@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('create_student_css')}}">
+
+{% if msg != "" %}
+    {% for id in entry %}
+        {% if id != "submit" %}
+            <style>
+                #{{id}} input{
+                    border-color: #ff0000;
+                }
+            </style>
+        {% endif %}
+        {% if id == "submit" %}
+            <style>
+                #submit button{
+                    background-color: #008000;
+                }
+                p.message{
+                    color: #008000;
+                }
+            </style>
+        {% endif %}
+    {% endfor %}
+    <p class="message">
+        {{msg}}
+    </p>
+{% endif %}
+
+<div class="create-student">
+    <div class="back">
+        <a href="{{url_for('manage_users_students')}}">
+            Back
+        </a>
+        <br>
+    </div>
+
+    <form class="create-student-form" method="POST" action="{{url_for('create_student')}}">
+        <p class="title">
+            Add a Student
+        </p>
+        <div id="first-name">
+            {% if data %}
+                <input type="text" name="first-name" placeholder="First Name" value="{{data[0]}}" required>
+            {% else %}
+                <input type="text" name="first-name" placeholder="First Name" required>
+            {% endif %}
+        </div>
+        <div id="last-name">
+            {% if data %}
+                <input type="text" name="last-name" placeholder="Last Name" value="{{data[1]}}" required>
+            {% else %}
+                <input type="text" name="last-name" placeholder="Last Name" required>
+            {% endif %}
+        </div>
+        <div id="birth-date">
+            {% if data %}
+                <input type="date" name="date" value="{{data[2]}}" required>
+            {% else %}
+                <input type="date" name="date" required>
+            {% endif %}
+        </div>
+        <div id="submit">
+            <button>Add Student</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
