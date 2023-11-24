@@ -836,6 +836,10 @@ def user_settings():
         del newPassword
         del confirmNewPassword
 
+        if not check_password_strength(cleanedNewPassword):
+            print("Insecure password")
+            return render_template("user_settings.html", msg="Insecure password", entry=["new-password","confirm-new-password"], savedEmail=cleanedEmail)
+        
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
@@ -881,8 +885,8 @@ def user_settings():
             return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
         
         cursor.execute(f"""UPDATE Staff SET PassHash = '{hash_function.hash_variable(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
-        result = cursor.fetchone()
-
+        connection.commit()
+        
         userDetails = current_user.get_user_dictionary()
         userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
         logout_user()
