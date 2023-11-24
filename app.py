@@ -1168,7 +1168,25 @@ def edit_staff(staffEmail):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         
-        cursor.execute(f"""SELECT Passhash, PassSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute(f"""SELECT Admin FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Target user not found")
+            return redirect(url_for("search_staff"))
+        
+        if admin == "False" and result[0] == "True":
+            cursor.execute(f"""SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';""")
+            result = cursor.fetchall()
+            if result == None or len(result) == 0:
+                connection.close()
+                print("Target user not found")
+                return redirect(url_for("search_staff"))
+            if len(result) == 1:
+                data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, "True"]
+                print("User is trying to remove last admin")
+                return render_template("edit_staff.html", data=data, msg="There must always be at least one admin account active", entry=["admin"])
+        
         result = cursor.fetchone()
         if result == None:
             connection.close()
