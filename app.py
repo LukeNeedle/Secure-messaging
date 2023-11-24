@@ -1104,9 +1104,15 @@ def edit_staff(staffEmail):
             result[11]  #Admin
             ]
 
-        return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg="")
+        return render_template("edit_staff.html", data=data, msg="")
     
     elif request.method == 'POST':
+        cleanedStaffEmail = entry_cleaner(staffEmail, "sql")
+        if staffEmail != cleanedStaffEmail:
+            print("Invalid ID")
+            return redirect(url_for("search_students"))
+        del staffEmail
+        
         email = request.form.get('email')
         title = request.form.get('title')
         firstName = request.form.get('first-name')
@@ -1140,7 +1146,7 @@ def edit_staff(staffEmail):
         if cleanedEmail != email:
             print("Invalid email")
             data = [firstName, lastName, title, email, enabled, senco, safeguarding, admin]
-            return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg="Email is invalid", entry=["email"])
+            return render_template("edit_staff.html", data=data, msg="Email is invalid", entry=["email"])
         del email
         
         cleanedFName = entry_cleaner(firstName, "sql")

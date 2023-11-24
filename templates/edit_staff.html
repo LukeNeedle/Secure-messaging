@@ -35,11 +35,7 @@
         </a>
         <br>
     </div>
-    {% if staffEmail %}
-        <form class="edit-staff-form" method="POST" action="{{url_for('edit_staff', staffEmail=staffEmail)}}">
-    {% else %}
-        <form class="edit-staff-form" method="POST" action="{{url_for('edit_staff', staffEmail=data[3])}}">
-    {% endif %}
+    <form class="edit-staff-form" method="POST" action="{{url_for('edit_staff', staffEmail=data[3])}}">
         <p class="title">
             Edit a staff account
         </p>
