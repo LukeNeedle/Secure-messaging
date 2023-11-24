@@ -916,18 +916,6 @@ def manage_user():
     else:
         return redirect(url_for('dashboard'))
 
-@app.route('/app/users/students', methods=['GET'])
-@login_required
-def manage_users_students():# TODO
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        # return render_template("manage_students.html")
-        return render_template("under_construction.html")
-    else:
-        return redirect(url_for('dashboard'))
-
 @app.route('/app/users/staff', methods=['GET'])
 @login_required
 def manage_users_staff():
@@ -936,6 +924,17 @@ def manage_users_staff():
     
     if current_user.admin:
         return render_template("manage_staff.html")
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/app/users/students', methods=['GET'])
+@login_required
+def manage_users_students():
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if current_user.admin:
+        return render_template("manage_students.html")
     else:
         return redirect(url_for('dashboard'))
 

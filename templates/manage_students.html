@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('manage_students_css')}}">
+
+<div class="options">
+    <a class="create" href="{{url_for('create_student')}}">
+        Add a Student
+    </a>
+    <a class="edit" href="{{url_for('search_students')}}">
+        Edit Student
+    </a>
+    <a class="links" href="{{url_for('staff_student_relationships')}}">
+        Manage Student-to-Staff Links
+    </a>
+</div>
+
+{% endblock %}
