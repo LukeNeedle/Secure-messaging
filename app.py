@@ -1056,7 +1056,7 @@ def search_staff():
     
     cursor.execute(f"""SELECT Email FROM Staff WHERE AccountArchived='False';""")
     result = cursor.fetchall()
-    if result == None:
+    if result == None or len(result) == 0:
         print("No accounts found")
         connection.close()
         return render_template("manage_staff_lookup.html", msg="empty")
