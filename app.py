@@ -1228,6 +1228,9 @@ def handle_not_found(error):
     else:
         return redirect(url_for('login'))
 
+def handle_no_permission(error):
+    return redirect(url_for('login'))
+
 
 #########################################################################
 #########################################################################
@@ -1238,4 +1241,5 @@ def handle_not_found(error):
 
 if __name__ == '__main__':
     app.register_error_handler(404, handle_not_found)
+    app.register_error_handler(401, handle_no_permission)
     app.run(debug=True, host='0.0.0.0')
