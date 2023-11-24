@@ -50,6 +50,7 @@ def create_tables():
 		"StudentID"	INTEGER NOT NULL UNIQUE,
 		"FirstName" STRING NOT NULL,
 		"LastName"  STRING NOT NULL,
+		"DateOfBirth"	STRING NOT NULL,
 		PRIMARY KEY("StudentID" AUTOINCREMENT)
 	)""")
 	conn.commit()
@@ -58,10 +59,9 @@ def create_tables():
 		"RelationshipID"	INTEGER NOT NULL UNIQUE,
 		"StudentID" STRING NOT NULL,
 		"StaffID"  STRING NOT NULL,
-		"Relationship"	INT NOT NULL,
+		"Relationship"	STRING NOT NULL,
 		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
 		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
-		CHECK ("Relationship"==1 OR "Relationship"==2 OR "Relationship"==3),
 		PRIMARY KEY("RelationshipID" AUTOINCREMENT)
 	)""")
 	conn.commit()

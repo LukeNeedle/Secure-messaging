@@ -97,19 +97,20 @@ These objectives aren't in any particular order and they are only numbered to he
 | Key          | The encrypted key to decrypt the message                              | -       | Text    | ❌          | -              | Not null                    |
 
 ### Students
-| Column       | Description                                | Example | Type    | Primary Key | Foreign Key    | Constraints      |
-|--------------|--------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
-| StudentID    | The integer ID associated with the student | 1       | Integer | ✅          | -              | Not null, Unique |
-| FirstName    | The encrypted first name of the student    | John    | Text    | ❌          | -              | Not null         |
-| LastName     | The encrypted last name of the student     | Smith   | Text    | ❌          | -              | Not null         |
+| Column       | Description                                | Example    | Type    | Primary Key | Foreign Key    | Constraints      |
+|--------------|--------------------------------------------|:----------:|:-------:|:-----------:|:--------------:|:----------------:|
+| StudentID    | The integer ID associated with the student | 1          | Integer | ✅          | -              | Not null, Unique |
+| FirstName    | The encrypted first name of the student    | John       | Text    | ❌          | -              | Not null         |
+| LastName     | The encrypted last name of the student     | Smith      | Text    | ❌          | -              | Not null         |
+| DateOfBirth  | The date of birth of the student           | 2023-11-24 | Text    | ❌          | -              | Not null         |
 
 ### StudentRelationship
-| Column         | Description                                                  | Example | Type    | Primary Key | Foreign Key         | Constraints      |
-|----------------|--------------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|:----------------:|
-| RelationshipID | The integer ID associated with the relationship              | 1       | Integer | ✅          | -                   | Not null, Unique |
-| StudentID      | The integer ID associated with the student                   | 1       | Integer | ❌          | Students(StudentID) | Not null         |
-| StaffID        | The integer ID associated with the staff member              | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
-| Relationship   | The type of relationship: 1=teacher, 2=tutor, 3=head of year | 1       | Integer | ❌          | -                   | Not null         |
+| Column         | Description                                            | Example | Type    | Primary Key | Foreign Key         | Constraints      |
+|----------------|--------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|:----------------:|
+| RelationshipID | The integer ID associated with the relationship        | 1       | Integer | ✅          | -                   | Not null, Unique |
+| StudentID      | The integer ID associated with the student             | 1       | Integer | ❌          | Students(StudentID) | Not null         |
+| StaffID        | The integer ID associated with the staff member        | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
+| Relationship   | The type of relationship: teacher, tutor, head of year | Tutor   | String  | ❌          | -                   | Not null         |
 
 ### Reporting
 | Column       | Description                                                          | Example | Type    | Primary Key | Foreign Key         | Constraints      |
