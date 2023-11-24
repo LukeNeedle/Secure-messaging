@@ -243,19 +243,27 @@ def check_password_strength(password:str):
     return True
 
 @app.before_request 
-def check_for_reset_password(): 
+def check_for_reset_password():
     if current_user.is_authenticated and request.method == 'GET':
+        if len(request.path) < 4:
+            pathDot = request.path[0]
+        else:
+            pathDot = request.path[-4]
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
+        cursor.execute(f"""SELECT AccountEnabled FROM Staff WHERE StaffID='{current_user.id}';""")
+        result = cursor.fetchone()
+        if result[0] == "False":
+            logout_user()
+            return redirect(url_for('login'))
+        
         cursor.execute(f"""SELECT PassHash, PassSalt FROM Staff WHERE StaffID='{current_user.id}';""")
         result = cursor.fetchone()
-        
-        if result != None:
-            if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
-                # return redirect(url_for("reset_password"))
-                pass
         connection.close()
+        if hash_function.hash_variable("ChangeMe", result[1]) == result[0] and request.path != "/ChangePassword" and pathDot != ".":
+            print("User needs to change password")
+            return redirect(url_for('reset_password'))
 
 
 #########################################################################
@@ -399,6 +407,73 @@ def login():
         print("Successfully logged in")
         return redirect(url_for('dashboard'))
 # Objective 2 completed
+
+@app.route('/ChangePassword', methods=['GET', 'POST'])
+@login_required
+def reset_password():
+    if type(current_user._get_current_object()) is not User:
+        print("User not logged in")
+        return redirect(url_for('login'))
+    
+    if request.method == 'GET':
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+
+        cursor.execute(f"""SELECT PassHash, PassSalt FROM Staff WHERE StaffID='{current_user.id}';""")
+        result = cursor.fetchone()
+        connection.close()
+        if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
+            print("User needs to change password")
+            return render_template("change_reset_password.html", msg="")
+        else:
+            return redirect(url_for('dashboard'))
+    
+    newPassword = request.form.get('new-password')
+    confirmNewPassword = request.form.get('confirm-new-password')
+    
+    #Password Validation
+    cleanedNewPassword = entry_cleaner(newPassword, "password")
+    cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
+    if cleanedNewPassword != newPassword:
+        print("Invalid new password")
+        return render_template("change_reset_password.html", msg="New password contains illegal characters", entry=["new-password"])
+    if cleanedConfirmNewPassword != confirmNewPassword:
+        print("Invalid confirm new password")
+        return render_template("change_reset_password.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
+    del newPassword
+    del confirmNewPassword
+
+    if not check_password_strength(cleanedNewPassword):
+        print("Insecure password")
+        return render_template("change_reset_password.html", msg="Insecure password", entry=["new-password","confirm-new-password"])
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    # Getting user's password salt  
+    cursor.execute(f"""SELECT passSalt FROM Staff WHERE StaffID='{current_user.id}';""")
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("User not found")
+        return render_template("change_reset_password.html", msg="Server Error")
+    else:
+        salt = result[0]
+    
+    if cleanedNewPassword != cleanedConfirmNewPassword:
+        connection.close()
+        print("New password and confirm new password aren't the same")
+        return render_template("change_reset_password.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
+    
+    cursor.execute(f"""UPDATE Staff SET PassHash = '{hash_function.hash_variable(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
+    connection.commit()
+    
+    userDetails = current_user.get_user_dictionary()
+    userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
+    logout_user()
+    login_user(User(userDetails), remember=False)
+    print("Changed Password")
+    return redirect(url_for('dashboard'))
 
 @app.route('/dashboard', methods=['GET'])
 @login_required
@@ -1153,6 +1228,10 @@ def base_css():
 @app.route('/static/css/login.css')
 def login_css():
     return send_file('static//css//login.css')
+
+@app.route('/static/css/change_reset_password.css')
+def change_reset_password_css():
+    return send_file('static//css//change_reset_password.css')
 
 @app.route('/static/css/dashboard.css')
 def dashboard_css():
