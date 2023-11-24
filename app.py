@@ -1187,6 +1187,7 @@ def edit_staff(staffEmail):
                 print("User is trying to remove last admin")
                 return render_template("edit_staff.html", data=data, msg="There must always be at least one admin account active", entry=["admin"])
         
+        cursor.execute(f"""SELECT StaffID, Passhash, PassSalt FROM Staff WHERE Email='{cleanedEmail}';""")
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -1194,9 +1195,9 @@ def edit_staff(staffEmail):
             return redirect(url_for("search_staff"))
         
         if resetPassword == "True":
-            passHash = hash_function.hash_variable("ChangeMe", result[1])
+            passHash = hash_function.hash_variable("ChangeMe", result[2])
         else:
-            passHash = result[0]
+            passHash = result[1]
 
         if deleteAccount == "True":
             enabled = "False"
@@ -1215,6 +1216,13 @@ def edit_staff(staffEmail):
             data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
             return render_template("create_staff.html", data=data, msg="Server Error")
         
+        if current_user.id == result[0]:
+            userDetails = current_user.get_user_dictionary()
+            logout_user()
+            login_user(User(userDetails), remember=False)
+        
+        if current_user.get_user_dictionary()["admin"] == "False":
+            return redirect(url_for("dashboard"))
         data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
         return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg=f"Successfully updated {staffEmail}'s account")
 
