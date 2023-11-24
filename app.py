@@ -991,7 +991,7 @@ def search_staff():
 
 @app.route('/app/users/staff/edit/<string:staffEmail>', methods=['GET', 'POST'])
 @login_required
-def edit_staff(staffEmail):# TODO
+def edit_staff(staffEmail):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
@@ -1028,79 +1028,98 @@ def edit_staff(staffEmail):# TODO
         return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg="")
     
     elif request.method == 'POST':
-        return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg=f"Successfully updated {staffEmail}")
-# <form class="edit-staff-form" method="POST" action="{{url_for('edit_staff', staffEmail=staffEmail)}}">
-    # <p class="title">
-    #     Edit a staff account
-    # </p>
-    # <div class="text-entries">
-    #     <div id="email">
-    #         <label for="email">Email Address:</label>
-    #         <input type="email" name="email" placeholder="Email" autofocus="" value="{{data[3]}}" required>
-    #     </div>
-    #     <div id="title">
-    #         <label for="title">Title:</label>
-    #         <input type="text" name="title" placeholder="Title (eg: Mr)" value="{{data[2]}}" required>
-    #     </div>
-    #     <div id="first-name">
-    #         <label for="first-name">First Name:</label>
-    #         <input type="text" name="first-name" placeholder="First Name" value="{{data[0]}}" required>
-    #     </div>
-    #     <div id="last-name">
-    #         <label for="last-name">Last Name:</label>
-    #         <input type="text" name="last-name" placeholder="Last Name" value="{{data[1]}}" required>
-    #     </div>
-    # </div>
+        email = request.form.get('email')
+        title = request.form.get('title')
+        firstName = request.form.get('first-name')
+        lastName = request.form.get('last-name')
+        senco = request.form.get('senco')
+        safeguarding = request.form.get('safeguarding')
+        admin = request.form.get('admin')
+        enabled = request.form.get('enabled')
+        resetPassword = request.form.get('password')
+        deleteAccount = request.form.get('delete')
+        
+        if senco != "True":
+            senco = "False"
+        
+        if safeguarding != "True":
+            safeguarding = "False"
+        
+        if admin != "True":
+            admin = "False"
+        
+        if enabled != "True":
+            enabled = "False"
+        
+        if resetPassword != "True":
+            resetPassword = "False"
+        
+        if deleteAccount != "True":
+            deleteAccount = "False"
+        
+        cleanedEmail = entry_cleaner(email, "email")
+        if cleanedEmail != email:
+            print("Invalid email")
+            data = [firstName, lastName, title, email, enabled, senco, safeguarding, admin]
+            return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg="Email is invalid", entry=["email"])
+        del email
+        
+        cleanedFName = entry_cleaner(firstName, "sql")
+        if cleanedFName != firstName:
+            print("Invalid first name")
+            data = [firstName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
+            return render_template("edit_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
+        del firstName
+        
+        cleanedLName = entry_cleaner(lastName, "sql")
+        if cleanedLName != lastName:
+            print("Invalid last name")
+            data = [cleanedFName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
+            return render_template("edit_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
+        del lastName
+        
+        cleanedTitle = entry_cleaner(title, "sql")
+        if cleanedTitle != title:
+            print("Invalid title")
+            data = [cleanedFName, cleanedLName, title, cleanedEmail, enabled, senco, safeguarding, admin]
+            return render_template("edit_staff.html", data=data, msg="Title is invalid", entry=["title"])
+        del title
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        
+        cursor.execute(f"""SELECT Passhash, PassSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Target user not found")
+            return redirect(url_for("search_staff"))
+        
+        if resetPassword == "True":
+            passHash = hash_function.hash_variable("ChangeMe", result[1])
+        else:
+            passHash = result[0]
 
-    # <div id="senco">
-    #     <label for="senco">SENCo team privileges:</label>
-    #     {% if data[5] == "True" %}
-    #         <input type="checkbox" name="senco" value="True" checked>
-    #     {% else %}
-    #         <input type="checkbox" name="senco" value="True">
-    #     {% endif %}
-    # </div>
-    # <div id="safeguarding">
-    #     <label for="safeguarding">Safeguarding team privileges:</label>
-    #     {% if data[6] == "True" %}
-    #         <input type="checkbox" name="safeguarding" value="True" checked>
-    #     {% else %}
-    #         <input type="checkbox" name="safeguarding" value="True">
-    #     {% endif %}
-    # </div>
-    # <div id="admin">
-    #     <label for="admin">Admin team privileges:</label>
-    #     {% if data[7] == "True" %}
-    #         <input type="checkbox" name="admin" value="True" checked>
-    #     {% else %}
-    #         <input type="checkbox" name="admin" value="True">
-    #     {% endif %}
-    # </div>
-    # <div id="enabled">
-    #     <label for="enabled">Enable account:</label>
-    #     {% if data[4] == "True" %}
-    #         <input type="checkbox" name="enabled" value="True" checked>
-    #     {% else %}
-    #         <input type="checkbox" name="enabled" value="True">
-    #     {% endif %}
-    # </div>
-    # <div id="password">
-    #     <label for="password">Reset password:</label>
-    #     <input type="checkbox" name="password" value="True">
-    # </div>
-    # {% if data[7] == "False" %}
-    #     <div id="delete">
-    #         <label for="delete">Delete account:</label>
-    #         <input type="checkbox" name="delete" value="True">
-    #     </div>
-    # {% else %}
-    #     <div class="delete">
-    #         <p>To delete an admin account, first remove their admin status</p>
-    #     </div>
-    # {% endif %}
-    # <div id="submit">
-    #     <button>Save</button>
-    # </div>
+        if deleteAccount == "True":
+            enabled = "False"
+            archived = "True"
+        else:
+            archived = "False"
+        
+        try:
+            cursor.execute("""UPDATE Staff SET FirstName = ?, Lastname = ?, Title = ?, Email = ?, AccountEnabled = ?, AccountArchived = ?, PassHash = ?, PassSalt = ?, SENCo = ?, Safeguarding = ?, Admin = ? WHERE Email = ?
+                           """, (cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, archived, passHash, result[1], senco, safeguarding, admin, cleanedEmail)
+                           )
+            connection.commit()
+        except sqlite3.IntegrityError:
+            print("Failed CHECK constraint")
+            connection.close()
+            data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
+            return render_template("create_staff.html", data=data, msg="Server Error")
+        
+        data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
+        return render_template("edit_staff.html", staffEmail=cleanedEmail, data=data, msg=f"Successfully updated {staffEmail}'s account")
+
 @app.route('/app/settings', methods=['GET'])
 @login_required
 def app_settings():# TODO
