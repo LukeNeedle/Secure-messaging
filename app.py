@@ -335,13 +335,11 @@ def generate_data_for_student_link(studentID, staffEmail):
     
     if result == None:
         print("No relationship found")
-        relationship = ""
-        linked = False
+        relationship = "None"
     else:
         relationship = str(result[0])
-        linked = True
     connection.close()
-    return studentData, staffDetails, linked, studentID, staffEmail, relationship
+    return studentData, staffDetails, studentID, staffEmail, relationship
 
 
 #########################################################################
@@ -1746,25 +1744,21 @@ def edit_staff_student_relationships(studentID, staffEmail):
         
         if result == None:
             print("No relationship found")
-            relationship = ""
-            linked = False
+            relationship = "None"
         else:
             relationship = str(result[0])
-            linked = True
         
-        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="")
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="")
     
     relationship = request.form.get('relationship')
-    linked = request.form.get('linked')
-
-    if linked != "True":
-        linked = "False"
     
     if relationship in [1, 2, 3, 0, "1", "2", "3", "0"]:
         cleanedRelationship = int(relationship)
+    elif relationship == "None":
+        cleanedRelationship = "None"
     else:
-        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Invalid Relationship")
+        studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Invalid Relationship")
     del relationship
 
     connection = sqlite3.connect("database.db")
@@ -1785,36 +1779,32 @@ def edit_staff_student_relationships(studentID, staffEmail):
     result = cursor.fetchone()
     if result == None:
         print("No relationship found")
-        relationship = ""
+        relationship = "None"
         result = [""]
-        originalLinked = "False"
     else:
         relationship = result[1]
-        originalLinked = "True"
     
-    if linked == originalLinked and linked == "False":
+    if relationship == cleanedRelationship:
         print("No change")
         connection.close()
-        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="No change detected")
-    elif linked != originalLinked and linked == "False":
+        studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="No change detected")
+    elif relationship != "None" and cleanedRelationship == "None":
         if result[0] == "":
-            print(1)
             connection.close()
-            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+            studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
         cursor.execute("DELETE FROM StudentRelationship WHERE RelationshipID = ?;"
                     , (result[0], ))
         connection.commit()
         connection.close()
-        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Link removed", entry="submit")
-    elif linked == originalLinked and linked == "True":
+        studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Link removed", entry="submit")
+    elif relationship != "None" and cleanedRelationship != "None":
         if result[0] == "":
-            print(2)
             connection.close()
-            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+            studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
         try:
             cursor.execute("UPDATE StudentRelationship SET StudentID = ?, StaffID = ?, Relationship = ? WHERE RelationshipID = ?"
                            , (
@@ -1828,9 +1818,9 @@ def edit_staff_student_relationships(studentID, staffEmail):
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             connection.close()
-            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
-    elif linked != originalLinked and linked == "True":
+            studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+    elif relationship == "None" and cleanedRelationship != "None":
         try:
             cursor.execute("INSERT INTO StudentRelationship(StudentID, StaffID, Relationship) VALUES (?, ?, ?);"
                            , (
@@ -1844,16 +1834,16 @@ def edit_staff_student_relationships(studentID, staffEmail):
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             connection.close()
-            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Link removed", entry="submit")
+            studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Link removed", entry="submit")
     else:
-        print(3)
         connection.close()
-        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+        studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+    
     connection.close()
-    studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
-    return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Sucessfully updated", entry="submit")
+    studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+    return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Sucessfully updated", entry="submit")
 
 @app.route('/app/settings', methods=['GET'])
 @login_required

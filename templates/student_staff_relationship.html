@@ -42,21 +42,13 @@
             </div>
         </div>
         
-        <div id="linked">
-            <label for="linked">Linked?:</label>
-            {% if linked %}
-                <input type="checkbox" name="linked" value="True" checked>
-            {% else %}
-                <input type="checkbox" name="linked" value="True">
-            {% endif %}
-        </div>
         <div id="relationship">
             <p class="label">Relationship:</p>
             <select name="relationship" required>
-                {% if relationship == "" %}
-                    <option value="_" selected disabled>Choose One</option>
+                {% if relationship == "None" %}
+                    <option value="None" selected>No relationship</option>
                 {% else %}
-                    <option value="_" disabled>Choose One</option>
+                    <option value="None">No relationship</option>
                 {% endif %}
 
                 {% if relationship == "1" %}
@@ -83,7 +75,6 @@
                     <option value="0">Other</option>
                 {% endif %}
             </select>
-            <p class="hint">Hint: To create a relationship, tick Linked? and select a relationship.</p>
         </div>
         <div id="submit">
             <button>Save</button>
