@@ -282,15 +282,13 @@ def check_for_reset_password():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute("SELECT AccountEnabled FROM Staff WHERE StaffID=?;"
-                       , (current_user.id))
+        cursor.execute(f"SELECT AccountEnabled FROM Staff WHERE StaffID={current_user.id};")
         result = cursor.fetchone()
         if result[0] == "False":
             logout_user()
             return redirect(url_for('login'))
         
-        cursor.execute("SELECT PassHash, PassSalt FROM Staff WHERE StaffID=?;"
-                       , (current_user.id))
+        cursor.execute(f"SELECT PassHash, PassSalt FROM Staff WHERE StaffID={current_user.id};")
         result = cursor.fetchone()
         connection.close()
         if hash_function.hash_variable("ChangeMe", result[1]) == result[0] and request.path != "/ChangePassword" and pathDot != ".":
@@ -456,8 +454,7 @@ def reset_password():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute("SELECT PassHash, PassSalt FROM Staff WHERE StaffID=?;"
-                       , (current_user.id))
+        cursor.execute(f"SELECT PassHash, PassSalt FROM Staff WHERE StaffID={current_user.id};")
         result = cursor.fetchone()
         connection.close()
         if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
@@ -489,8 +486,7 @@ def reset_password():
     cursor = connection.cursor()
     
     # Getting user's password salt  
-    cursor.execute("SELECT passSalt FROM Staff WHERE StaffID=?;"
-                   , (current_user.id))
+    cursor.execute(f"SELECT passSalt FROM Staff WHERE StaffID={current_user.id};")
     result = cursor.fetchone()
     if result == None:
         connection.close()
@@ -504,11 +500,12 @@ def reset_password():
         print("New password and confirm new password aren't the same")
         return render_template("change_reset_password.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
     
-    cursor.execute("UPDATE Staff SET PassHash = ? WHERE StaffID = ?;"
+    cursor.execute(f"UPDATE Staff SET PassHash = ? WHERE StaffID = {current_user.id};"
                    , (hash_function.hash_variable(
                        cleanedNewPassword,
-                       salt),
-                      current_user.id))
+                       salt)
+                      )
+                   )
     connection.commit()
     
     userDetails = current_user.get_user_dictionary()
@@ -544,8 +541,7 @@ def messages_inbox():
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM Messages WHERE RecipientID=? and Archived='False';"
-                   , (current_user.id))
+    cursor.execute(f"SELECT * FROM Messages WHERE RecipientID={current_user.id} and Archived='False';")
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         return render_template("inbox.html", msg="empty")
@@ -913,8 +909,7 @@ def user_settings():
         cursor = connection.cursor()
 
         # Checking email
-        cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                       , (current_user.id))
+        cursor.execute(f"SELECT Email FROM Staff WHERE StaffID={current_user.id};")
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -956,11 +951,10 @@ def user_settings():
             print("New password and confirm new password aren't the same")
             return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
         
-        cursor.execute("UPDATE Staff SET PassHash = ? WHERE StaffID = ?;"
+        cursor.execute(f"UPDATE Staff SET PassHash = ? WHERE StaffID = {current_user.id};"
                        , (hash_function.hash_variable(
                            cleanedNewPassword,
                            salt),
-                          current_user.id
                           )
                        )
         connection.commit()
