@@ -292,6 +292,57 @@ def check_for_reset_password():
             print("User needs to change password")
             return redirect(url_for('reset_password'))
 
+def generate_data_for_student_link(studentID, staffEmail):
+    """
+    Generates all of the data needed for student linking, this is a separate function as it needs to run at different points and it is quite long.
+
+    Args:
+        cleanedID (string): The student's ID.
+        cleanedEmail (string): The staff member's email address.
+
+    Returns:
+        tuple: studentData, staffDetails, linked, studentID, staffEmail, relationship
+    """
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
+                       , (studentID, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("Target user not found")
+        return redirect(url_for("staff_student_relationships_lookup"))
+    
+    studentData = [
+        f"{result[0]} {result[1]}", #Name
+        result[2]                   #DateOfBirth
+    ]
+    
+    cursor.execute("SELECT StaffID, FirstName, LastName, Title, Email FROM Staff WHERE Email=? and AccountArchived='False';"
+                    , (staffEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("Target user not found")
+        return redirect(url_for("staff_student_relationships_lookup"))
+    
+    staffDetails = f"{result[3]} {result[1]} {result[2]}: {result[4]}"
+    
+    cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID = ? AND StaffID = ?;"
+                    , (studentID, result[0]))
+    result = cursor.fetchone()
+    
+    if result == None:
+        print("No relationship found")
+        relationship = ""
+        linked = False
+    else:
+        relationship = str(result[0])
+        linked = True
+    connection.close()
+    return studentData, staffDetails, linked, studentID, staffEmail, relationship
+
 
 #########################################################################
 #########################################################################
@@ -1575,6 +1626,36 @@ def staff_student_relationships_lookup():
     
     return render_template("staff_student_relationships_lookup.html", names=names)
 
+@app.route('/app/users/students/Links/All', methods=['GET'])
+def view_all_student_staff_relationships():
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT Students.StudentID, Staff.StaffID, StudentRelationship.Relationship FROM StudentRelationship INNER JOIN Students ON StudentRelationship.StudentID = Students.StudentID INNER JOIN Staff ON StudentRelationship.StaffID = Staff.StaffID")
+    relationships = cursor.fetchall()
+    data = []
+    for row in relationships:
+        cursor.execute("SELECT Firstname, LastName FROM Students WHERE StudentID=?", (row[0], ))
+        studentData = cursor.fetchone()
+        cursor.execute("SELECT Firstname, LastName, Title FROM Staff WHERE StaffID=?", (row[1], ))
+        staffData = cursor.fetchone()
+        relationshipTypes = {
+            0: "other relationship",
+            1: "teacher",
+            2: "form tutor",
+            3: "head of year"
+        }
+        data.append(f"{studentData[0]} {studentData[1]} is the {relationshipTypes[row[2]]} of {staffData[2]} {staffData[0]} {staffData[1]}")
+    
+    print(data)
+    connection.close()
+    return render_template("all_student_staff_relationships.html", data=data)
+
 @app.route('/app/users/students/Links/<string:studentID>', methods=['GET', 'POST'])
 @login_required
 def staff_student_relationships(studentID):
@@ -1612,6 +1693,167 @@ def staff_student_relationships(studentID):
     
     return render_template("staff_student_relationships.html", studentID=cleanedID, emails=emails)
 
+@app.route('/app/users/students/Links/<string:studentID>/<string:staffEmail>', methods=['GET', 'POST'])
+def edit_staff_student_relationships(studentID, staffEmail):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    cleanedID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedID:
+        print("Invalid ID")
+        return redirect(url_for("staff_student_relationships_lookup"))
+    del studentID
+    
+    cleanedEmail = entry_cleaner(staffEmail, "sql")
+    if staffEmail != cleanedEmail:
+        print("Invalid ID")
+        return redirect(url_for("staff_student_relationships_lookup"))
+    del staffEmail
+    
+    if request.method == 'GET':
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        
+        cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
+                       , (cleanedID, ))
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Target user not found")
+            return redirect(url_for("staff_student_relationships_lookup"))
+        
+        studentData = [
+            f"{result[0]} {result[1]}",
+            result[2]
+        ]
+        
+        cursor.execute("SELECT StaffID, FirstName, LastName, Title, Email FROM Staff WHERE Email=? and AccountArchived='False';"
+                       , (cleanedEmail, ))
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Target user not found")
+            return redirect(url_for("staff_student_relationships_lookup"))
+        
+        staffDetails = f"{result[3]} {result[1]} {result[2]}: {result[4]}"
+        
+        cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID = ? AND StaffID = ?;"
+                       , (cleanedID, result[0]))
+        result = cursor.fetchone()
+        connection.close()
+        
+        if result == None:
+            print("No relationship found")
+            relationship = ""
+            linked = False
+        else:
+            relationship = str(result[0])
+            linked = True
+        
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="")
+    
+    relationship = request.form.get('relationship')
+    linked = request.form.get('linked')
+
+    if linked != "True":
+        linked = "False"
+    
+    if relationship in [1, 2, 3, 0, "1", "2", "3", "0"]:
+        cleanedRelationship = int(relationship)
+    else:
+        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Invalid Relationship")
+    del relationship
+
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT StaffID FROM Staff WHERE Email=? and AccountArchived='False';"
+                   , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("Target user not found")
+        return redirect(url_for("staff_student_relationships_lookup"))
+    else:
+        staffID = result[0]
+    
+    cursor.execute("SELECT RelationshipID, Relationship FROM StudentRelationship WHERE StudentID = ? AND StaffID = ?;"
+                   , (cleanedID, staffID))
+    result = cursor.fetchone()
+    if result == None:
+        print("No relationship found")
+        relationship = ""
+        result = [""]
+        originalLinked = "False"
+    else:
+        relationship = result[1]
+        originalLinked = "True"
+    
+    if linked == originalLinked and linked == "False":
+        print("No change")
+        connection.close()
+        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="No change detected")
+    elif linked != originalLinked and linked == "False":
+        if result[0] == "":
+            print(1)
+            connection.close()
+            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+        cursor.execute("DELETE FROM StudentRelationship WHERE RelationshipID = ?;"
+                    , (result[0], ))
+        connection.commit()
+        connection.close()
+        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Link removed", entry="submit")
+    elif linked == originalLinked and linked == "True":
+        if result[0] == "":
+            print(2)
+            connection.close()
+            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+        try:
+            cursor.execute("UPDATE StudentRelationship SET StudentID = ?, StaffID = ?, Relationship = ? WHERE RelationshipID = ?"
+                           , (
+                               cleanedID,
+                               staffID,
+                               cleanedRelationship,
+                               result[0]
+                               )
+                           )
+            connection.commit()
+        except sqlite3.IntegrityError:
+            print("Failed CHECK constraint")
+            connection.close()
+            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+    elif linked != originalLinked and linked == "True":
+        try:
+            cursor.execute("INSERT INTO StudentRelationship(StudentID, StaffID, Relationship) VALUES (?, ?, ?);"
+                           , (
+                               cleanedID,
+                               staffID,
+                               cleanedRelationship
+                               )
+                           )
+            
+            connection.commit()
+        except sqlite3.IntegrityError:
+            print("Failed CHECK constraint")
+            connection.close()
+            studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Link removed", entry="submit")
+    else:
+        print(3)
+        connection.close()
+        studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Unknown Error Occurred")
+    connection.close()
+    studentData, staffDetails, linked, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+    return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, linked=linked, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Sucessfully updated", entry="submit")
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
@@ -1726,6 +1968,10 @@ def staff_student_relationships_css():
 @app.route('/static/css/student_staff_relationship.css')
 def student_staff_relationship_css():
     return send_file('static//css//student_staff_relationship.css')
+
+@app.route('/static/css/all_student_staff_relationships.css')
+def all_student_staff_relationships_css():
+    return send_file('static//css//all_student_staff_relationships.css')
 
 @app.route('/static/css/under_construction.css')
 def under_construction_css():

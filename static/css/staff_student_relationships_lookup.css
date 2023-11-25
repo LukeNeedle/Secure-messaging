@@ -102,3 +102,17 @@ button {
     font-size: larger;
     cursor: pointer;
 }
+
+.view-all{
+    margin-top: 3%;
+}
+.view-all a{
+    text-decoration: underline;
+    cursor: pointer;
+    color: #0000EE;
+}
+.view-all a:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    color: hsla(240, 100%, 47%, 0.788);
+}

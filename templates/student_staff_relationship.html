@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('student_staff_relationship_css')}}">
+
+{% if msg != "" %}
+    {% if entry == "submit" %}
+        <style>
+            #submit button{
+                background-color: #008000;
+            }
+            p.message{
+                color: #008000;
+            }
+        </style>
+    {% endif %}
+    <p class="message">
+        {{msg}}
+    </p>
+{% endif %}
+
+<div class="link-staff-to-students">
+    <div class="back">
+        <a href="{{url_for('staff_student_relationships_lookup')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <form class="linking-form" method="POST" action="{{url_for('edit_staff_student_relationships', studentID=studentID, staffEmail=staffEmail)}}">
+        <p class="title">
+            Account Linking
+        </p>
+        <div class="static">
+            <div id="staff">
+                <p class="label">Staff Member:</p>
+                <input type="text" name="staff" value="{{staffDetails}}" disabled>
+            </div>
+            <div id="student">
+                <p class="label">Student:</p>
+                <input type="text" name="student-name" value="{{studentData[0]}}" disabled>
+                <input type="date" name="student-dob" value="{{studentData[1]}}" disabled>
+            </div>
+        </div>
+        
+        <div id="linked">
+            <label for="linked">Linked?:</label>
+            {% if linked %}
+                <input type="checkbox" name="linked" value="True" checked>
+            {% else %}
+                <input type="checkbox" name="linked" value="True">
+            {% endif %}
+        </div>
+        <div id="relationship">
+            <p class="label">Relationship:</p>
+            <select name="relationship" required>
+                {% if relationship == "" %}
+                    <option value="_" selected disabled>Choose One</option>
+                {% else %}
+                    <option value="_" disabled>Choose One</option>
+                {% endif %}
+
+                {% if relationship == "1" %}
+                    <option value="1" selected>Teacher</option>
+                {% else %}
+                    <option value="1">Teacher</option>
+                {% endif %}
+                
+                {% if relationship == "2" %}
+                    <option value="2" selected>Form Tutor</option>
+                {% else %}
+                    <option value="2">Form Tutor</option>
+                {% endif %}
+
+                {% if relationship == "3" %}
+                    <option value="3" selected>Head of Year</option>
+                {% else %}
+                    <option value="3">Head of Year</option>
+                {% endif %}
+
+                {% if relationship == "0" %}
+                    <option value="0" selected>Other</option>
+                {% else %}
+                    <option value="0">Other</option>
+                {% endif %}
+            </select>
+            <p class="hint">Hint: To create a relationship, tick Linked? and select a relationship.</p>
+        </div>
+        <div id="submit">
+            <button>Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

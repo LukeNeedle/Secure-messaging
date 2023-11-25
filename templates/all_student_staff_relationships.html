@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('all_student_staff_relationships_css')}}">
+
+<div class="student">
+    <div class="back">
+        <a href="{{url_for('manage_users_students')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    
+    <p class="title">
+        All Student-Staff links
+    </p>
+    {% if data == [] %}
+        <p class="empty">
+            No links were found, <a href="{{url_for('staff_student_relationships_lookup')}}">Click Here</a> to create one.
+        </p>
+    {% else %}
+        {% for relationship in data %}
+            <p class="relationship">
+                {{relationship}}
+            </p>
+        {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}
