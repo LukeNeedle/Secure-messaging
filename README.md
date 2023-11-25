@@ -105,12 +105,12 @@ These objectives aren't in any particular order and they are only numbered to he
 | DateOfBirth  | The date of birth of the student           | 2023-11-24 | Text    | ❌          | -              | Not null         |
 
 ### StudentRelationship
-| Column         | Description                                            | Example | Type    | Primary Key | Foreign Key         | Constraints      |
-|----------------|--------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|:----------------:|
-| RelationshipID | The integer ID associated with the relationship        | 1       | Integer | ✅          | -                   | Not null, Unique |
-| StudentID      | The integer ID associated with the student             | 1       | Integer | ❌          | Students(StudentID) | Not null         |
-| StaffID        | The integer ID associated with the staff member        | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
-| Relationship   | The type of relationship: teacher, tutor, head of year | Tutor   | String  | ❌          | -                   | Not null         |
+| Column         | Description                                                              | Example | Type    | Primary Key | Foreign Key         | Constraints      |
+|----------------|--------------------------------------------------------------------------|:-------:|:-------:|:-----------:|:-------------------:|:----------------:|
+| RelationshipID | The integer ID associated with the relationship                          | 1       | Integer | ✅          | -                   | Not null, Unique |
+| StudentID      | The integer ID associated with the student                               | 1       | Integer | ❌          | Students(StudentID) | Not null         |
+| StaffID        | The integer ID associated with the staff member                          | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
+| Relationship   | The type of relationship: 1=teacher, 2=tutor, 3=head of year and 4=other | 1       | Integer  | ❌          | -                   | Not null         |
 
 ### Reporting
 | Column       | Description                                                          | Example | Type    | Primary Key | Foreign Key         | Constraints      |

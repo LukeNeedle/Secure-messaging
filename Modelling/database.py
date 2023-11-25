@@ -59,9 +59,10 @@ def create_tables():
 		"RelationshipID"	INTEGER NOT NULL UNIQUE,
 		"StudentID" STRING NOT NULL,
 		"StaffID"  STRING NOT NULL,
-		"Relationship"	STRING NOT NULL,
+		"Relationship"	INT NOT NULL,
 		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
 		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
+		CHECK ("Relationship"==1 OR "Relationship"==2 OR "Relationship"==3 OR "Relationship"==4),
 		PRIMARY KEY("RelationshipID" AUTOINCREMENT)
 	)""")
 	conn.commit()
