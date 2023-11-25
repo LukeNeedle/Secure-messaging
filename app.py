@@ -1584,7 +1584,7 @@ def staff_student_relationships_lookup():
 
 @app.route('/app/users/students/Links/<string:studentID>', methods=['GET', 'POST'])
 @login_required
-def staff_student_relationships(studentID):# TODO
+def staff_student_relationships(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
@@ -1594,29 +1594,14 @@ def staff_student_relationships(studentID):# TODO
     cleanedID = entry_cleaner(studentID, "sql")
     if studentID != cleanedID:
         print("Invalid ID")
-        return redirect(url_for("search_students"))
+        return redirect(url_for("staff_student_relationships_lookup"))
     del studentID
     
     if request.method == 'POST':
-        dataString = request.form.get('email-list')
-        if not dataString:
-            return redirect(url_for('search_students'))
-        
-        data = dataString.split("|")
-        if len(data) != 3:
-            return redirect(url_for('search_students'))
-        
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
-        cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
-                       , (data[0], data[1], data[2]))
-        result = cursor.fetchone()
-        if result == None:
-            print("No accounts found")
-            connection.close()
-            return redirect(url_for("search_students"))
-        else:
-            return redirect(url_for('edit_student', studentID=result[0]))
+        email = request.form.get('email-list')
+        if not email:
+            return redirect(url_for('staff_student_relationships_lookup'))
+        return redirect(url_for('edit_staff_student_relationships', studentID=cleanedID, staffEmail=email))
     
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -1627,15 +1612,13 @@ def staff_student_relationships(studentID):# TODO
         print("No accounts found")
         connection.close()
         return render_template("staff_student_relationships.html", msg="empty")
-    else:
-        data = result
     
     emails = []
-    for email in data:
+    for email in result:
         emails.append(email[0])
     
     return render_template("staff_student_relationships.html", studentID=cleanedID, emails=emails)
-    # return render_template("under_construction.html")
+
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
