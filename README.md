@@ -110,7 +110,7 @@ These objectives aren't in any particular order and they are only numbered to he
 | RelationshipID | The integer ID associated with the relationship                          | 1       | Integer | ✅          | -                   | Not null, Unique |
 | StudentID      | The integer ID associated with the student                               | 1       | Integer | ❌          | Students(StudentID) | Not null         |
 | StaffID        | The integer ID associated with the staff member                          | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
-| Relationship   | The type of relationship: 1=teacher, 2=tutor, 3=head of year and 4=other | 1       | Integer  | ❌          | -                   | Not null         |
+| Relationship   | The type of relationship: 1=teacher, 2=tutor, 3=head of year and 0=other | 1       | Integer  | ❌          | -                   | Not null         |
 
 ### Reporting
 | Column       | Description                                                          | Example | Type    | Primary Key | Foreign Key         | Constraints      |

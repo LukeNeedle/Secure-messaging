@@ -62,7 +62,7 @@ def create_tables():
 		"Relationship"	INT NOT NULL,
 		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
 		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
-		CHECK ("Relationship"==1 OR "Relationship"==2 OR "Relationship"==3 OR "Relationship"==4),
+		CHECK ("Relationship"==1 OR "Relationship"==2 OR "Relationship"==3 OR "Relationship"==0),
 		PRIMARY KEY("RelationshipID" AUTOINCREMENT)
 	)""")
 	conn.commit()
