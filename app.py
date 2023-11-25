@@ -94,24 +94,37 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
     for file in attachments:
         filePath = f"uploads/{senderID}/{timeStamp}/{file.filename}"
         tempURL = str(uuid.uuid4())
-        cursor.execute(f"""INSERT INTO Files(OwnerID, Origin, FilePath, HashedUrl, TimeStamp)
-                       VALUES (?, ?, ?, ?, ?);
-                       """, (senderID, f'M+{messageID}', filePath, tempURL, timeStamp))
+        cursor.execute("""INSERT INTO Files(OwnerID, Origin, FilePath, HashedUrl, TimeStamp)
+                       VALUES (?, ?, ?, ?, ?);"""
+                       , (
+                           senderID,
+                           f'M+{messageID}',
+                           filePath,
+                           tempURL,
+                           timeStamp
+                           )
+                       )
         connection.commit()
         
-        cursor.execute(f"""SELECT FileID FROM Files
-                    WHERE OwnerID=? and Origin=? and FilePath=? and HashedUrl=? and TimeStamp=?;
-                    """, (senderID, f'M+{messageID}', filePath, tempURL, timeStamp))
+        cursor.execute("""SELECT FileID FROM Files
+                       WHERE OwnerID=? and Origin=? and FilePath=? and HashedUrl=? and TimeStamp=?;"""
+                       , (
+                           senderID,
+                           f'M+{messageID}',
+                           filePath,
+                           tempURL,
+                           timeStamp
+                           )
+                       )
         result = cursor.fetchone()
         
         with open("secrets.json", "r") as f:
-            cursor.execute(f"""UPDATE Files SET HashedUrl = ? WHERE FileID = ?;
-                            """, (encryption.substitution_encrypt(
-                                plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
-                                key=json.load(f)['UrlKey']),
-                                str(result)
-                                )
-                            )
+            cursor.execute("""UPDATE Files SET HashedUrl = ?
+                           WHERE FileID = ?;"""
+                           , (encryption.substitution_encrypt(
+                               plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                               key=json.load(f)['UrlKey']),
+                              str(result)))
         connection.commit()
         file.save(filePath)
 # Objective 4 completed
@@ -186,16 +199,31 @@ def send_read_receipt(data):
     
     try:
         cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
-                    VALUES (?, ?, ?, ?, ?, 'False', 'False', ?);
-                    """, (data[2], data[1], cleanedEncryptedMessage, str(uuid.uuid4()), timeStamp, key))
+                       VALUES (?, ?, ?, ?, ?, 'False', 'False', ?);"""
+                       , (
+                           data[2],
+                           data[1],
+                           cleanedEncryptedMessage,
+                           str(uuid.uuid4()),
+                           timeStamp,
+                           key
+                           )
+                       )
         connection.commit()
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
         return
     
-    cursor.execute(f"""SELECT MessageID FROM Messages
-                    WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and Key=?;
-                    """, (data[2], data[1], cleanedEncryptedMessage, timeStamp, key))
+    cursor.execute("""SELECT MessageID FROM Messages
+                   WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and Key=?;"""
+                   , (
+                       data[2],
+                       data[1],
+                       cleanedEncryptedMessage,
+                       timeStamp,
+                       key
+                       )
+                   )
     result = cursor.fetchone()
 
     if result == None:
@@ -206,15 +234,16 @@ def send_read_receipt(data):
         messageID = result[0]
     
     with open("secrets.json", "r") as f:
-        cursor.execute(f"""UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;
-                        """, (encryption.substitution_encrypt(
-                            plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
-                            key=json.load(f)['UrlKey']),
-                            messageID
-                            ))
+        cursor.execute("""UPDATE Messages SET HashedUrl = ?
+                       WHERE MessageID = ?;"""
+                       , (encryption.substitution_encrypt(
+                           plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                           key=json.load(f)['UrlKey']),
+                          messageID))
         connection.commit()
     
-    cursor.execute(f"""UPDATE Messages SET ReadReceipts='False' WHERE MessageID='{data[0]}';""")
+    cursor.execute("UPDATE Messages SET ReadReceipts='False' WHERE MessageID=?;"
+                   , (data[0]))
     connection.commit()
     connection.close()
 # Objective 8 completed
@@ -253,13 +282,15 @@ def check_for_reset_password():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute(f"""SELECT AccountEnabled FROM Staff WHERE StaffID='{current_user.id}';""")
+        cursor.execute("SELECT AccountEnabled FROM Staff WHERE StaffID=?;"
+                       , (current_user.id))
         result = cursor.fetchone()
         if result[0] == "False":
             logout_user()
             return redirect(url_for('login'))
         
-        cursor.execute(f"""SELECT PassHash, PassSalt FROM Staff WHERE StaffID='{current_user.id}';""")
+        cursor.execute("SELECT PassHash, PassSalt FROM Staff WHERE StaffID=?;"
+                       , (current_user.id))
         result = cursor.fetchone()
         connection.close()
         if hash_function.hash_variable("ChangeMe", result[1]) == result[0] and request.path != "/ChangePassword" and pathDot != ".":
@@ -291,10 +322,12 @@ def user_loader(email):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
-    cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+    cursor.execute("SELECT * FROM Staff WHERE Email=?;"
+                   , (cleanedEmail))
     result = cursor.fetchone()
     if result == None:
-        cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{cleanedEmail}';""")
+        cursor.execute("SELECT * FROM Staff WHERE StaffID=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -359,7 +392,8 @@ def login():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         
-        cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -368,7 +402,8 @@ def login():
         else:
             passHash = result[0]
         
-        cursor.execute(f"""SELECT PassSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT PassSalt FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -382,7 +417,8 @@ def login():
             print("Password doesn't match stored password")
             return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
         
-        cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT * FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         connection.close()
         if result == None:
@@ -420,7 +456,8 @@ def reset_password():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute(f"""SELECT PassHash, PassSalt FROM Staff WHERE StaffID='{current_user.id}';""")
+        cursor.execute("SELECT PassHash, PassSalt FROM Staff WHERE StaffID=?;"
+                       , (current_user.id))
         result = cursor.fetchone()
         connection.close()
         if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
@@ -452,7 +489,8 @@ def reset_password():
     cursor = connection.cursor()
     
     # Getting user's password salt  
-    cursor.execute(f"""SELECT passSalt FROM Staff WHERE StaffID='{current_user.id}';""")
+    cursor.execute("SELECT passSalt FROM Staff WHERE StaffID=?;"
+                   , (current_user.id))
     result = cursor.fetchone()
     if result == None:
         connection.close()
@@ -466,7 +504,11 @@ def reset_password():
         print("New password and confirm new password aren't the same")
         return render_template("change_reset_password.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"])
     
-    cursor.execute(f"""UPDATE Staff SET PassHash = '{hash_function.hash_variable(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
+    cursor.execute("UPDATE Staff SET PassHash = ? WHERE StaffID = ?;"
+                   , (hash_function.hash_variable(
+                       cleanedNewPassword,
+                       salt),
+                      current_user.id))
     connection.commit()
     
     userDetails = current_user.get_user_dictionary()
@@ -502,7 +544,8 @@ def messages_inbox():
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
-    cursor.execute(f"""SELECT * FROM Messages WHERE RecipientID='{current_user.id}' and Archived='False';""")
+    cursor.execute("SELECT * FROM Messages WHERE RecipientID=? and Archived='False';"
+                   , (current_user.id))
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         return render_template("inbox.html", msg="empty")
@@ -514,7 +557,8 @@ def messages_inbox():
     for message in messages:
         tempResponse = [message[1]]
         
-        cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{message[1]}';""")
+        cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                       , (message[1]))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -528,7 +572,8 @@ def messages_inbox():
             f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
             )
         
-        cursor.execute(f"""SELECT HashedUrl FROM Messages WHERE MessageID='{message[0]}';""")
+        cursor.execute("SELECT HashedUrl FROM Messages WHERE MessageID=?;"
+                       , (message[0]))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -591,7 +636,8 @@ def messages_compose():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute(f"""SELECT StaffID FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT StaffID FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             print("Invalid email")
@@ -647,17 +693,34 @@ def messages_compose():
 
         try:
             cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
-                        VALUES (?, ?, ?, ?, ?, ?, 'False', ?);
-                        """, (currentUser["id"], recipientID, cleanedEncryptedMessage, str(uuid.uuid4()), timeStamp, str(readReceipts), key))
+                           VALUES (?, ?, ?, ?, ?, ?, 'False', ?);"""
+                           , (
+                               currentUser["id"],
+                               recipientID,
+                               cleanedEncryptedMessage,
+                               str(uuid.uuid4()),
+                               timeStamp,
+                               str(readReceipts),
+                               key
+                               )
+                           )
             connection.commit()
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             data = [cleanedEmail, message, readReceipts]
             return render_template("compose.html", data=data, msg="Server Error")
         
-        cursor.execute(f"""SELECT MessageID FROM Messages
-                        WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and ReadReceipts=? and Key=?;
-                        """, (currentUser["id"], recipientID, cleanedEncryptedMessage, timeStamp, str(readReceipts), key))
+        cursor.execute("""SELECT MessageID FROM Messages
+                       WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and ReadReceipts=? and Key=?;"""
+                       , (
+                           currentUser["id"],
+                           recipientID,
+                           cleanedEncryptedMessage,
+                           timeStamp,
+                           str(readReceipts),
+                           key
+                           )
+                       )
         result = cursor.fetchone()
 
         if result == None:
@@ -669,12 +732,11 @@ def messages_compose():
             messageID = result[0]
         
         with open("secrets.json", "r") as f:
-            cursor.execute(f"""UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;
-                            """, (encryption.substitution_encrypt(
-                                plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
-                                key=json.load(f)['UrlKey']),
-                                messageID
-                                ))
+            cursor.execute("UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;"
+                           , (encryption.substitution_encrypt(
+                               plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                               key=json.load(f)['UrlKey']),
+                              messageID))
             connection.commit()
         
         connection.close()
@@ -693,7 +755,8 @@ def preview_message(encryptedMessageID):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
-    cursor.execute(f"""SELECT MessageID FROM Messages WHERE HashedUrl='{encryptedMessageID}';""")
+    cursor.execute("SELECT MessageID FROM Messages WHERE HashedUrl=?;"
+                   , (encryptedMessageID))
     result = cursor.fetchone()
     if result == None:
         print("URL not found")
@@ -703,13 +766,13 @@ def preview_message(encryptedMessageID):
         messageID = result[0]
     
     if request.method == 'POST':
-        cursor.execute(f"""UPDATE Messages SET Archived='True' WHERE MessageID='{messageID}';""")
+        cursor.execute("UPDATE Messages SET Archived='True' WHERE MessageID=?;"
+                       , (messageID))
         connection.commit()
         print("Message archived")
         connection.close()
         return redirect(url_for('messages_inbox'))
     
-    cursor.execute(f"""SELECT * FROM Messages WHERE MessageID='{messageID}';""")
     result = cursor.fetchone()
     if result == None:
         print("Message not found")
@@ -726,7 +789,8 @@ def preview_message(encryptedMessageID):
     if data[6] == "True":
         send_read_receipt(data)
     
-    cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{data[1]}';""")
+    cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                   , (data[1]))
     result = cursor.fetchone()
     if result == None:
         print("Sender not found")
@@ -755,7 +819,8 @@ def preview_message(encryptedMessageID):
     
     mail.append(data[4])
     
-    cursor.execute(f"""SELECT * FROM Files WHERE Origin='M+{messageID}';""")
+    cursor.execute("SELECT * FROM Files WHERE Origin=?;"
+                   , (f"M+{messageID}"))
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         mail.append([])
@@ -782,7 +847,8 @@ def preview_message(encryptedMessageID):
 def download_user_content(encryptedAttachmentID):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
-    cursor.execute(f"""SELECT FilePath FROM Files WHERE HashedUrl='{encryptedAttachmentID}';""")
+    cursor.execute("SELECT FilePath FROM Files WHERE HashedUrl=?;"
+                   , encryptedAttachmentID)
     result = cursor.fetchone()
     if result == None:
         print("File not found")
@@ -845,7 +911,8 @@ def user_settings():
         cursor = connection.cursor()
 
         # Checking email
-        cursor.execute(f"""SELECT Email FROM Staff WHERE StaffID='{current_user.id}';""")
+        cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                       , (current_user.id))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -857,7 +924,8 @@ def user_settings():
             return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"], savedEmail=cleanedEmail)
         
         # Getting user's password
-        cursor.execute(f"""SELECT passHash FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -866,7 +934,8 @@ def user_settings():
         else:
             passHash = result[0]
         
-        cursor.execute(f"""SELECT passSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT passSalt FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -885,7 +954,13 @@ def user_settings():
             print("New password and confirm new password aren't the same")
             return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
         
-        cursor.execute(f"""UPDATE Staff SET PassHash = '{hash_function.hash_variable(cleanedNewPassword, salt)}' WHERE StaffID = '{current_user.id}';""")
+        cursor.execute("UPDATE Staff SET PassHash = ? WHERE StaffID = ?;"
+                       , (hash_function.hash_variable(
+                           cleanedNewPassword,
+                           salt),
+                          current_user.id
+                          )
+                       )
         connection.commit()
         
         userDetails = current_user.get_user_dictionary()
@@ -1021,9 +1096,21 @@ def create_staff():
     cursor = connection.cursor()
     
     try:
-        cursor.execute(f"""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
-                    VALUES (?, ?, ?, ?, ?, 'False', ?, ?, ?, ?, ?);
-                    """, (cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, passwordHash, passwordSalt, senco, safeguarding, admin))
+        cursor.execute("""INSERT INTO Staff(FirstName, LastName, Title, Email, AccountEnabled, AccountArchived, PassHash, PassSalt, SENCo, Safeguarding, Admin)
+                       VALUES (?, ?, ?, ?, ?, 'False', ?, ?, ?, ?, ?);"""
+                       , (
+                           cleanedFName,
+                           cleanedLName,
+                           cleanedTitle,
+                           cleanedEmail,
+                           enabled,
+                           passwordHash,
+                           passwordSalt,
+                           senco,
+                           safeguarding,
+                           admin
+                           )
+                       )
         connection.commit()
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
@@ -1053,7 +1140,7 @@ def search_staff():
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
-    cursor.execute(f"""SELECT Email FROM Staff WHERE AccountArchived='False';""")
+    cursor.execute("SELECT Email FROM Staff WHERE AccountArchived='False';")
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         print("No accounts found")
@@ -1086,7 +1173,8 @@ def edit_staff(staffEmail):
         
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT * FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -1173,7 +1261,8 @@ def edit_staff(staffEmail):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         
-        cursor.execute(f"""SELECT Admin FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT Admin FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -1181,7 +1270,7 @@ def edit_staff(staffEmail):
             return redirect(url_for("search_staff"))
         
         if admin == "False" and result[0] == "True":
-            cursor.execute(f"""SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';""")
+            cursor.execute("SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';")
             result = cursor.fetchall()
             if result == None or len(result) == 0:
                 connection.close()
@@ -1192,7 +1281,8 @@ def edit_staff(staffEmail):
                 print("User is trying to remove last admin")
                 return render_template("edit_staff.html", data=data, msg="There must always be at least one admin account active", entry=["admin"])
         
-        cursor.execute(f"""SELECT StaffID, Passhash, PassSalt FROM Staff WHERE Email='{cleanedEmail}';""")
+        cursor.execute("SELECT StaffID, Passhash, PassSalt FROM Staff WHERE Email=?;"
+                       , (cleanedEmail))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -1211,8 +1301,20 @@ def edit_staff(staffEmail):
             archived = "False"
         
         try:
-            cursor.execute("""UPDATE Staff SET FirstName = ?, Lastname = ?, Title = ?, Email = ?, AccountEnabled = ?, AccountArchived = ?, PassHash = ?, PassSalt = ?, SENCo = ?, Safeguarding = ?, Admin = ? WHERE Email = ?
-                           """, (cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, archived, passHash, result[1], senco, safeguarding, admin, cleanedEmail)
+            cursor.execute("UPDATE Staff SET FirstName = ?, Lastname = ?, Title = ?, Email = ?, AccountEnabled = ?, AccountArchived = ?, PassHash = ?, PassSalt = ?, SENCo = ?, Safeguarding = ?, Admin = ? WHERE Email = ?"
+                           , (cleanedFName,
+                              cleanedLName,
+                              cleanedTitle,
+                              cleanedEmail,
+                              enabled,
+                              archived,
+                              passHash,
+                              result[1],
+                              senco,
+                              safeguarding,
+                              admin,
+                              cleanedEmail
+                              )
                            )
             connection.commit()
         except sqlite3.IntegrityError:
@@ -1265,9 +1367,9 @@ def create_student():
     cursor = connection.cursor()
     
     try:
-        cursor.execute(f"""INSERT INTO Students(FirstName, LastName, DateOfBirth)
-                    VALUES (?, ?, ?);
-                    """, (cleanedFName, cleanedLName, date))
+        cursor.execute("""INSERT INTO Students(FirstName, LastName, DateOfBirth)
+                       VALUES (?, ?, ?);"""
+                       , (cleanedFName, cleanedLName, date))
         connection.commit()
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
@@ -1298,8 +1400,8 @@ def search_students():
         
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute("""SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;
-                       """, (data[0], data[1], data[2]))
+        cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
+                       , (data[0], data[1], data[2]))
         result = cursor.fetchone()
         if result == None:
             print("No accounts found")
@@ -1311,7 +1413,7 @@ def search_students():
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
-    cursor.execute(f"""SELECT FirstName, LastName, DateOfBirth FROM Students;""")
+    cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students;")
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         print("No accounts found")
@@ -1344,7 +1446,8 @@ def edit_student(studentID):
         
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
-        cursor.execute(f"""SELECT * FROM Students WHERE StudentID='{cleanedID}';""")
+        cursor.execute("SELECT * FROM Students WHERE StudentID=?;"
+                       , (cleanedID))
         result = cursor.fetchone()
         if result == None:
             connection.close()
@@ -1376,17 +1479,20 @@ def edit_student(studentID):
         cursor = connection.cursor()
         
         if delete == "True":
-            cursor.execute("""DELETE FROM Reporting WHERE StudentID = ?;
+            cursor.execute("""DELETE FROM Reporting
+                           WHERE StudentID = ?;
                            """, (cleanedID))
             connection.commit()
-            cursor.execute("""DELETE FROM StudentRelationship WHERE StudentID = ?;
+            cursor.execute("""DELETE FROM StudentRelationship
+                           WHERE StudentID = ?;
                            """, (cleanedID))
             connection.commit()
-            cursor.execute("""DELETE FROM Students WHERE StudentID = ?;
+            cursor.execute("""DELETE FROM Students
+                           WHERE StudentID = ?;
                            """, (cleanedID))
             connection.commit()
             
-            cursor.execute(f"""SELECT * FROM Students;""")
+            cursor.execute("SELECT * FROM Students;")
             result = cursor.fetchall()
             connection.close()
             if result == None or len(result) == 0:
@@ -1408,8 +1514,13 @@ def edit_student(studentID):
         del lastName
 
         try:
-            cursor.execute("""UPDATE Students SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?
-                           """, (cleanedFName, cleanedLName, dateOfBirth, cleanedID)
+            cursor.execute("""UPDATE Students SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?"""
+                           , (
+                               cleanedFName,
+                               cleanedLName,
+                               dateOfBirth,
+                               cleanedID
+                               )
                            )
             connection.commit()
         except sqlite3.IntegrityError:
