@@ -773,6 +773,8 @@ def preview_message(encryptedMessageID):
         connection.close()
         return redirect(url_for('messages_inbox'))
     
+    cursor.execute("SELECT * FROM Messages WHERE MessageID=?;"
+                   , (messageID))
     result = cursor.fetchone()
     if result == None:
         print("Message not found")
@@ -1534,14 +1536,106 @@ def edit_student(studentID):
 
 @app.route('/app/users/students/Links', methods=['GET', 'POST'])
 @login_required
-def staff_student_relationships():# TODO
+def staff_student_relationships_lookup():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
     if not current_user.admin:
         return redirect(url_for('dashboard'))
-    # return render_template("staff_student_relationships.html")
-    return render_template("under_construction.html")
+    
+    if request.method == 'POST':
+        dataString = request.form.get('email-list')
+        if not dataString:
+            return redirect(url_for('staff_student_relationships_lookup'))
+        
+        data = dataString.split("|")
+        if len(data) != 3:
+            return redirect(url_for('staff_student_relationships_lookup'))
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
+                       , (data[0], data[1], data[2]))
+        result = cursor.fetchone()
+        if result == None:
+            print("No accounts found")
+            connection.close()
+            return redirect(url_for("staff_student_relationships_lookup"))
+        else:
+            return redirect(url_for('staff_student_relationships', studentID=result[0]))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students;")
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        print("No accounts found")
+        connection.close()
+        return render_template("manage_student_lookup.html", msg="empty")
+    else:
+        data = result
+    
+    names = []
+    for name in data:
+        names.append((f"{name[0]} {name[1]}", f"{name[0]}|{name[1]}|{name[2]}"))
+    
+    return render_template("staff_student_relationships_lookup.html", names=names)
+
+@app.route('/app/users/students/Links/<string:studentID>', methods=['GET', 'POST'])
+@login_required
+def staff_student_relationships(studentID):# TODO
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    if not current_user.admin:
+        return redirect(url_for('dashboard'))
+    
+    cleanedID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedID:
+        print("Invalid ID")
+        return redirect(url_for("search_students"))
+    del studentID
+    
+    if request.method == 'POST':
+        dataString = request.form.get('email-list')
+        if not dataString:
+            return redirect(url_for('search_students'))
+        
+        data = dataString.split("|")
+        if len(data) != 3:
+            return redirect(url_for('search_students'))
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
+                       , (data[0], data[1], data[2]))
+        result = cursor.fetchone()
+        if result == None:
+            print("No accounts found")
+            connection.close()
+            return redirect(url_for("search_students"))
+        else:
+            return redirect(url_for('edit_student', studentID=result[0]))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT Email FROM Staff WHERE AccountArchived='False';")
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        print("No accounts found")
+        connection.close()
+        return render_template("staff_student_relationships.html", msg="empty")
+    else:
+        data = result
+    
+    emails = []
+    for email in data:
+        emails.append(email[0])
+    
+    return render_template("staff_student_relationships.html", studentID=cleanedID, emails=emails)
+    # return render_template("under_construction.html")
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
@@ -1644,6 +1738,14 @@ def manage_student_lookup_css():
 @app.route('/static/css/edit_student.css')
 def edit_student_css():
     return send_file('static//css//edit_student.css')
+
+@app.route('/static/css/staff_student_relationships_lookup.css')
+def staff_student_relationships_lookup_css():
+    return send_file('static//css//staff_student_relationships_lookup.css')
+
+@app.route('/static/css/staff_student_relationships.css')
+def staff_student_relationships_css():
+    return send_file('static//css//staff_student_relationships.css')
 
 @app.route('/static/css/under_construction.css')
 def under_construction_css():

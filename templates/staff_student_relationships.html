@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('staff_student_relationships_css')}}">
+
+<div class="student">
+    <div class="back">
+        <a href="{{url_for('staff_student_relationships_lookup')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    
+    <p class="title">
+        Link Staff
+    </p>
+    {% if msg == "empty" %}
+        <p class="empty">
+            No staff accounts were found, <a href="{{url_for('create_staff')}}">Click Here</a> to create one.
+        </p>
+    {% else %}
+        <form method="POST" action="{{url_for('staff_student_relationships', studentID=studentID)}}">
+            <select name="email-list" id="email-list">
+                <option value="_" selected disabled>Choose One</option>
+                {% for email in emails %}
+                    <option value="{{email}}">{{email}}</option>
+                {% endfor %}
+            </select>
+            <div id="submit">
+                <button>Search</button>
+            </div>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    var select = document.getElementById("email-list");
+    
+    select.addEventListener("click", function(e) {
+        var option = e.target;
+        if (option.tagName === 'OPTION') {
+            option.selected = !option.selected;
+        }
+    });
+</script>
+{% endblock %}
