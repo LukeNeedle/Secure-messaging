@@ -1770,7 +1770,10 @@ def handle_not_found(error):
         return redirect(url_for('login'))
 
 def handle_no_permission(error):
-    return redirect(url_for('login'))
+    if type(current_user._get_current_object()) is User:
+        return redirect(url_for('dashboard'))
+    else:
+        return redirect(url_for('login'))
 
 
 #########################################################################
