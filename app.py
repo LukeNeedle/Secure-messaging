@@ -1408,7 +1408,7 @@ def edit_student(studentID):
         del lastName
 
         try:
-            cursor.execute("""UPDATE Student SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?
+            cursor.execute("""UPDATE Students SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?
                            """, (cleanedFName, cleanedLName, dateOfBirth, cleanedID)
                            )
             connection.commit()
