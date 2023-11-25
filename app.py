@@ -1316,7 +1316,7 @@ def search_students():
     if result == None or len(result) == 0:
         print("No accounts found")
         connection.close()
-        return redirect(url_for("create_student"))
+        return render_template("manage_student_lookup.html", msg="empty")
     else:
         data = result
     
