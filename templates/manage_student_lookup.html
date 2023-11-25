@@ -12,11 +12,11 @@
     </div>
     
     <p class="title">
-        Search staff
+        Search students
     </p>
     {% if msg == "empty" %}
         <p class="empty">
-            No staff accounts were found, <a href="{{url_for('create_student')}}">Click Here</a> to create one.
+            No students were found, <a href="{{url_for('create_student')}}">Click Here</a> to create one.
         </p>
     {% else %}
         <form method="POST" action="{{url_for('search_students')}}">

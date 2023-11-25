@@ -54,6 +54,17 @@ p.title {
     margin-right: 75px;
 }
 
+.student p.empty a{
+    text-decoration: underline;
+    cursor: pointer;
+    color: #0000EE;
+}
+.student p.empty a:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    color: hsla(240, 100%, 47%, 0.788);
+}
+
 select {
     border-color: #201316;
     color: #201316;
