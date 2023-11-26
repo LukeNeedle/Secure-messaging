@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('student_profile_css')}}">
+
+<div class="option-block">
+    <div class="back">
+        <a href="{{url_for('reporting_search')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <div class="options-wrapper">
+        <div class="static">
+            <p class="title">
+                Student's profile
+            </p>
+            <div class="student-details">
+                <p class="label">Student's Name:</p>
+                <input type="text" name="student-name" value="{{studentData[0]}}" disabled>
+                <p class="label">Student's date of birth:</p>
+                <input type="date" name="student-dob" value="{{studentData[1]}}" disabled>
+            </div>
+        </div>
+        <div class="buttons">
+            <p class="title">
+                Actions
+            </p>
+            <a class="view" href="{{url_for('view_reports', studentID=studentID)}}">
+                <picture>
+                    <source
+                    srcset="/static/icons/file_dark.svg"
+                    media="(prefers-color-scheme: dark)"
+                    />
+                    <img width="20" height="20" src="/static/icons/file.svg"/>
+                </picture>
+                <span>
+                    View Reports
+                </span>
+            </a>
+            <a class="create" href="{{url_for('create_report', studentID=studentID)}}">
+                <picture>
+                    <source
+                    srcset="/static/icons/pen_dark.svg"
+                    media="(prefers-color-scheme: dark)"
+                    />
+                    <img width="20" height="20" src="/static/icons/pen.svg"/>
+                </picture>
+                <span>
+                    Create New Report
+                </span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

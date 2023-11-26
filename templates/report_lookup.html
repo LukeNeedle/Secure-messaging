@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('report_lookup_css')}}">
+
+<div class="student">
+    <div class="back">
+        <a href="{{url_for('dashboard')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    
+    <p class="title">
+        Search students
+    </p>
+    {% if msg == "empty" %}
+        <p class="empty">
+            {% if current_user.admin %}
+                No students were found, <a href="{{url_for('create_student')}}">Click Here</a> to create one.
+            {% else %}
+                No students were found, please contact your systems administrator to import your students or add you as a link.
+            {% endif %}
+        </p>
+    {% else %}
+        <form method="POST" action="{{url_for('reporting_search')}}">
+            <select name="email-list" id="email-list">
+                <option value="_" selected disabled>Choose One</option>
+                {% for name in names %}
+                    <option value="{{name[1]}}">{{name[0]}}</option>
+                {% endfor %}
+            </select>
+            <div id="submit">
+                <button>Search</button>
+            </div>
+        </form>
+        <p class="empty">
+            If the student you were looking for is missing, please contact your systems administrator to import the missing student or add you as a link.
+        </p>
+    {% endif %}
+</div>
+
+{% endblock %}

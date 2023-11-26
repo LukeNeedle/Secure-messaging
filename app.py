@@ -906,11 +906,129 @@ def download_user_content(encryptedAttachmentID):
     connection.close()
     return send_file(result[0], as_attachment=True)
 
-@app.route('/reports', methods=['GET'])
+@app.route('/reports', methods=['GET', 'POST'])
 @login_required
-def reporting():# TODO
+def reporting_search():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        dataString = request.form.get('email-list')
+        if not dataString:
+            return redirect(url_for('reporting_search'))
+        
+        data = dataString.split("|")
+        if len(data) != 3:
+            return redirect(url_for('reporting_search'))
+        
+        connection = sqlite3.connect("database.db")
+        cursor = connection.cursor()
+        cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
+                       , (data[0], data[1], data[2]))
+        result = cursor.fetchone()
+        if result == None:
+            print("No accounts found")
+            connection.close()
+            return redirect(url_for("reporting_search"))
+        else:
+            return redirect(url_for('student_reports', studentID=result[0]))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    if current_user.senco or current_user.safeguarding:
+        cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students;")
+        result = cursor.fetchall()
+        if result == None or len(result) == 0:
+            print("No accounts found")
+            connection.close()
+            return render_template("report_lookup.html", msg="empty")
+        
+        names = []
+        for name in result:
+            names.append((f"{name[0]} {name[1]}", f"{name[0]}|{name[1]}|{name[2]}"))
+        
+        connection.close()
+        return render_template("report_lookup.html", names=names)
+    
+    cursor.execute("SELECT StudentID FROM StudentRelationship WHERE StaffID=?;"
+                   , (current_user.id, ))
+    students = cursor.fetchall()
+    if students == None or len(students) == 0:
+        print("No links found")
+        connection.close()
+        return render_template("report_lookup.html", msg="empty")
+    
+    names=[]
+    for student in students:
+        cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
+                       , (student[0], ))
+        result = cursor.fetchone()
+        if result == None:
+            print("No students found")
+            connection.close()
+            return render_template("report_lookup.html", msg="empty")
+        
+        names.append((f"{result[0]} {result[1]}", f"{result[0]}|{result[1]}|{result[2]}"))
+    
+    connection.close()
+    return render_template("report_lookup.html", names=names)
+
+@app.route('/reports/<string:studentID>', methods=['GET', 'POST'])
+def student_reports(studentID):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cleanedID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedID:
+        print("Invalid ID")
+        return redirect(url_for("reporting_search"))
+    del studentID
+    
+    cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
+                   , (cleanedID, current_user.id))
+    result = cursor.fetchone()
+    
+    if result == None and not (current_user.senco or current_user.safeguarding):
+        print("No relationship found")
+        connection.close()
+        return redirect(url_for("reporting_search"))
+
+    cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
+                   , (cleanedID, ))
+    result = cursor.fetchone()
+    if result == None or len(result) == 0:
+        print("No student")
+        connection.close()
+        return redirect(url_for("reporting_search"))
+    
+    
+    cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
+                   , (cleanedID, ))
+    result = cursor.fetchone()
+    if result == None:
+        print("No students found")
+        connection.close()
+        return render_template("report_lookup.html", msg="empty")
+    
+    studentData = (f"{result[0]} {result[1]}", result[2])
+    
+    return render_template("student_profile.html", studentData=studentData, studentID=cleanedID)
+
+@app.route('/reports/view/<string:studentID>', methods=['GET', 'POST'])
+def view_reports(studentID):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    return render_template("under_construction.html")
+
+@app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
+def create_report(studentID):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
     return render_template("under_construction.html")
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -1338,6 +1456,7 @@ def edit_staff(staffEmail):
             return redirect(url_for("search_staff"))
         
         if resetPassword == "True":
+            print(resetPassword)
             passHash = hash_function.hash_variable("ChangeMe", result[2])
         else:
             passHash = result[1]
@@ -1357,7 +1476,7 @@ def edit_staff(staffEmail):
                               enabled,
                               archived,
                               passHash,
-                              result[1],
+                              result[2],
                               senco,
                               safeguarding,
                               admin,
@@ -1379,7 +1498,7 @@ def edit_staff(staffEmail):
         if current_user.get_user_dictionary()["admin"] == "False":
             return redirect(url_for("dashboard"))
         data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
-        return render_template("edit_staff.html", data=data, msg=f"Successfully updated {staffEmail}'s account")
+        return render_template("edit_staff.html", data=data, msg=f"Successfully updated {cleanedEmail}'s account")
 
 @app.route('/app/users/students/create', methods=['GET', 'POST'])
 @login_required
@@ -1904,6 +2023,14 @@ def messaging_compose_css():
 @app.route('/static/css/messaging_messages.css')
 def messaging_messages_css():
     return send_file('static//css//messaging_messages.css')
+
+@app.route('/static/css/report_lookup.css')
+def report_lookup_css():
+    return send_file('static//css//report_lookup.css')
+
+@app.route('/static/css/student_profile.css')
+def student_profile_css():
+    return send_file('static/css/student_profile.css')
 
 @app.route('/static/css/user_settings.css')
 def user_settings_css():
