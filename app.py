@@ -1576,6 +1576,7 @@ def edit_student(studentID):
         data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
         return render_template("edit_student.html", data=data, msg="Successfully updated!")
 
+# Objective 6 started
 @app.route('/app/users/students/Links', methods=['GET', 'POST'])
 @login_required
 def staff_student_relationships_lookup():
@@ -1844,6 +1845,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
     connection.close()
     studentData, staffDetails, studentID, staffEmail, relationship = generate_data_for_student_link(cleanedID, cleanedEmail)
     return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=relationship, msg="Sucessfully updated", entry="submit")
+# Objective 6 completed
 
 @app.route('/app/settings', methods=['GET'])
 @login_required
