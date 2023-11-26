@@ -75,7 +75,7 @@ def entry_cleaner(entry:str, mode:str):
         raise ValueError(f"Invalid mode: {mode} for entryCleaner")
 
 # Objective 4 started
-def save_message_attachments(senderID:int, attachments, timeStamp:float, messageID:int):
+def save_message_attachments(senderID:int, attachments, timeStamp:float, messageID:int, type:str):
     """
     Saves attachments from a message being sent.
 
@@ -84,6 +84,7 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
         attachments (list of files): _description_
         timeStamp (float): _description_
         messageID (integer): _description_
+        type (string): _description_
     """
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -94,10 +95,11 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
     for file in attachments:
         filePath = f"uploads/{senderID}/{timeStamp}/{file.filename}"
         tempURL = str(uuid.uuid4())
+        origin = f"{type[0]}+{messageID}"
         cursor.execute("INSERT INTO Files(OwnerID, Origin, FilePath, HashedUrl, TimeStamp) VALUES (?, ?, ?, ?, ?);"
                        , (
                            senderID,
-                           f'M+{messageID}',
+                           origin,
                            filePath,
                            tempURL,
                            timeStamp
@@ -108,7 +110,7 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
         cursor.execute("SELECT FileID FROM Files WHERE OwnerID=? and Origin=? and FilePath=? and HashedUrl=? and TimeStamp=?;"
                        , (
                            senderID,
-                           f'M+{messageID}',
+                           origin,
                            filePath,
                            tempURL,
                            timeStamp
@@ -787,7 +789,7 @@ def messages_compose():
         
         connection.close()
         if attachments[0].filename != '':
-            save_message_attachments(currentUser['id'], attachments, timeStamp, messageID)
+            save_message_attachments(currentUser['id'], attachments, timeStamp, messageID, type="message")
         connection.close()
         return redirect(url_for('messages_compose'))
 # Objective 3 completed
@@ -974,7 +976,7 @@ def reporting_search():
     connection.close()
     return render_template("report_lookup.html", names=names)
 
-@app.route('/reports/<string:studentID>', methods=['GET', 'POST'])
+@app.route('/reports/<string:studentID>', methods=['GET'])
 def student_reports(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -1022,6 +1024,13 @@ def student_reports(studentID):
 def view_reports(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
+    
+    cleanedID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedID:
+        print("Invalid ID")
+        return redirect(url_for("reporting_search"))
+    del studentID
+    
     return render_template("under_construction.html")
 
 @app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
@@ -1029,7 +1038,120 @@ def create_report(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
     
-    return render_template("under_construction.html")
+    cleanedID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedID:
+        print("Invalid ID")
+        return redirect(url_for("reporting_search"))
+    del studentID
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
+                , (cleanedID, ))
+    result = cursor.fetchone()
+    if result == None:
+        print("Student not found")
+        connection.close()
+        return redirect(url_for("reporting_search"))
+    
+    studentName = f"{result[0]} {result[1]}"
+    if request.method == 'GET':
+        connection.close()
+        print(cleanedID + " | " +  studentName)
+        return render_template("write_report.html", msg="", studentID=cleanedID, studentName=studentName)
+    
+    currentUser = current_user.get_user_dictionary()
+    message = request.form.get('message')
+    attachments = request.files.getlist('attachments')
+
+    timeStamp = float(datetime.timestamp(datetime.now()))
+    
+    vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
+    subsitutionKey = random.randint(1, 61)
+
+    cleanedMessage = message.replace('\0', '')
+    
+    encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+    if subsitutionKey < 10:
+        subsitutionKey = "0" + str(subsitutionKey)
+    
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_encrypt(
+            plainText=(vernamKey + str(subsitutionKey)),
+            key=json.load(f)['ReportKey']
+            )
+    
+    cleanedEncryptedMessage = ""
+    for character in encryptedMessage:
+        if character == '"':
+            cleanedEncryptedMessage += "<Double_Quote>"
+        elif character == "'":
+            cleanedEncryptedMessage += "<Single_Quote>"
+        elif character == "\\":
+            cleanedEncryptedMessage += "<Escape>"
+        elif character == "\n":
+            cleanedEncryptedMessage += "<New_Line>"
+        elif character == "\t":
+            cleanedEncryptedMessage += "<Tab>"
+        elif character == "\r":
+            cleanedEncryptedMessage += "<Carriage_Return>"
+        elif character == "\0":
+            cleanedEncryptedMessage += "<Null_Character>"
+        elif character == "\a":
+            cleanedEncryptedMessage += "<ASCII_Bell>"
+        elif character == "\b":
+            cleanedEncryptedMessage += "<ASCII_Backspace>"
+        elif character == "\f":
+            cleanedEncryptedMessage += "<ASCII_Form_Feed>"
+        elif character == "\v":
+            cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
+        else:
+            cleanedEncryptedMessage += character
+
+    randomURL = str(uuid.uuid4())
+
+    try:
+        cursor.execute("""INSERT INTO Reporting(StudentID, StaffID, Report, URL, TimeStamp, Key)
+                        VALUES (?, ?, ?, ?, ?, ?);"""
+                        , (
+                            cleanedID,
+                            currentUser["id"],
+                            cleanedEncryptedMessage,
+                            randomURL,
+                            timeStamp,
+                            key
+                            )
+                        )
+        connection.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        return render_template("write_report.html", reportContent=message, msg="Server Error", studentID=cleanedID, studentName=studentName)
+    
+    cursor.execute("""SELECT ReportID FROM Reporting
+                    WHERE StudentID=? and StaffID=? and Report=? and URL=? and TimeStamp=? and Key=?;"""
+                    , (
+                        cleanedID,
+                        currentUser["id"],
+                        cleanedEncryptedMessage,
+                        randomURL,
+                        timeStamp,
+                        key
+                        )
+                    )
+    result = cursor.fetchone()
+
+    if result == None:
+        connection.close()
+        print("Failed to save message")
+        return render_template("write_report.html", reportContent=message, msg="Server Error", studentID=cleanedID, studentName=studentName)
+    else:
+        reportID = result[0]
+    
+    connection.close()
+    if attachments[0].filename != '':
+        save_message_attachments(currentUser['id'], attachments, timeStamp, reportID, type="report")
+    connection.close()
+    return render_template("write_report.html", msg="Report Filed Successfully", studentID=cleanedID, studentName=studentName, id="submit")
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -1768,7 +1890,7 @@ def view_all_student_staff_relationships():
             2: "form tutor",
             3: "head of year"
         }
-        data.append(f"{studentData[0]} {studentData[1]} is the {relationshipTypes[row[2]]} of {staffData[2]} {staffData[0]} {staffData[1]}")
+        data.append(f"{staffData[2]} {staffData[0]} {staffData[1]} is the {relationshipTypes[row[2]]} of {studentData[0]} {studentData[1]} ")
     
     print(data)
     connection.close()
@@ -2027,6 +2149,10 @@ def messaging_messages_css():
 @app.route('/static/css/report_lookup.css')
 def report_lookup_css():
     return send_file('static//css//report_lookup.css')
+
+@app.route('/static/css/report_write.css')
+def report_write_css():
+    return send_file('static//css//report_write.css')
 
 @app.route('/static/css/student_profile.css')
 def student_profile_css():

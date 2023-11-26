@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('report_write_css')}}">
+
+{% if msg != "" %}
+    {% if id != "submit" %}
+        <style>
+            #message input{
+                border-color: #ff0000;
+            }
+        </style>
+    {% else %}
+        <style>
+            #submit button{
+                background-color: #008000 !important;
+            }
+            p.message{
+                color: #008000;
+            }
+        </style>
+    {% endif %}
+    <p class="message">
+        {{msg}}
+    </p>
+{% endif %}
+
+
+<div class="compose">
+    <div class="back">
+        <a href="{{url_for('student_reports', studentID=studentID)}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <p class="title">
+        Write a Report
+    </p>
+    <form class="compose-message" method="POST" action="{{url_for('create_report', studentID=studentID)}}" enctype="multipart/form-data">
+        <div id="student">
+            <p class="label">Student's Name:</p>
+            <input type="text" name="student" value="{{studentName}}" disabled>
+        </div>
+        <div id="message">
+            <p class="label">Report Content:</p>
+            {% if reportContent %}
+                <textarea name="message" placeholder="Your report" cols="50" rows="5" required>{{reportContent}}</textarea>
+            {% else %}
+                <textarea name="message" placeholder="Your report" cols="50" rows="5" required></textarea>
+            {% endif %}
+        </div>
+        <div id="upload-attachments">
+            <span>
+                <picture>
+                    <source
+                    srcset="/static/icons/file_dark.svg"
+                    media="(prefers-color-scheme: dark)"
+                    />
+                    <img width="20" height="20" src="/static/icons/file.svg"/>
+                </picture>
+                Upload attachments
+            </span>
+            <br>
+            <input type="file" name="attachments" multiple=""/>
+        </div>
+        <div id="submit">
+            <button>File Report</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
