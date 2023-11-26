@@ -119,7 +119,9 @@ These objectives aren't in any particular order and they are only numbered to he
 | StudentID    | The integer ID associated with the student who is being reported     | 1       | Integer | ❌          | Students(StudentID) | Not null         |
 | StaffID      | The integer ID associated with the staff member who filed the report | 1       | Integer | ❌          | Staff(StaffID)      | Not null         |
 | Report       | The encrypted report                                                 | -       | Blob    | ❌          | -                   | Not null         |
+| URL          | The hashed URL for the message                                       | -       | Text    | ❌          | -                   | Not null         |
 | TimeStamp    | The timestamp that the report was filed                              | -       | Text    | ❌          | -                   | Not null         |
+| Key          | The encrypted key to decrypt the message                             | -       | Text    | ❌          | -                   | Not null         |
 
 ### Files
 | Column    | Description                                                       | Example | Type    | Primary Key | Foreign Key    | Constraints      |

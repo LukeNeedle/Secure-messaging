@@ -72,10 +72,12 @@ def create_tables():
 		"StudentID"	INTEGER NOT NULL,
 		"StaffID"	INTEGER NOT NULL,
 		"Report"	BLOB NOT NULL,
+		"URL"	STRING NOT NULL,
 		"TimeStamp"	TEXT NOT NULL,
-		PRIMARY KEY("ReportID" AUTOINCREMENT),
+		"Key"	TEXT NOT NULL,
 		FOREIGN KEY("StudentID") REFERENCES "Students"("StudentID"),
-		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID")
+		FOREIGN KEY("StaffID") REFERENCES "Staff"("StaffID"),
+		PRIMARY KEY("ReportID" AUTOINCREMENT)
 	)""")
 	conn.commit()
 
