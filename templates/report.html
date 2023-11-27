@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('messaging_messages_css')}}">
+
+<div class="message">
+    <div class="back">
+        <a href="{{url_for('messages_inbox')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <p class="sender">
+        Reporter: {{mail[0]}}
+    </p>
+    <p class="timestamp">
+        Filed: {{mail[2]}}
+    </p>
+    <p>
+        Report contents:
+    </p>
+    <textarea class="msg" cols="50" rows="5" readonly>{{mail[1]}}</textarea>
+    
+    {% if mail[4] %}
+        <p>
+            Attachments:
+        </p>
+        <div class="attachments">
+            {% for attachment in mail[4] %}
+                <div class="attachment">
+                    <span>{{ attachment[0] }}</span><a href="{{ url_for('download_user_content', encryptedAttachmentID=attachment[1]) }}">Download</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="POST" action="{{ url_for('preview_message', encryptedMessageID=mail[3]) }}">
+        <button>Archive</button>
+    </form>
+</div>
+
+{% endblock %}

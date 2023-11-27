@@ -870,7 +870,7 @@ def preview_message(encryptedMessageID):
     mail.append(data[4])
     
     cursor.execute("SELECT * FROM Files WHERE Origin=?;"
-                   , (f"M+{messageID}", ))
+                   , (f"m+{messageID}", ))
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         mail.append([])
@@ -881,8 +881,6 @@ def preview_message(encryptedMessageID):
     attachments = []
     
     for attachment in result:
-        if data[1] != attachment[1]:
-            continue
         attachments.append(
             (attachment[3].split('/')[-1], attachment[4])
         )
@@ -1029,6 +1027,7 @@ def view_reports(studentID):
     if studentID != cleanedID:
         print("Invalid ID")
         return redirect(url_for("reporting_search"))
+    cleanedID = int(cleanedID)
     del studentID
     
     connection = sqlite3.connect("database.db")
@@ -1049,7 +1048,7 @@ def view_reports(studentID):
     
     result = cursor.fetchall()
     if result == None or len(result) == 0:
-        return render_template("reports.html", msg="empty")
+        return render_template("reports.html", msg="empty", studentID=cleanedID)
     else:
         reports = result
 
@@ -1090,12 +1089,14 @@ def preview_report(studentID, reportID):
     if studentID != cleanedStudentID:
         print("Invalid student ID")
         return redirect(url_for("reporting_search"))
+    cleanedStudentID = int(cleanedStudentID)
     del studentID
     
     cleanedReportID = entry_cleaner(reportID, "sql")
     if reportID != cleanedReportID:
         print("Invalid report ID")
         return redirect(url_for("reporting_search"))
+    cleanedReportID = int(cleanedReportID)
     del reportID
     
     connection = sqlite3.connect("database.db")
@@ -1110,6 +1111,9 @@ def preview_report(studentID, reportID):
         return redirect(url_for('view_reports', studentID=cleanedStudentID))
     else:
         data = result
+
+    if data[1] != cleanedStudentID:
+        return redirect(url_for("reporting_search"))
     
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
                     , (cleanedStudentID, current_user.id))
@@ -1122,6 +1126,9 @@ def preview_report(studentID, reportID):
         connection.close()
         return redirect(url_for("reporting_search"))
     
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_decrypt(encryptedText=data[6], key=json.load(f)['ReportKey'])
+    
     cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
                    , (data[2], ))
     result = cursor.fetchone()
@@ -1130,12 +1137,10 @@ def preview_report(studentID, reportID):
         connection.close()
         return redirect(url_for('view_reports', studentID=cleanedStudentID))
     else:
-        data = [result[0]]
+        report = [result[0]]
     
-    with open("secrets.json", "r") as f:
-        key = encryption.substitution_decrypt(encryptedText=data[6], key=json.load(f)['ReportKey'])
-            
-    data.append(
+    
+    report.append(
         str(
             encryption.decrypt(
                 cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
@@ -1146,34 +1151,34 @@ def preview_report(studentID, reportID):
     )
     
     timestamp = datetime.fromtimestamp(float(data[5]))
-    data.append(
+    report.append(
         f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
     )
     
-    data.append(data[4])
+    report.append(data[4])
     
     cursor.execute("SELECT * FROM Files WHERE Origin=?;"
-                   , (f"R+{cleanedReportID}", ))
+                   , (f"r+{cleanedReportID}", ))
     result = cursor.fetchall()
+    print(f"r+{cleanedReportID}")
+    print(result)
     if result == None or len(result) == 0:
-        data.append([])
+        report.append([])
         connection.close()
         print("No attachments")
-        return render_template("report.html", mail=data)
+        return render_template("report.html", mail=report)
     
     attachments = []
     
     for attachment in result:
-        if data[1] != attachment[1]:
-            continue
         attachments.append(
             (attachment[3].split('/')[-1], attachment[4])
         )
     
-    data.append(attachments)
+    report.append(attachments)
     
     connection.close()
-    return render_template("report.html", mail=data)
+    return render_template("report.html", mail=report)
 
 @app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
 def create_report(studentID):
