@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('messaging_inbox_css')}}">
+
+<div class="inbox">
+    <div class="back">
+        <a href="{{url_for('student_reports', studentID=studentID)}}">
+            Back
+        </a>
+        <br>
+    </div>
+    
+    <p class="title">
+        Your inbox
+    </p>
+    {% if msg == "empty" %}
+        <p class="empty">
+            No reports have been filed.
+        </p>
+    {% else %}
+        {% for report in data %}
+            <div class="message" onclick="openMessageWindow('{{ url_for('preview_report', studentID=studentID, reportID=report[0]) }}')">
+                <span class="sender">
+                    Reporter: {{report[1]}}
+                </span>
+                <span class="timestamp">
+                    {{report[2]}}
+                </span>
+                <b>
+                    <p class="view-message">
+                        Click to view the report
+                    </p>
+                </b>
+            </div>
+        {% endfor %}
+        <script type="text/javascript">
+            function openMessageWindow(url){
+                window.open(url);
+            }
+        </script>
+    {% endif %}
+</div>
+
+{% endblock %}

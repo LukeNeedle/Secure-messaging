@@ -1020,7 +1020,7 @@ def student_reports(studentID):
     
     return render_template("student_profile.html", studentData=studentData, studentID=cleanedID)
 
-@app.route('/reports/view/<string:studentID>', methods=['GET', 'POST'])
+@app.route('/reports/view/<string:studentID>', methods=['GET'])
 def view_reports(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -1031,7 +1031,149 @@ def view_reports(studentID):
         return redirect(url_for("reporting_search"))
     del studentID
     
-    return render_template("under_construction.html")
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
+                    , (cleanedID, current_user.id))
+    result = cursor.fetchone()
+    if result == None:
+        return redirect(url_for("reporting_search"))
+    
+    if current_user.senco or current_user.safeguarding or result in [1, 2, 3, 0]:
+        cursor.execute("SELECT * FROM Reporting WHERE StudentID=?;"
+                    , (cleanedID, ))
+    else:
+        cursor.execute("SELECT * FROM Reporting WHERE StudentID=? and StaffID=?;"
+                    , (cleanedID, current_user.id))
+    
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        return render_template("reports.html", msg="empty")
+    else:
+        reports = result
+
+    response = [] # A list of reports
+
+    for report in reports:
+        tempResponse = [report[1]]
+        
+        cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                       , (report[2], ))
+        result = cursor.fetchone()
+        if result == None:
+            connection.close()
+            print("Sender not found")
+            return redirect(url_for('reporting_search'))
+        else:
+            tempResponse.append(result[0])
+        
+        timestamp = datetime.fromtimestamp(float(report[5]))
+        tempResponse.append(
+            f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
+            )
+        tempResponse.append(result[0])
+        
+        tempResponse.append(report[0])
+        
+        response.append(tempResponse)
+    
+    connection.close()
+    return render_template("reports.html", data=response, studentID=cleanedID)
+
+@app.route('/reports/view/<string:studentID>/<string:reportID>', methods=['GET'])
+def preview_report(studentID, reportID):
+    if type(current_user._get_current_object()) is not User:
+        return redirect(url_for('login'))
+    
+    cleanedStudentID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedStudentID:
+        print("Invalid student ID")
+        return redirect(url_for("reporting_search"))
+    del studentID
+    
+    cleanedReportID = entry_cleaner(reportID, "sql")
+    if reportID != cleanedReportID:
+        print("Invalid report ID")
+        return redirect(url_for("reporting_search"))
+    del reportID
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT * FROM Reporting WHERE ReportID=?;"
+                   , (cleanedReportID, ))
+    result = cursor.fetchone()
+    if result == None:
+        print("Report not found")
+        connection.close()
+        return redirect(url_for('view_reports', studentID=cleanedStudentID))
+    else:
+        data = result
+    
+    cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
+                    , (cleanedStudentID, current_user.id))
+    result = cursor.fetchone()
+    if result == None:
+        return redirect(url_for("reporting_search"))
+    
+    if current_user.id != data[2] and not (current_user.senco or current_user.safeguarding) and result not in [1, 2, 3, 0]:
+        print("No permission no view report")
+        connection.close()
+        return redirect(url_for("reporting_search"))
+    
+    cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                   , (data[2], ))
+    result = cursor.fetchone()
+    if result == None:
+        print("Reporter not found")
+        connection.close()
+        return redirect(url_for('view_reports', studentID=cleanedStudentID))
+    else:
+        data = [result[0]]
+    
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_decrypt(encryptedText=data[6], key=json.load(f)['ReportKey'])
+            
+    data.append(
+        str(
+            encryption.decrypt(
+                cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
+                vernamKey=str(key[:-2]),
+                subsitutionKey=int(key[-2:])
+            )
+        ).replace("\0", '').replace("\a", '')
+    )
+    
+    timestamp = datetime.fromtimestamp(float(data[5]))
+    data.append(
+        f"{timestamp.strftime('%a')} {timestamp.strftime('%d')} {timestamp.strftime('%b')} {timestamp.strftime('%y')} at {timestamp.strftime('%I')}:{timestamp.strftime('%M')}{timestamp.strftime('%p').lower()}"
+    )
+    
+    data.append(data[4])
+    
+    cursor.execute("SELECT * FROM Files WHERE Origin=?;"
+                   , (f"R+{cleanedReportID}", ))
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        data.append([])
+        connection.close()
+        print("No attachments")
+        return render_template("report.html", mail=data)
+    
+    attachments = []
+    
+    for attachment in result:
+        if data[1] != attachment[1]:
+            continue
+        attachments.append(
+            (attachment[3].split('/')[-1], attachment[4])
+        )
+    
+    data.append(attachments)
+    
+    connection.close()
+    return render_template("report.html", mail=data)
 
 @app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
 def create_report(studentID):
@@ -1584,6 +1726,9 @@ def edit_staff(staffEmail):
             passHash = result[1]
 
         if deleteAccount == "True":
+            cursor.execute("DELETE FROM StudentRelationship WHERE StaffID = ?;"
+                           , (result[0], ))
+            connection.commit()
             enabled = "False"
             archived = "True"
         else:
@@ -2153,6 +2298,10 @@ def report_lookup_css():
 @app.route('/static/css/report_write.css')
 def report_write_css():
     return send_file('static//css//report_write.css')
+
+@app.route('/static/css/reporting_reports.css')
+def reporting_reports_css():
+    return send_file('static//css//reporting_reports.css')
 
 @app.route('/static/css/student_profile.css')
 def student_profile_css():
