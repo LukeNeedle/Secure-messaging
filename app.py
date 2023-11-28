@@ -2329,9 +2329,9 @@ def report_lookup_css():
 def report_write_css():
     return send_file('static//css//report_write.css')
 
-@app.route('/static/css/reporting_reports.css')
-def reporting_reports_css():
-    return send_file('static//css//reporting_reports.css')
+@app.route('/static/css/reporting_report.css')
+def reporting_report_css():
+    return send_file('static//css//reporting_report.css')
 
 @app.route('/static/css/student_profile.css')
 def student_profile_css():

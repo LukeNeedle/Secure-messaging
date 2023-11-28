@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{url_for('messaging_messages_css')}}">
+<link rel="stylesheet" href="{{url_for('reporting_report_css')}}">
 
 <div class="message">
     <div class="back">
@@ -34,9 +34,15 @@
         </div>
     {% endif %}
     
-    <form method="POST" action="{{ url_for('preview_message', encryptedMessageID=mail[3]) }}">
-        <button>Archive</button>
-    </form>
+    <p class="hint">If you minimise the window you will be redirected to your dashboard</p>
 </div>
+
+<script>
+    document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState=== 'hidden') {
+            window.location.href = "/dashboard";
+        }
+    });
+</script>
 
 {% endblock %}
