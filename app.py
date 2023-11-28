@@ -377,32 +377,28 @@ def generate_data_for_student_link(studentID, staffEmail):
 
 
 @login_manager.user_loader
-def user_loader(email):
+def user_loader(userID):
     """
     Generates the user object from the email address provided.
 
     Args:
-        email (string): The email to lookup.
+        userID (string): The email to lookup.
 
     Returns:
         User: The user object if the user exists, otherwise it returns None
     """
 
-    cleanedEmail = entry_cleaner(entry=email, mode="sql")
+    cleanedUserID = entry_cleaner(entry=userID, mode="sql")
 
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM Staff WHERE Email=?;"
-                   , (cleanedEmail, ))
+    cursor.execute("SELECT * FROM Staff WHERE StaffID=?;"
+                   , (cleanedUserID, ))
     result = cursor.fetchone()
     if result == None:
-        cursor.execute("SELECT * FROM Staff WHERE StaffID=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            return None
+        connection.close()
+        return None
     
     userDetails = {
         "id": result[0],
