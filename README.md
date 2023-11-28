@@ -27,7 +27,7 @@ The system should be run locally with ideally no access to the internet so that 
 3.	Sending messages
 4.	Uploading attachments
 5.	Admin page
-6.	Linking teachers to students (for Student notify)
+6.	Linking teachers to students
 7.	Search up student’s records for safeguarding and SENCo staff
 8.  Read receipts
 9.  Session timeout
@@ -53,15 +53,15 @@ These objectives aren't in any particular order and they are only numbered to he
 
 | Objective | Progress | Comment                                                                                                    | Commit first introduced                                                                                   |
 |:---------:|:--------:|:-----------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------:|
-| 1         | ❌       | -                                                                                                          | N/A                                                                                                       |
+| 1         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [b49ea92](https://github.com/LukeNeedle/Secure-messaging/commit/b49ea9256456204bc1608bd0868fbb019534b39c) |
 | 2         | ✅       | [Modelling/Basic Login/](https://github.com/LukeNeedle/Secure-messaging/tree/main/Modelling/Basic%20Login) | [df3d9ce](https://github.com/LukeNeedle/Secure-messaging/commit/df3d9ce0dbb5c0954efdaba7233797b99ce3a78f) |
 | 3         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [0448463](https://github.com/LukeNeedle/Secure-messaging/commit/04484630959e990e1159af90ee10df15ce2747bd) |
 | 4         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [8b4c5d4](https://github.com/LukeNeedle/Secure-messaging/commit/8b4c5d4920223af4fa88431a0fcd96a18dacf902) |
-| 5         | ❌       | -                                                                                                          | N/A                                                                                                       |
-| 6         | ❌       | -                                                                                                          | N/A                                                                                                       |
-| 7         | ❌       | -                                                                                                          | N/A                                                                                                       |
+| 5         | ❌       | - |N/A|
+| 6         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [30fa8ae](https://github.com/LukeNeedle/Secure-messaging/commit/30fa8ae584c2715a0ed4c792e128fae6553c832f) |
+| 7         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [50a400b](https://github.com/LukeNeedle/Secure-messaging/commit/50a400bcb258e1f478bbed5007515f2cdebc93d4) |
 | 8         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [220aa5a](https://github.com/LukeNeedle/Secure-messaging/commit/220aa5a7a418e1ebbb15a29d9f6f4448cea740c1) |
-| 9         | ❌       | -                                                                                                          | N/A                                                                                                       |
+| 9         | ✅       | [app.py](https://github.com/LukeNeedle/Secure-messaging/blob/main/Modelling/Basic%20Login/app.py)          | [7f9785d](https://github.com/LukeNeedle/Secure-messaging/commit/7f9785df015104873e42c42ded1b56e80355b250) |
 
 ---
 

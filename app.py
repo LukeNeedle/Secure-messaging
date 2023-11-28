@@ -931,6 +931,7 @@ def download_user_content(encryptedAttachmentID):
     connection.close()
     return send_file(result[0], as_attachment=True)
 
+# Objective 7 started
 @app.route('/reports', methods=['GET', 'POST'])
 @login_required
 def reporting_search():
@@ -1204,6 +1205,7 @@ def preview_report(studentID, reportID):
     
     connection.close()
     return render_template("report.html", mail=report)
+# Objective 7 completed
 
 @app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
 def create_report(studentID):
