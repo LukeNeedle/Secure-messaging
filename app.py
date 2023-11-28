@@ -256,17 +256,51 @@ def check_password_strength(password:str):
         boolean: If the password strength is valid
     """
     
-    return True
     if len(password) <= 8:
         return False
     
-    # Sequential characters
-    if regex.search(r'(\d)\1*', password) or regex.search(r'([a-z])\1*', password):
+    digits = 0
+    upperCase = 0
+    lowerCase = 0
+    specialCharacters = 0
+    
+    for character in password:
+        if character in string.digits:
+            digits += 1
+        elif character in string.ascii_lowercase:
+            lowerCase += 1
+        elif character in string.ascii_uppercase:
+            upperCase += 1
+        else:
+            specialCharacters += 1
+    
+    percentageDigits = digits/len(password)
+    percentageUpperCase = upperCase/len(password)
+    percentageLowerCase = lowerCase/len(password)
+    percentageSpecialCharacters = specialCharacters/len(password)
+    
+    if percentageLowerCase >= 0.8:
+        return False
+    elif percentageUpperCase >= 0.8:
+        return False
+    elif percentageDigits >= 0.8:
+        return False
+    elif percentageSpecialCharacters >= 0.8:
         return False
     
-    # Repetitive characters
-    if regex.search(r'(\w)\1\1+', password):
+    if percentageLowerCase <= 0.02:
         return False
+    elif percentageUpperCase <= 0.02:
+        return False
+    elif percentageDigits <= 0.02:
+        return False
+    elif percentageSpecialCharacters <= 0.02:
+        return False
+    
+    for examplePassword in ["password", "changeme"]:
+        if examplePassword in password.lower():
+            return False
+    
     return True
 
 @app.before_request 
