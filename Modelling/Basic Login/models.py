@@ -19,8 +19,8 @@ class User(UserMixin):
         else:
             self.archived = True
 
-        self.passwordHash = userDetails['passhash']
-        self.passwordSalt = userDetails['passsalt']
+        self.passwordHash = userDetails['passHash']
+        self.passwordSalt = userDetails['passSalt']
 
         if userDetails['SENCo'] == "False":
             self.senco = False
@@ -78,8 +78,8 @@ class User(UserMixin):
                 "email": result[4],
                 "accountEnabled": result[5],
                 "accountArchived": result[6],
-                "passhash": result[7],
-                "passsalt": result[8],
+                "passHash": result[7],
+                "passSalt": result[8],
                 "SENCo": result[9],
                 "safeguarding": result[10],
                 "admin": result[11]
@@ -87,30 +87,3 @@ class User(UserMixin):
             user = User(userDetails)
             connection.close()
             return user
-
-    def get_user_dictionary(self):
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
-
-        cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{self.id}';""")
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            return None
-        else:
-            userDetails = {
-                "id": result[0],
-                "firstName": result[1],
-                "lastName": result[2],
-                "title": result[3],
-                "email": result[4],
-                "accountEnabled": result[5],
-                "accountArchived": result[6],
-                "passhash": result[7],
-                "passsalt": result[8],
-                "SENCo": result[9],
-                "safeguarding": result[10],
-                "admin": result[11]
-            }
-            connection.close()
-            return userDetails

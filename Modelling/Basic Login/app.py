@@ -2,7 +2,6 @@ from flask import Flask, redirect, url_for, render_template, request
 from flask_login import LoginManager, login_user, logout_user, login_required
 from models import User
 import sqlite3
-import re as regex
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-string'
@@ -15,7 +14,6 @@ def entry_cleaner(entry, mode):
     Remove unwanted characters from a string.
     mode = "sql" --> Removes characters that could be used for sql injection
     mode = "password" --> Removes characters that could be used for sql injection as well as characters that aren't on the english keyboard.
-    mode = "email" --> Removes characters that could be used for sql injection and checks that it is a valid email.
 
     Args:
         entry (string): The input that needs cleaning
@@ -35,37 +33,10 @@ def entry_cleaner(entry, mode):
         for letter in entry:
             if letter in allowedChars:
                 cleanedEntry += letter
-
         return cleanedEntry
+    
     elif mode == "password":
-        cleanedEntry = entry_cleaner(entry, "sql")
-
-        cleanedEntry = cleanedEntry.encode("ascii", "ignore").decode()
-
-        return cleanedEntry
-    elif mode == "email":
-        cleanedEntry = entry_cleaner(entry, "sql").lower()
-        if not regex.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cleanedEntry):
-            return None
-        else:
-            return cleanedEntry
-    else:
-        raise f"Invalid mode: {mode} for entryCleaner"
-
-def hashing(variable:str, salt:str):
-    """
-    Hashes the variable passed in.
-
-    Args:
-        variable (string): The variable that needs cleaning
-        salt (string): The salt to be applied to the variable.
-
-    Returns:
-        string: The hashed variable
-    """
-    # result = hash_function.hash_variable(variable, salt)
-    # return result
-    return variable
+        return entry_cleaner(entry, "sql").encode("ascii", "ignore").decode()
 
 @login_manager.user_loader
 def user_loader(email):
@@ -78,20 +49,17 @@ def user_loader(email):
     Returns:
         User: The user object if the user exists, otherwise it returns None
     """
-
+    print(email)
     cleanedEmail = entry_cleaner(entry=email, mode="sql")
 
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
-    cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
+    cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{cleanedEmail}';""")
     result = cursor.fetchone()
     if result == None:
-        cursor.execute(f"""SELECT * FROM Staff WHERE StaffID='{cleanedEmail}';""")
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            return None
+        connection.close()
+        return None
     
     userDetails = {
         "id": result[0],
@@ -101,8 +69,8 @@ def user_loader(email):
         "email": result[4],
         "accountEnabled": result[5],
         "accountArchived": result[6],
-        "passhash": result[7],
-        "passsalt": result[8],
+        "passHash": result[7],
+        "passSalt": result[8],
         "SENCo": result[9],
         "safeguarding": result[10],
         "admin": result[11]
@@ -123,12 +91,13 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        cleanedEmail = entry_cleaner(email)
-        cleanedPassword = entry_cleaner(password)
+        cleanedEmail = entry_cleaner(email, "sql")
+        cleanedPassword = entry_cleaner(password, "password")
 
         if cleanedEmail != email:
             # Invalid email
             return redirect(url_for('login'))
+        
         if cleanedPassword != password:
             # Invalid password
             return redirect(url_for('login'))
@@ -143,7 +112,7 @@ def login():
             # User not found
             return redirect(url_for('login'))
         
-        if result[0].encode() == hashing(cleanedPassword, salt=None):
+        if result[0] == cleanedPassword:
             cursor.execute(f"""SELECT * FROM Staff WHERE Email='{cleanedEmail}';""")
             result = cursor.fetchone()
             if result == None:
