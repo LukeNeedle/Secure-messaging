@@ -121,7 +121,7 @@ These objectives aren't in any particular order and they are only numbered to he
 | Report       | The encrypted report                                                 | -       | Blob    | ❌          | -                   | Not null         |
 | URL          | The hashed URL for the message                                       | -       | Text    | ❌          | -                   | Not null         |
 | TimeStamp    | The timestamp that the report was filed                              | -       | Text    | ❌          | -                   | Not null         |
-| Key          | The encrypted key to decrypt the message                             | -       | Text    | ❌          | -                   | Not null         |
+| Key          | The encrypted key to decrypt the report                              | -       | Text    | ❌          | -                   | Not null         |
 
 ### Files
 | Column    | Description                                                       | Example | Type    | Primary Key | Foreign Key    | Constraints      |
