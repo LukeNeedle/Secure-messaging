@@ -1,5 +1,5 @@
 # Flask libraries
-from flask import Flask, redirect, url_for, render_template, request, send_file
+from flask import Flask, redirect, url_for, render_template, request, send_file, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 # Custom libraries
@@ -14,7 +14,7 @@ import os
 import string
 import random
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 
 app = Flask(__name__)
@@ -293,6 +293,31 @@ def check_for_reset_password():
         if hash_function.hash_variable("ChangeMe", result[1]) == result[0] and request.path != "/ChangePassword" and pathDot != ".":
             print("User needs to change password")
             return redirect(url_for('reset_password'))
+
+# Objective 9 started
+@app.before_request
+def session_timeout_management():
+    """
+    This function is called before the endpoint code is run.
+    This function adds an extra 20 minutes to the session.
+    """
+    if len(request.path) < 4:
+        validPath = request.path[0] != "."
+    else:
+        validPath = request.path[-4] != "."
+
+    if current_user.is_authenticated and request.method == 'GET' and validPath:
+        if current_user.admin:
+            extraTime = 5
+        elif current_user.safeguarding or current_user.senco:
+            extraTime = 10
+        else:
+            extraTime = 15
+        print(extraTime)
+        
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=extraTime)
+# Objective 9 completed
 
 def generate_data_for_student_link(studentID, staffEmail):
     """
