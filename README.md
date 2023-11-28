@@ -128,7 +128,7 @@ These objectives aren't in any particular order and they are only numbered to he
 |-----------|-------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:----------------:|
 | FileID    | The integer ID associated with the file                           | 1       | Integer | ✅          | -              | Not null, Unique |
 | OwnerID   | The integer ID associated with the staff member who owns the file | 1       | Integer | ❌          | Staff(StaffID) | Not null         |
-| Origin    | The message or report that the file is attached to                | M+1     | Text    | ❌          | -              | Not null         |
+| Origin    | The message or report that the file is attached to                | m+1     | Text    | ❌          | -              | Not null         |
 | FilePath  | The path on the server to the file                                | -       | Text    | ❌          | -              | Not null, Unique |
 | HashedUrl | The uuid of FileID to be used to download the file                | -       | Text    | ❌          | -              | Not null, Unique |
 | TimeStamp | The timestamp that the file was uploaded                          | -       | Text    | ❌          | -              | Not null         |
