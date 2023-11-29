@@ -1800,6 +1800,9 @@ def edit_staff(staffEmail):
             connection.commit()
             enabled = "False"
             archived = "True"
+            senco = "False"
+            safeguarding = "False"
+            admin = "False"
         else:
             archived = "False"
         
@@ -1833,6 +1836,10 @@ def edit_staff(staffEmail):
         
         if current_user.get_user_dictionary()["admin"] == "False":
             return redirect(url_for("dashboard"))
+        
+        if deleteAccount == "True":
+            return redirect(url_for('search_staff'))
+        
         data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
         return render_template("edit_staff.html", data=data, msg=f"Successfully updated {cleanedEmail}'s account")
 
