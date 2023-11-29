@@ -470,92 +470,86 @@ def login():
             print("User not logged in")
             return render_template("login.html", msg="")
         return redirect(url_for('dashboard'))
-    
-    elif request.method == 'POST':
-        if type(current_user._get_current_object()) is User:
-            print("User already logged in")
-            return redirect(url_for('dashboard'))
-        
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        #Email validation
-        cleanedEmail = entry_cleaner(email, "email")
-        if cleanedEmail != email.lower():
-            print("Invalid email")
-            return render_template("login.html", msg="Invalid Credentials", savedEmail=email)
-        del email
-        
-        #Password Validation
-        cleanedPassword = entry_cleaner(password, "password")
-        if cleanedPassword != password:
-            print("Invalid password")
-            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
-        del password
-
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
-        
-        cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            print("User not found")
-            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
-        else:
-            passHash = result[0]
-        
-        cursor.execute("SELECT PassSalt FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            print("User not found")
-            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
-        else:
-            salt = result[0]
-        
-        if passHash != hash_function.hash_variable(cleanedPassword, salt):
-            connection.close()
-            print("Password doesn't match stored password")
-            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
-        
-        cursor.execute("SELECT * FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        connection.close()
-        if result == None:
-            print("User not found")
-            return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
-        
-        userDetails = {
-            "id": result[0],
-            "firstName": result[1],
-            "lastName": result[2],
-            "title": result[3],
-            "email": result[4],
-            "accountEnabled": result[5],
-            "accountArchived": result[6],
-            "passhash": result[7],
-            "passsalt": result[8],
-            "SENCo": result[9],
-            "safeguarding": result[10],
-            "admin": result[11]
-        }
-
-        login_user(User(userDetails), remember=False)
-        print("Successfully logged in")
+    if type(current_user._get_current_object()) is User:
+        print("User already logged in")
         return redirect(url_for('dashboard'))
+    
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    #Email validation
+    cleanedEmail = entry_cleaner(email, "email")
+    if cleanedEmail != email.lower():
+        print("Invalid email")
+        return render_template("login.html", msg="Invalid Credentials", savedEmail=email)
+    del email
+    
+    #Password Validation
+    cleanedPassword = entry_cleaner(password, "password")
+    if cleanedPassword != password:
+        print("Invalid password")
+        return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
+    del password
+
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("User not found")
+        return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
+    else:
+        passHash = result[0]
+    
+    cursor.execute("SELECT PassSalt FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("User not found")
+        return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
+    else:
+        salt = result[0]
+    
+    if passHash != hash_function.hash_variable(cleanedPassword, salt):
+        connection.close()
+        print("Password doesn't match stored password")
+        return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
+    
+    cursor.execute("SELECT * FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    connection.close()
+    if result == None:
+        print("User not found")
+        return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
+    
+    userDetails = {
+        "id": result[0],
+        "firstName": result[1],
+        "lastName": result[2],
+        "title": result[3],
+        "email": result[4],
+        "accountEnabled": result[5],
+        "accountArchived": result[6],
+        "passhash": result[7],
+        "passsalt": result[8],
+        "SENCo": result[9],
+        "safeguarding": result[10],
+        "admin": result[11]
+    }
+
+    login_user(User(userDetails), remember=False)
+    print("Successfully logged in")
+    return redirect(url_for('dashboard'))
 # Objective 2 completed
 
 @app.route('/ChangePassword', methods=['GET', 'POST'])
 @login_required
 def reset_password():
-    if type(current_user._get_current_object()) is not User:
-        print("User not logged in")
-        return redirect(url_for('login'))
-    
     if request.method == 'GET':
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
@@ -627,26 +621,16 @@ def reset_password():
 @app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    if type(current_user._get_current_object()) is not User:
-        print("User not logged in")
-        return redirect(url_for('login'))
     return render_template("dashboard.html")
 
 @app.route('/messages', methods=['GET'])
 @login_required
 def messages():
-    if type(current_user._get_current_object()) is not User:
-        print("User not logged in")
-        return redirect(url_for('login'))
     return render_template("messaging.html")
 
 @app.route('/messages/inbox', methods=['GET'])
 @login_required
 def messages_inbox():
-    if type(current_user._get_current_object()) is not User:
-        print("User not logged in")
-        return redirect(url_for('login'))
-    
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
 
@@ -713,151 +697,143 @@ def messages_inbox():
 @app.route('/messages/compose', methods=['GET', 'POST'])
 @login_required
 def messages_compose():
-    if type(current_user._get_current_object()) is not User:
-        print("User not logged in")
-        return redirect(url_for('login'))
-    
     if request.method == 'GET':
         return render_template("compose.html", msg="")
-    elif request.method == 'POST':
-        currentUser = current_user.get_user_dictionary()
-        recipient = request.form.get('recipient')
-        message = request.form.get('message')
-        readReceipts = request.form.get('read-receipts')
-        attachments = request.files.getlist('attachments')
-        
-        #Email validation
-        cleanedEmail = entry_cleaner(recipient, "email")
-        if cleanedEmail != recipient.lower():
-            print("Invalid email")
-            data = [recipient, message, readReceipts]
-            return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
-        del recipient
-        
-        if readReceipts == "True":
-            readReceipts = True
-        else:
-            readReceipts = False
+    currentUser = current_user.get_user_dictionary()
+    recipient = request.form.get('recipient')
+    message = request.form.get('message')
+    readReceipts = request.form.get('read-receipts')
+    attachments = request.files.getlist('attachments')
+    
+    #Email validation
+    cleanedEmail = entry_cleaner(recipient, "email")
+    if cleanedEmail != recipient.lower():
+        print("Invalid email")
+        data = [recipient, message, readReceipts]
+        return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
+    del recipient
+    
+    if readReceipts == "True":
+        readReceipts = True
+    else:
+        readReceipts = False
 
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
 
-        cursor.execute("SELECT StaffID FROM Staff WHERE Email=? and AccountArchived='False';"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            print("Invalid email")
-            connection.close()
-            data = [cleanedEmail, message, readReceipts]
-            return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
-        else:
-            recipientID = result[0]
-
-        timeStamp = float(datetime.timestamp(datetime.now()))
-        
-        vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
-        subsitutionKey = random.randint(1, 61)
-
-        cleanedMessage = message.replace('\0', '')
-        
-        encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
-        if subsitutionKey < 10:
-            subsitutionKey = "0" + str(subsitutionKey)
-            
-        with open("secrets.json", "r") as f:
-            key = encryption.substitution_encrypt(
-                plainText=(vernamKey + str(subsitutionKey)),
-                key=json.load(f)['MessageKey']
-                )
-        
-        cleanedEncryptedMessage = ""
-        for character in encryptedMessage:
-            if character == '"':
-                cleanedEncryptedMessage += "<Double_Quote>"
-            elif character == "'":
-                cleanedEncryptedMessage += "<Single_Quote>"
-            elif character == "\\":
-                cleanedEncryptedMessage += "<Escape>"
-            elif character == "\n":
-                cleanedEncryptedMessage += "<New_Line>"
-            elif character == "\t":
-                cleanedEncryptedMessage += "<Tab>"
-            elif character == "\r":
-                cleanedEncryptedMessage += "<Carriage_Return>"
-            elif character == "\0":
-                cleanedEncryptedMessage += "<Null_Character>"
-            elif character == "\a":
-                cleanedEncryptedMessage += "<ASCII_Bell>"
-            elif character == "\b":
-                cleanedEncryptedMessage += "<ASCII_Backspace>"
-            elif character == "\f":
-                cleanedEncryptedMessage += "<ASCII_Form_Feed>"
-            elif character == "\v":
-                cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
-            else:
-                cleanedEncryptedMessage += character
-
-        try:
-            cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
-                           VALUES (?, ?, ?, ?, ?, ?, 'False', ?);"""
-                           , (
-                               currentUser["id"],
-                               recipientID,
-                               cleanedEncryptedMessage,
-                               str(uuid.uuid4()),
-                               timeStamp,
-                               str(readReceipts),
-                               key
-                               )
-                           )
-            connection.commit()
-        except sqlite3.IntegrityError:
-            print("Failed CHECK constraint")
-            data = [cleanedEmail, message, readReceipts]
-            return render_template("compose.html", data=data, msg="Server Error")
-        
-        cursor.execute("""SELECT MessageID FROM Messages
-                       WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and ReadReceipts=? and Key=?;"""
-                       , (
-                           currentUser["id"],
-                           recipientID,
-                           cleanedEncryptedMessage,
-                           timeStamp,
-                           str(readReceipts),
-                           key
-                           )
-                       )
-        result = cursor.fetchone()
-
-        if result == None:
-            connection.close()
-            print("Failed to save message")
-            data = [cleanedEmail, message, readReceipts]
-            return render_template("compose.html", data=data, msg="Server Error")
-        else:
-            messageID = result[0]
-        
-        with open("secrets.json", "r") as f:
-            cursor.execute("UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;"
-                           , (encryption.substitution_encrypt(
-                               plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
-                               key=json.load(f)['UrlKey']),
-                              messageID))
-            connection.commit()
-        
+    cursor.execute("SELECT StaffID FROM Staff WHERE Email=? and AccountArchived='False';"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        print("Invalid email")
         connection.close()
-        if attachments[0].filename != '':
-            save_message_attachments(currentUser['id'], attachments, timeStamp, messageID, type="message")
+        data = [cleanedEmail, message, readReceipts]
+        return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
+    else:
+        recipientID = result[0]
+
+    timeStamp = float(datetime.timestamp(datetime.now()))
+    
+    vernamKey = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(message)))
+    subsitutionKey = random.randint(1, 61)
+
+    cleanedMessage = message.replace('\0', '')
+    
+    encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+    if subsitutionKey < 10:
+        subsitutionKey = "0" + str(subsitutionKey)
+        
+    with open("secrets.json", "r") as f:
+        key = encryption.substitution_encrypt(
+            plainText=(vernamKey + str(subsitutionKey)),
+            key=json.load(f)['MessageKey']
+            )
+    
+    cleanedEncryptedMessage = ""
+    for character in encryptedMessage:
+        if character == '"':
+            cleanedEncryptedMessage += "<Double_Quote>"
+        elif character == "'":
+            cleanedEncryptedMessage += "<Single_Quote>"
+        elif character == "\\":
+            cleanedEncryptedMessage += "<Escape>"
+        elif character == "\n":
+            cleanedEncryptedMessage += "<New_Line>"
+        elif character == "\t":
+            cleanedEncryptedMessage += "<Tab>"
+        elif character == "\r":
+            cleanedEncryptedMessage += "<Carriage_Return>"
+        elif character == "\0":
+            cleanedEncryptedMessage += "<Null_Character>"
+        elif character == "\a":
+            cleanedEncryptedMessage += "<ASCII_Bell>"
+        elif character == "\b":
+            cleanedEncryptedMessage += "<ASCII_Backspace>"
+        elif character == "\f":
+            cleanedEncryptedMessage += "<ASCII_Form_Feed>"
+        elif character == "\v":
+            cleanedEncryptedMessage += "<ASCII_Vertical_Tab>"
+        else:
+            cleanedEncryptedMessage += character
+
+    try:
+        cursor.execute("""INSERT INTO Messages(SenderID, RecipientID, Message, HashedUrl, TimeStamp, ReadReceipts, Archived, Key)
+                        VALUES (?, ?, ?, ?, ?, ?, 'False', ?);"""
+                        , (
+                            currentUser["id"],
+                            recipientID,
+                            cleanedEncryptedMessage,
+                            str(uuid.uuid4()),
+                            timeStamp,
+                            str(readReceipts),
+                            key
+                            )
+                        )
+        connection.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        data = [cleanedEmail, message, readReceipts]
+        return render_template("compose.html", data=data, msg="Server Error")
+    
+    cursor.execute("""SELECT MessageID FROM Messages
+                    WHERE SenderID=? and RecipientID=? and Message=? and TimeStamp=? and ReadReceipts=? and Key=?;"""
+                    , (
+                        currentUser["id"],
+                        recipientID,
+                        cleanedEncryptedMessage,
+                        timeStamp,
+                        str(readReceipts),
+                        key
+                        )
+                    )
+    result = cursor.fetchone()
+
+    if result == None:
         connection.close()
-        return redirect(url_for('messages_compose'))
+        print("Failed to save message")
+        data = [cleanedEmail, message, readReceipts]
+        return render_template("compose.html", data=data, msg="Server Error")
+    else:
+        messageID = result[0]
+    
+    with open("secrets.json", "r") as f:
+        cursor.execute("UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;"
+                        , (encryption.substitution_encrypt(
+                            plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
+                            key=json.load(f)['UrlKey']),
+                            messageID))
+        connection.commit()
+    
+    connection.close()
+    if attachments[0].filename != '':
+        save_message_attachments(currentUser['id'], attachments, timeStamp, messageID, type="message")
+    connection.close()
+    return redirect(url_for('messages_compose'))
 # Objective 3 completed
 
 @app.route('/messages/inbox/<string:encryptedMessageID>', methods=['GET', 'POST'])
 @login_required
 def preview_message(encryptedMessageID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
@@ -968,9 +944,6 @@ def download_user_content(encryptedAttachmentID):
 @app.route('/reports', methods=['GET', 'POST'])
 @login_required
 def reporting_search():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if request.method == 'POST':
         dataString = request.form.get('email-list')
         if not dataString:
@@ -1036,9 +1009,6 @@ def reporting_search():
 @app.route('/reports/<string:studentID>', methods=['GET'])
 @login_required
 def student_reports(studentID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
@@ -1065,7 +1035,6 @@ def student_reports(studentID):
         connection.close()
         return redirect(url_for("reporting_search"))
     
-    
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
                    , (cleanedID, ))
     result = cursor.fetchone()
@@ -1081,9 +1050,6 @@ def student_reports(studentID):
 @app.route('/reports/view/<string:studentID>', methods=['GET'])
 @login_required
 def view_reports(studentID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     cleanedID = entry_cleaner(studentID, "sql")
     if studentID != cleanedID:
         print("Invalid ID")
@@ -1097,8 +1063,6 @@ def view_reports(studentID):
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
                     , (cleanedID, current_user.id))
     result = cursor.fetchone()
-    if result == None:
-        return redirect(url_for("reporting_search"))
     
     if current_user.senco or current_user.safeguarding or result in [1, 2, 3, 0]:
         cursor.execute("SELECT * FROM Reporting WHERE StudentID=?;"
@@ -1144,9 +1108,6 @@ def view_reports(studentID):
 @app.route('/reports/view/<string:studentID>/<string:reportID>', methods=['GET'])
 @login_required
 def preview_report(studentID, reportID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     cleanedStudentID = entry_cleaner(studentID, "sql")
     if studentID != cleanedStudentID:
         print("Invalid student ID")
@@ -1179,9 +1140,6 @@ def preview_report(studentID, reportID):
     
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
                     , (cleanedStudentID, current_user.id))
-    result = cursor.fetchone()
-    if result == None:
-        return redirect(url_for("reporting_search"))
     
     if current_user.id != data[2] and not (current_user.senco or current_user.safeguarding) and result not in [1, 2, 3, 0]:
         print("No permission no view report")
@@ -1246,9 +1204,6 @@ def preview_report(studentID, reportID):
 @app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
 @login_required
 def create_report(studentID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     cleanedID = entry_cleaner(studentID, "sql")
     if studentID != cleanedID:
         print("Invalid ID")
@@ -1367,157 +1322,135 @@ def create_report(studentID):
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def user_settings():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if request.method == 'GET':
         return render_template("user_settings.html", msg="", entry=[])
-    elif request.method == 'POST':
-        email = request.form.get('email')
-        oldPassword = request.form.get('old-password')
-        newPassword = request.form.get('new-password')
-        confirmNewPassword = request.form.get('confirm-new-password')
+    
+    email = request.form.get('email')
+    oldPassword = request.form.get('old-password')
+    newPassword = request.form.get('new-password')
+    confirmNewPassword = request.form.get('confirm-new-password')
 
-        #Email validation
-        cleanedEmail = entry_cleaner(email, "email")
-        if cleanedEmail != email.lower():
-            print("Invalid email")
-            return render_template("user_settings.html", msg="Invalid Email", entry=["email"], savedEmail=email)
-        del email
-        
-        #Password Validation
-        cleanedOldPassword = entry_cleaner(oldPassword, "password")
-        cleanedNewPassword = entry_cleaner(newPassword, "password")
-        cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
-        if cleanedOldPassword != oldPassword:
-            print("Invalid old password")
-            return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"], savedEmail=cleanedEmail)
-        if cleanedNewPassword != newPassword:
-            print("Invalid new password")
-            return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"], savedEmail=cleanedEmail)
-        if cleanedConfirmNewPassword != confirmNewPassword:
-            print("Invalid confirm new password")
-            return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"], savedEmail=cleanedEmail)
-        del oldPassword
-        del newPassword
-        del confirmNewPassword
+    #Email validation
+    cleanedEmail = entry_cleaner(email, "email")
+    if cleanedEmail != email.lower():
+        print("Invalid email")
+        return render_template("user_settings.html", msg="Invalid Email", entry=["email"], savedEmail=email)
+    del email
+    
+    #Password Validation
+    cleanedOldPassword = entry_cleaner(oldPassword, "password")
+    cleanedNewPassword = entry_cleaner(newPassword, "password")
+    cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
+    if cleanedOldPassword != oldPassword:
+        print("Invalid old password")
+        return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"], savedEmail=cleanedEmail)
+    if cleanedNewPassword != newPassword:
+        print("Invalid new password")
+        return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"], savedEmail=cleanedEmail)
+    if cleanedConfirmNewPassword != confirmNewPassword:
+        print("Invalid confirm new password")
+        return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"], savedEmail=cleanedEmail)
+    del oldPassword
+    del newPassword
+    del confirmNewPassword
 
-        if not check_password_strength(cleanedNewPassword):
-            print("Insecure password")
-            return render_template("user_settings.html", msg="Insecure password", entry=["new-password","confirm-new-password"], savedEmail=cleanedEmail)
-        
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
+    if not check_password_strength(cleanedNewPassword):
+        print("Insecure password")
+        return render_template("user_settings.html", msg="Insecure password", entry=["new-password","confirm-new-password"], savedEmail=cleanedEmail)
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
 
-        # Checking email
-        cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                       , (current_user.id, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            print("User not found")
-            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
-        elif result[0].lower() != cleanedEmail.lower():
-            connection.close()
-            print("Invalid email")
-            return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"], savedEmail=cleanedEmail)
-        
-        # Getting user's password
-        cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            print("User not found")
-            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
-        else:
-            passHash = result[0]
-        
-        cursor.execute("SELECT passSalt FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            print("User not found")
-            return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
-        else:
-            salt = result[0]
-        
-        if passHash != hash_function.hash_variable(cleanedOldPassword, salt):
-            connection.close()
-            print("Old password isn't valid")
-            return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"], savedEmail=cleanedEmail)
-        
-        if cleanedNewPassword != cleanedConfirmNewPassword:
-            connection.close()
-            print("New password and confirm new password aren't the same")
-            return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
-        
-        cursor.execute("UPDATE Staff SET PassHash = ? WHERE StaffID=?;"
-                       , (hash_function.hash_variable(
-                           cleanedNewPassword,
-                           salt),
-                          ),
-                       current_user.id
-                       )
-        connection.commit()
-        
-        userDetails = current_user.get_user_dictionary()
-        userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
-        logout_user()
-        login_user(User(userDetails), remember=False)
-        return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
+    # Checking email
+    cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                    , (current_user.id, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("User not found")
+        return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
+    elif result[0].lower() != cleanedEmail.lower():
+        connection.close()
+        print("Invalid email")
+        return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"], savedEmail=cleanedEmail)
+    
+    # Getting user's password
+    cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("User not found")
+        return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
+    else:
+        passHash = result[0]
+    
+    cursor.execute("SELECT passSalt FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("User not found")
+        return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
+    else:
+        salt = result[0]
+    
+    if passHash != hash_function.hash_variable(cleanedOldPassword, salt):
+        connection.close()
+        print("Old password isn't valid")
+        return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"], savedEmail=cleanedEmail)
+    
+    if cleanedNewPassword != cleanedConfirmNewPassword:
+        connection.close()
+        print("New password and confirm new password aren't the same")
+        return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
+    
+    cursor.execute("UPDATE Staff SET PassHash = ? WHERE StaffID=?;"
+                    , (hash_function.hash_variable(
+                        cleanedNewPassword,
+                        salt),
+                        ),
+                    current_user.id
+                    )
+    connection.commit()
+    
+    userDetails = current_user.get_user_dictionary()
+    userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
+    logout_user()
+    login_user(User(userDetails), remember=False)
+    return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
 @app.route('/app/analytics', methods=['GET'])
 @login_required
 def analytics():# TODO
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        return render_template("under_construction.html")
-    else:
+    if not current_user.admin:
         return redirect(url_for('dashboard'))
+    return render_template("under_construction.html")
 
 @app.route('/app/users', methods=['GET'])
 @login_required
 def manage_user():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        return render_template("manage_users.html")
-    else:
+    if not current_user.admin:
         return redirect(url_for('dashboard'))
+    return render_template("manage_users.html")
 
 @app.route('/app/users/staff', methods=['GET'])
 @login_required
 def manage_users_staff():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        return render_template("manage_staff.html")
-    else:
+    if not current_user.admin:
         return redirect(url_for('dashboard'))
+    return render_template("manage_staff.html")
 
 @app.route('/app/users/students', methods=['GET'])
 @login_required
 def manage_users_students():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        return render_template("manage_students.html")
-    else:
+    if not current_user.admin:
         return redirect(url_for('dashboard'))
+    return render_template("manage_students.html")
 
 @app.route('/app/users/staff/create', methods=['GET', 'POST'])
 @login_required
 def create_staff():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -1623,9 +1556,6 @@ def create_staff():
 @app.route('/app/users/staff/lookup', methods=['GET', 'POST'])
 @login_required
 def search_staff():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -1633,8 +1563,7 @@ def search_staff():
         email = request.form.get('email-list')
         if email:
             return redirect(url_for('edit_staff', staffEmail=email))
-        else:
-            return redirect(url_for('search_staff'))
+        return redirect(url_for('search_staff'))
     
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -1657,9 +1586,6 @@ def search_staff():
 @app.route('/app/users/staff/edit/<string:staffEmail>', methods=['GET', 'POST'])
 @login_required
 def edit_staff(staffEmail):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -1693,162 +1619,158 @@ def edit_staff(staffEmail):
 
         return render_template("edit_staff.html", data=data, msg="")
     
-    elif request.method == 'POST':
-        cleanedStaffEmail = entry_cleaner(staffEmail, "sql")
-        if staffEmail != cleanedStaffEmail:
-            print("Invalid ID")
-            return redirect(url_for("search_students"))
-        del staffEmail
-        
-        email = request.form.get('email')
-        title = request.form.get('title')
-        firstName = request.form.get('first-name')
-        lastName = request.form.get('last-name')
-        senco = request.form.get('senco')
-        safeguarding = request.form.get('safeguarding')
-        admin = request.form.get('admin')
-        enabled = request.form.get('enabled')
-        resetPassword = request.form.get('password')
-        deleteAccount = request.form.get('delete')
-        
-        if senco != "True":
-            senco = "False"
-        
-        if safeguarding != "True":
-            safeguarding = "False"
-        
-        if admin != "True":
-            admin = "False"
-        
-        if enabled != "True":
-            enabled = "False"
-        
-        if resetPassword != "True":
-            resetPassword = "False"
-        
-        if deleteAccount != "True":
-            deleteAccount = "False"
-        
-        cleanedEmail = entry_cleaner(email, "email")
-        if cleanedEmail != email:
-            print("Invalid email")
-            data = [firstName, lastName, title, email, enabled, senco, safeguarding, admin]
-            return render_template("edit_staff.html", data=data, msg="Email is invalid", entry=["email"])
-        del email
-        
-        cleanedFName = entry_cleaner(firstName, "sql")
-        if cleanedFName != firstName:
-            print("Invalid first name")
-            data = [firstName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
-            return render_template("edit_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
-        del firstName
-        
-        cleanedLName = entry_cleaner(lastName, "sql")
-        if cleanedLName != lastName:
-            print("Invalid last name")
-            data = [cleanedFName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
-            return render_template("edit_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
-        del lastName
-        
-        cleanedTitle = entry_cleaner(title, "sql")
-        if cleanedTitle != title:
-            print("Invalid title")
-            data = [cleanedFName, cleanedLName, title, cleanedEmail, enabled, senco, safeguarding, admin]
-            return render_template("edit_staff.html", data=data, msg="Title is invalid", entry=["title"])
-        del title
-        
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
-        
-        cursor.execute("SELECT Admin FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
+    cleanedStaffEmail = entry_cleaner(staffEmail, "sql")
+    if staffEmail != cleanedStaffEmail:
+        print("Invalid ID")
+        return redirect(url_for("search_students"))
+    del staffEmail
+    
+    email = request.form.get('email')
+    title = request.form.get('title')
+    firstName = request.form.get('first-name')
+    lastName = request.form.get('last-name')
+    senco = request.form.get('senco')
+    safeguarding = request.form.get('safeguarding')
+    admin = request.form.get('admin')
+    enabled = request.form.get('enabled')
+    resetPassword = request.form.get('password')
+    deleteAccount = request.form.get('delete')
+    
+    if senco != "True":
+        senco = "False"
+    
+    if safeguarding != "True":
+        safeguarding = "False"
+    
+    if admin != "True":
+        admin = "False"
+    
+    if enabled != "True":
+        enabled = "False"
+    
+    if resetPassword != "True":
+        resetPassword = "False"
+    
+    if deleteAccount != "True":
+        deleteAccount = "False"
+    
+    cleanedEmail = entry_cleaner(email, "email")
+    if cleanedEmail != email:
+        print("Invalid email")
+        data = [firstName, lastName, title, email, enabled, senco, safeguarding, admin]
+        return render_template("edit_staff.html", data=data, msg="Email is invalid", entry=["email"])
+    del email
+    
+    cleanedFName = entry_cleaner(firstName, "sql")
+    if cleanedFName != firstName:
+        print("Invalid first name")
+        data = [firstName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
+        return render_template("edit_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
+    del firstName
+    
+    cleanedLName = entry_cleaner(lastName, "sql")
+    if cleanedLName != lastName:
+        print("Invalid last name")
+        data = [cleanedFName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
+        return render_template("edit_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
+    del lastName
+    
+    cleanedTitle = entry_cleaner(title, "sql")
+    if cleanedTitle != title:
+        print("Invalid title")
+        data = [cleanedFName, cleanedLName, title, cleanedEmail, enabled, senco, safeguarding, admin]
+        return render_template("edit_staff.html", data=data, msg="Title is invalid", entry=["title"])
+    del title
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT Admin FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("Target user not found")
+        return redirect(url_for("search_staff"))
+    
+    if admin == "False" and result[0] == "True":
+        cursor.execute("SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';")
+        result = cursor.fetchall()
+        if result == None or len(result) == 0:
             connection.close()
             print("Target user not found")
             return redirect(url_for("search_staff"))
-        
-        if admin == "False" and result[0] == "True":
-            cursor.execute("SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';")
-            result = cursor.fetchall()
-            if result == None or len(result) == 0:
-                connection.close()
-                print("Target user not found")
-                return redirect(url_for("search_staff"))
-            if len(result) == 1:
-                data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, "True"]
-                print("User is trying to remove last admin")
-                return render_template("edit_staff.html", data=data, msg="There must always be at least one admin account active", entry=["admin"])
-        
-        cursor.execute("SELECT StaffID, Passhash, PassSalt FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
-        result = cursor.fetchone()
-        if result == None:
-            connection.close()
-            print("Target user not found")
-            return redirect(url_for("search_staff"))
-        
-        if resetPassword == "True":
-            print(resetPassword)
-            passHash = hash_function.hash_variable("ChangeMe", result[2])
-        else:
-            passHash = result[1]
+        if len(result) == 1:
+            data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, "True"]
+            print("User is trying to remove last admin")
+            return render_template("edit_staff.html", data=data, msg="There must always be at least one admin account active", entry=["admin"])
+    
+    cursor.execute("SELECT StaffID, Passhash, PassSalt FROM Staff WHERE Email=?;"
+                    , (cleanedEmail, ))
+    result = cursor.fetchone()
+    if result == None:
+        connection.close()
+        print("Target user not found")
+        return redirect(url_for("search_staff"))
+    
+    if resetPassword == "True":
+        print(resetPassword)
+        passHash = hash_function.hash_variable("ChangeMe", result[2])
+    else:
+        passHash = result[1]
 
-        if deleteAccount == "True":
-            cursor.execute("DELETE FROM StudentRelationship WHERE StaffID = ?;"
-                           , (result[0], ))
-            connection.commit()
-            enabled = "False"
-            archived = "True"
-            senco = "False"
-            safeguarding = "False"
-            admin = "False"
-        else:
-            archived = "False"
-        
-        try:
-            cursor.execute("UPDATE Staff SET FirstName = ?, Lastname = ?, Title = ?, Email = ?, AccountEnabled = ?, AccountArchived = ?, PassHash = ?, PassSalt = ?, SENCo = ?, Safeguarding = ?, Admin = ? WHERE Email = ?"
-                           , (cleanedFName,
-                              cleanedLName,
-                              cleanedTitle,
-                              cleanedEmail,
-                              enabled,
-                              archived,
-                              passHash,
-                              result[2],
-                              senco,
-                              safeguarding,
-                              admin,
-                              cleanedEmail
-                              )
-                           )
-            connection.commit()
-        except sqlite3.IntegrityError:
-            print("Failed CHECK constraint")
-            connection.close()
-            data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
-            return render_template("create_staff.html", data=data, msg="Server Error")
-        
-        if current_user.id == result[0]:
-            userDetails = current_user.get_user_dictionary()
-            logout_user()
-            login_user(User(userDetails), remember=False)
-        
-        if current_user.get_user_dictionary()["admin"] == "False":
-            return redirect(url_for("dashboard"))
-        
-        if deleteAccount == "True":
-            return redirect(url_for('search_staff'))
-        
+    if deleteAccount == "True":
+        cursor.execute("DELETE FROM StudentRelationship WHERE StaffID = ?;"
+                        , (result[0], ))
+        connection.commit()
+        enabled = "False"
+        archived = "True"
+        senco = "False"
+        safeguarding = "False"
+        admin = "False"
+    else:
+        archived = "False"
+    
+    try:
+        cursor.execute("UPDATE Staff SET FirstName = ?, Lastname = ?, Title = ?, Email = ?, AccountEnabled = ?, AccountArchived = ?, PassHash = ?, PassSalt = ?, SENCo = ?, Safeguarding = ?, Admin = ? WHERE Email = ?"
+                        , (cleanedFName,
+                            cleanedLName,
+                            cleanedTitle,
+                            cleanedEmail,
+                            enabled,
+                            archived,
+                            passHash,
+                            result[2],
+                            senco,
+                            safeguarding,
+                            admin,
+                            cleanedEmail
+                            )
+                        )
+        connection.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        connection.close()
         data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
-        return render_template("edit_staff.html", data=data, msg=f"Successfully updated {cleanedEmail}'s account")
+        return render_template("create_staff.html", data=data, msg="Server Error")
+    
+    if current_user.id == result[0]:
+        userDetails = current_user.get_user_dictionary()
+        logout_user()
+        login_user(User(userDetails), remember=False)
+    
+    if current_user.get_user_dictionary()["admin"] == "False":
+        return redirect(url_for("dashboard"))
+    
+    if deleteAccount == "True":
+        return redirect(url_for('search_staff'))
+    
+    data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
+    return render_template("edit_staff.html", data=data, msg=f"Successfully updated {cleanedEmail}'s account")
 
 @app.route('/app/users/students/create', methods=['GET', 'POST'])
 @login_required
 def create_student():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -1892,9 +1814,6 @@ def create_student():
 @app.route('/app/users/students/lookup', methods=['GET', 'POST'])
 @login_required
 def search_students():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -1940,9 +1859,6 @@ def search_students():
 @app.route('/app/users/students/edit/<string:studentID>', methods=['GET', 'POST'])
 @login_required
 def edit_student(studentID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -1971,80 +1887,75 @@ def edit_student(studentID):
             ]
 
         return render_template("edit_student.html", data=data, msg="")
+    cleanedID = entry_cleaner(studentID, "sql")
+    if studentID != cleanedID:
+        print("Invalid ID")
+        return redirect(url_for("search_students"))
+    del studentID
     
-    elif request.method == 'POST':
-        cleanedID = entry_cleaner(studentID, "sql")
-        if studentID != cleanedID:
-            print("Invalid ID")
-            return redirect(url_for("search_students"))
-        del studentID
+    firstName = request.form.get('first-name')
+    lastName = request.form.get('last-name')
+    dateOfBirth = request.form.get('date-of-birth')
+    delete = request.form.get('delete')
+    
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    if delete == "True":
+        cursor.execute("DELETE FROM Reporting WHERE StudentID = ?;"
+                        , (cleanedID, ))
+        connection.commit()
+        cursor.execute("DELETE FROM StudentRelationship WHERE StudentID = ?;"
+                        , (cleanedID, ))
+        connection.commit()
+        cursor.execute("DELETE FROM Students WHERE StudentID = ?;"
+                        , (cleanedID, ))
+        connection.commit()
         
-        firstName = request.form.get('first-name')
-        lastName = request.form.get('last-name')
-        dateOfBirth = request.form.get('date-of-birth')
-        delete = request.form.get('delete')
-        
-        connection = sqlite3.connect("database.db")
-        cursor = connection.cursor()
-        
-        if delete == "True":
-            cursor.execute("DELETE FROM Reporting WHERE StudentID = ?;"
-                           , (cleanedID, ))
-            connection.commit()
-            cursor.execute("DELETE FROM StudentRelationship WHERE StudentID = ?;"
-                           , (cleanedID, ))
-            connection.commit()
-            cursor.execute("DELETE FROM Students WHERE StudentID = ?;"
-                           , (cleanedID, ))
-            connection.commit()
-            
-            cursor.execute("SELECT StudentID FROM Students;")
-            result = cursor.fetchall()
-            connection.close()
-            if result == None or len(result) == 0:
-                return redirect(url_for("manage_users_students"))
-            return redirect(url_for('search_students'))
+        cursor.execute("SELECT StudentID FROM Students;")
+        result = cursor.fetchall()
+        connection.close()
+        if result == None or len(result) == 0:
+            return redirect(url_for("manage_users_students"))
+        return redirect(url_for('search_students'))
 
-        cleanedFName = entry_cleaner(firstName, "sql")
-        if cleanedFName != firstName:
-            print("Invalid first name")
-            data = [cleanedID, firstName, lastName, dateOfBirth]
-            return render_template("edit_student.html", data=data, msg="First name is invalid", entry=["first-name"])
-        del firstName
-        
-        cleanedLName = entry_cleaner(lastName, "sql")
-        if cleanedLName != lastName:
-            print("Invalid last name")
-            data = [cleanedID, cleanedFName, lastName, dateOfBirth]
-            return render_template("edit_student.html", data=data, msg="Last name is invalid", entry=["last-name"])
-        del lastName
+    cleanedFName = entry_cleaner(firstName, "sql")
+    if cleanedFName != firstName:
+        print("Invalid first name")
+        data = [cleanedID, firstName, lastName, dateOfBirth]
+        return render_template("edit_student.html", data=data, msg="First name is invalid", entry=["first-name"])
+    del firstName
+    
+    cleanedLName = entry_cleaner(lastName, "sql")
+    if cleanedLName != lastName:
+        print("Invalid last name")
+        data = [cleanedID, cleanedFName, lastName, dateOfBirth]
+        return render_template("edit_student.html", data=data, msg="Last name is invalid", entry=["last-name"])
+    del lastName
 
-        try:
-            cursor.execute("UPDATE Students SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?"
-                           , (
-                               cleanedFName,
-                               cleanedLName,
-                               dateOfBirth,
-                               cleanedID
-                               )
-                           )
-            connection.commit()
-        except sqlite3.IntegrityError:
-            print("Failed CHECK constraint")
-            connection.close()
-            data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
-            return render_template("edit_student.html", data=data, msg="Server Error")
-        
+    try:
+        cursor.execute("UPDATE Students SET FirstName = ?, Lastname = ?, DateOfBirth = ? WHERE StudentID = ?"
+                        , (
+                            cleanedFName,
+                            cleanedLName,
+                            dateOfBirth,
+                            cleanedID
+                            )
+                        )
+        connection.commit()
+    except sqlite3.IntegrityError:
+        print("Failed CHECK constraint")
+        connection.close()
         data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
-        return render_template("edit_student.html", data=data, msg="Successfully updated!")
+        return render_template("edit_student.html", data=data, msg="Server Error")
+    
+    data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
+    return render_template("edit_student.html", data=data, msg="Successfully updated!")
 
 # Objective 6 started
 @app.route('/app/users/students/Links', methods=['GET', 'POST'])
 @login_required
 def staff_student_relationships_lookup():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -2090,9 +2001,6 @@ def staff_student_relationships_lookup():
 @app.route('/app/users/students/Links/All', methods=['GET'])
 @login_required
 def view_all_student_staff_relationships():
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -2114,16 +2022,12 @@ def view_all_student_staff_relationships():
         }
         data.append(f"{staffData[2]} {staffData[0]} {staffData[1]} is the {relationshipTypes[row[2]]} of {studentData[0]} {studentData[1]} ")
     
-    print(data)
     connection.close()
     return render_template("all_student_staff_relationships.html", data=data)
 
 @app.route('/app/users/students/Links/<string:studentID>', methods=['GET', 'POST'])
 @login_required
 def staff_student_relationships(studentID):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
     
@@ -2158,11 +2062,9 @@ def staff_student_relationships(studentID):
 @app.route('/app/users/students/Links/<string:studentID>/<string:staffEmail>', methods=['GET', 'POST'])
 @login_required
 def edit_staff_student_relationships(studentID, staffEmail):
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
     if not current_user.admin:
         return redirect(url_for('dashboard'))
+    
     cleanedID = entry_cleaner(studentID, "sql")
     if studentID != cleanedID:
         print("Invalid ID")
@@ -2314,20 +2216,19 @@ def edit_staff_student_relationships(studentID, staffEmail):
 @app.route('/app/settings', methods=['GET'])
 @login_required
 def app_settings():# TODO
-    if type(current_user._get_current_object()) is not User:
-        return redirect(url_for('login'))
-    
-    if current_user.admin:
-        # return render_template("app_settings.html")
-        return render_template("under_construction.html")
-    else:
+    if not current_user.admin:
         return redirect(url_for('dashboard'))
+    
+    # return render_template("app_settings.html")
+    return render_template("under_construction.html")
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    if request.method == 'GET':
+        return redirect(url_for('login'))
+    return "True"
 
 
 #########################################################################
