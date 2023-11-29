@@ -742,7 +742,7 @@ def messages_compose():
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
 
-        cursor.execute("SELECT StaffID FROM Staff WHERE Email=?;"
+        cursor.execute("SELECT StaffID FROM Staff WHERE Email=? and AccountArchived='False';"
                        , (cleanedEmail, ))
         result = cursor.fetchone()
         if result == None:
