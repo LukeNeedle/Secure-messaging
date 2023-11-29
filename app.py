@@ -1034,6 +1034,7 @@ def reporting_search():
     return render_template("report_lookup.html", names=names)
 
 @app.route('/reports/<string:studentID>', methods=['GET'])
+@login_required
 def student_reports(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -1078,6 +1079,7 @@ def student_reports(studentID):
     return render_template("student_profile.html", studentData=studentData, studentID=cleanedID)
 
 @app.route('/reports/view/<string:studentID>', methods=['GET'])
+@login_required
 def view_reports(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -1140,6 +1142,7 @@ def view_reports(studentID):
     return render_template("reports.html", data=response, studentID=cleanedID)
 
 @app.route('/reports/view/<string:studentID>/<string:reportID>', methods=['GET'])
+@login_required
 def preview_report(studentID, reportID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -1241,6 +1244,7 @@ def preview_report(studentID, reportID):
 # Objective 7 completed
 
 @app.route('/reports/write/<string:studentID>', methods=['GET', 'POST'])
+@login_required
 def create_report(studentID):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -2077,6 +2081,7 @@ def staff_student_relationships_lookup():
     return render_template("staff_student_relationships_lookup.html", names=names)
 
 @app.route('/app/users/students/Links/All', methods=['GET'])
+@login_required
 def view_all_student_staff_relationships():
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
@@ -2144,6 +2149,7 @@ def staff_student_relationships(studentID):
     return render_template("staff_student_relationships.html", studentID=cleanedID, emails=emails)
 
 @app.route('/app/users/students/Links/<string:studentID>/<string:staffEmail>', methods=['GET', 'POST'])
+@login_required
 def edit_staff_student_relationships(studentID, staffEmail):
     if type(current_user._get_current_object()) is not User:
         return redirect(url_for('login'))
