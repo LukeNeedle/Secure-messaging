@@ -1,23 +1,11 @@
 /* colour schemes */
-@media (prefers-color-scheme: light) {
-    :root {
-        --text: #201316;
-        --background: #efe6e8;
-        --primary: #5d367d;
-        --secondary: #f5f4ef;
-        --accent: #3c90af;
-        --minor-border: #dad2d3;
-    }
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text: #efe6e8;
-        --background: #201316;
-        --primary: #3a347e;
-        --secondary: #2c1c16;
-        --accent: #a4d0e0;
-        --minor-border: #dad2d3;
-    }
+:root {
+    --text: #201316;
+    --background: #efe6e8;
+    --primary: #5d367d;
+    --secondary: #f5f4ef;
+    --accent: #3c90af;
+    --minor-border: #dad2d3;
 }
 
 .content {
@@ -87,13 +75,13 @@
     margin-bottom: 5px;
 }
 
-div.options a.user-settings picture img{
+div.options a.user-settings img{
     animation-name: spin;
     animation-duration: 3s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
 }
-div.options a.app-settings picture img{
+div.options a.app-settings img{
     animation-name: spin-backwards;
     animation-duration: 3s;
     animation-iteration-count: infinite;

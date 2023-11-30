@@ -27,25 +27,13 @@
                 Actions
             </p>
             <a class="view" href="{{url_for('view_reports', studentID=studentID)}}">
-                <picture>
-                    <source
-                    srcset="/static/icons/file_dark.svg"
-                    media="(prefers-color-scheme: dark)"
-                    />
-                    <img width="20" height="20" src="/static/icons/file.svg"/>
-                </picture>
+                <img width="20" height="20" src="/static/icons/file.svg"/>
                 <span>
                     View Reports
                 </span>
             </a>
             <a class="create" href="{{url_for('create_report', studentID=studentID)}}">
-                <picture>
-                    <source
-                    srcset="/static/icons/pen_dark.svg"
-                    media="(prefers-color-scheme: dark)"
-                    />
-                    <img width="20" height="20" src="/static/icons/pen.svg"/>
-                </picture>
+                <img width="20" height="20" src="/static/icons/pen.svg"/>
                 <span>
                     Create New Report
                 </span>

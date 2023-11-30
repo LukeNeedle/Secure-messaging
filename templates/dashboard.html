@@ -12,62 +12,32 @@
         Messages
     </a>
     <a class="reporting" href="{{url_for('reporting_search')}}">
-        <picture>
-            <source
-              srcset="/static/icons/flag_dark.svg"
-              media="(prefers-color-scheme: dark)"
-            />
-            <img width="20" height="20" src="/static/icons/flag.svg"/>
-        </picture>
+        <img width="20" height="20" src="/static/icons/flag.svg"/>
         <span>
             Reporting
         </span>
     </a>
     <a class="user-settings" href="{{url_for('user_settings')}}">
-        <picture>
-            <source
-              srcset="/static/icons/settings_dark.svg"
-              media="(prefers-color-scheme: dark)"
-            />
-            <img width="20" height="20" src="/static/icons/settings.svg"/>
-        </picture>
+        <img width="20" height="20" src="/static/icons/settings.svg"/>
         <span>
             User Settings
         </span>
     </a>
     {% if current_user.admin %}
         <a class="analytics" href="{{url_for('analytics')}}">
-            <picture>
-                <source
-                srcset="/static/icons/magnifying_glass_dark.svg"
-                media="(prefers-color-scheme: dark)"
-                />
-                <img width="20" height="20" src="/static/icons/magnifying_glass.svg"/>
-            </picture>
+            <img width="20" height="20" src="/static/icons/magnifying_glass.svg"/>
             <span>
                 App Analytics
             </span>
         </a>
         <a class="manage-user" href="{{url_for('manage_user')}}">
-            <picture>
-                <source
-                srcset="/static/icons/user_dark.svg"
-                media="(prefers-color-scheme: dark)"
-                />
-                <img width="20" height="20" src="/static/icons/user.svg"/>
-            </picture>
+            <img width="20" height="20" src="/static/icons/user.svg"/>
             <span>
                 Manage Users
             </span>
         </a>
         <a class="app-settings" href="{{url_for('app_settings')}}">
-            <picture>
-                <source
-                srcset="/static/icons/settings_dark.svg"
-                media="(prefers-color-scheme: dark)"
-                />
-                <img width="20" height="20" src="/static/icons/settings.svg"/>
-            </picture>
+            <img width="20" height="20" src="/static/icons/settings.svg"/>
             <span>
                 App Settings
             </span>
