@@ -2365,14 +2365,12 @@ def four_zero_four_css():
 def handle_not_found(error):
     if type(current_user._get_current_object()) is User:
         return render_template("404.html")
-    else:
-        return redirect(url_for('login'))
+    return redirect(url_for('login'))
 
 def handle_no_permission(error):
     if type(current_user._get_current_object()) is User:
         return redirect(url_for('dashboard'))
-    else:
-        return redirect(url_for('login'))
+    return redirect(url_for('login'))
 
 
 #########################################################################
