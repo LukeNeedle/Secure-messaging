@@ -1185,8 +1185,7 @@ def preview_report(studentID, reportID):
     cursor.execute("SELECT * FROM Files WHERE Origin=?;"
                    , (f"r+{cleanedReportID}", ))
     result = cursor.fetchall()
-    print(f"r+{cleanedReportID}")
-    print(result)
+    
     if result == None or len(result) == 0:
         report.append([])
         connection.close()
