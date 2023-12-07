@@ -133,6 +133,18 @@ These objectives aren't in any particular order and they are only numbered to he
 | HashedUrl | The uuid of FileID to be used to download the file                | -       | Text    | ❌          | -              | Not null, Unique |
 | TimeStamp | The timestamp that the file was uploaded                          | -       | Text    | ❌          | -              | Not null         |
 
+### Notifications
+| Column         | Description                                                                  | Example | Type    | Primary Key | Foreign Key    | Constraints                 |
+|----------------|------------------------------------------------------------------------------|:-------:|:-------:|:-----------:|:--------------:|:---------------------------:|
+| NotificationID | The integer ID associated with the notification                              | 1       | Integer | ✅          | -              | Not null, Unique            |
+| SenderID       | The integer ID associated with the staff member who sent the notification    | 1       | Integer | ❌          | Staff(StaffID) | Not null                    |
+| RecipientID    | The integer ID associated with the staff member who can see the notification | 1       | Integer | ❌          | Staff(StaffID) | Not null                    |
+| BannerMessage  | The short message that is displayed in the notification                      | Test    | Text    | ❌          | -              | Not null                    |
+| Message        | The full notification contents                                               | Testing | Text    | ❌          | -              | Not null                    |
+| URL            | A random UUID to view the full notification                                  | -       | Text    | ❌          | -              | Not null, Unique            |
+| TimeStamp      | The timestamp that the notification will be deleted                          | -       | Text    | ❌          | -              | Not null                    |
+| Ephemeral      | Whether the notification disapears on view                                   | True    | Text    | ❌          | -              | 'True' or 'False', Not null |
+
 
 ## Naming schema
 |           | Correct name       |

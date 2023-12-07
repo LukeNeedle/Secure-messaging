@@ -5,7 +5,7 @@ def create_tables():
 	"""
 	conn = sqlite3.connect("database.db")
 	cur = conn.cursor()
-
+	
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Staff" (
 		"StaffID"	INTEGER NOT NULL UNIQUE,
 		"FirstName"	TEXT NOT NULL,
@@ -27,7 +27,7 @@ def create_tables():
 		CHECK ("Admin"=='True' OR "Admin"=='False')
 	)""")
 	conn.commit()
-
+	
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Messages" (
 		"MessageID"	INTEGER NOT NULL UNIQUE,
 		"SenderID"	INTEGER NOT NULL,
@@ -45,7 +45,7 @@ def create_tables():
 		CHECK ("Archived"=='True' OR "Archived"=='False')
 	)""")
 	conn.commit()
-
+	
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Students" (
 		"StudentID"	INTEGER NOT NULL UNIQUE,
 		"FirstName" STRING NOT NULL,
@@ -54,7 +54,7 @@ def create_tables():
 		PRIMARY KEY("StudentID" AUTOINCREMENT)
 	)""")
 	conn.commit()
-
+	
 	cur.execute("""CREATE TABLE IF NOT EXISTS "StudentRelationship" (
 		"RelationshipID"	INTEGER NOT NULL UNIQUE,
 		"StudentID" STRING NOT NULL,
@@ -66,7 +66,7 @@ def create_tables():
 		PRIMARY KEY("RelationshipID" AUTOINCREMENT)
 	)""")
 	conn.commit()
-
+	
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Reporting" (
 		"ReportID"	INTEGER NOT NULL UNIQUE,
 		"StudentID"	INTEGER NOT NULL,
@@ -80,7 +80,7 @@ def create_tables():
 		PRIMARY KEY("ReportID" AUTOINCREMENT)
 	)""")
 	conn.commit()
-
+	
 	cur.execute("""CREATE TABLE IF NOT EXISTS "Files" (
 		"FileID"	INTEGER NOT NULL UNIQUE,
 		"OwnerID"	INTEGER NOT NULL,
@@ -92,7 +92,23 @@ def create_tables():
 		PRIMARY KEY("FileID" AUTOINCREMENT)
 	)""")
 	conn.commit()
-
+	
+	cur.execute("""CREATE TABLE IF NOT EXISTS "Notifications" (
+		"NotificationID"	INTEGER NOT NULL UNIQUE,
+		"SenderID"	INTEGER NOT NULL,
+		"RecipientID"	INTEGER NOT NULL,
+		"BannerMessage"	TEXT NOT NULL,
+		"Message"	TEXT NOT NULL,
+		"URL"	TEXT NOT NULL UNIQUE,
+		"TimeStamp" TEXT NOT NULL,
+		"Ephemeral" TEXT NOT NULL,
+		FOREIGN KEY("SenderID") REFERENCES "Staff"("StaffID"),
+		FOREIGN KEY("RecipientID") REFERENCES "Staff"("StaffID"),
+		PRIMARY KEY("NotificationID" AUTOINCREMENT),
+		CHECK ("Ephemeral"=='True' OR "Ephemeral"=='False')
+	)""")
+	conn.commit()
+	
 	conn.close()
 
 def create_user(firstName:str, lastName:str, title:str, email:str,
@@ -123,7 +139,7 @@ def create_user(firstName:str, lastName:str, title:str, email:str,
     except sqlite3.IntegrityError:
         print("Failed CHECK constraint")
 
-    cur.execute(f"""SELECT StaffID FROM Staff WHERE FirstName='{firstName}' and LastName='{lastName}' and Title='{title}' and AccountEnabled='{enabled}' and SENCo='{SENCo}' and Safeguarding='{safeguarding}' and Admin='{admin}'""")
+    cur.execute(f"""SELECT StaffID FROM Staff WHERE FirstName='{firstName}' and LastName='{lastName}' and Title='{title}' and Email='{email}' and AccountEnabled='{enabled}' and SENCo='{SENCo}' and Safeguarding='{safeguarding}' and Admin='{admin}'""")
     results = cur.fetchall()
 
     if len(results) > 1:
