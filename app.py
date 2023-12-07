@@ -2132,7 +2132,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
     else:
         data = generate_data_for_student_link(cleanedID, cleanedEmail)
         import werkzeug.wrappers.response
-        if type(data) != werkzeug.wrappers.response.Response:
+        if type(data) == werkzeug.wrappers.response.Response:
             return data
         
         studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2169,7 +2169,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
         
         data = generate_data_for_student_link(cleanedID, cleanedEmail)
         import werkzeug.wrappers.response
-        if type(data) != werkzeug.wrappers.response.Response:
+        if type(data) == werkzeug.wrappers.response.Response:
             return data
         
         studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2182,7 +2182,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
             
             data = generate_data_for_student_link(cleanedID, cleanedEmail)
             import werkzeug.wrappers.response
-            if type(data) != werkzeug.wrappers.response.Response:
+            if type(data) == werkzeug.wrappers.response.Response:
                 return data
             
             studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2194,7 +2194,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
         
         data = generate_data_for_student_link(cleanedID, cleanedEmail)
         import werkzeug.wrappers.response
-        if type(data) != werkzeug.wrappers.response.Response:
+        if type(data) == werkzeug.wrappers.response.Response:
             return data
         
         studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2207,7 +2207,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
             
             data = generate_data_for_student_link(cleanedID, cleanedEmail)
             import werkzeug.wrappers.response
-            if type(data) != werkzeug.wrappers.response.Response:
+            if type(data) == werkzeug.wrappers.response.Response:
                 return data
             
             studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2229,7 +2229,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
             
             data = generate_data_for_student_link(cleanedID, cleanedEmail)
             import werkzeug.wrappers.response
-            if type(data) != werkzeug.wrappers.response.Response:
+            if type(data) == werkzeug.wrappers.response.Response:
                 return data
             
             studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2253,7 +2253,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
             
             data = generate_data_for_student_link(cleanedID, cleanedEmail)
             import werkzeug.wrappers.response
-            if type(data) != werkzeug.wrappers.response.Response:
+            if type(data) == werkzeug.wrappers.response.Response:
                 return data
             
             studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2266,7 +2266,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
         
         data = generate_data_for_student_link(cleanedID, cleanedEmail)
         import werkzeug.wrappers.response
-        if type(data) != werkzeug.wrappers.response.Response:
+        if type(data) == werkzeug.wrappers.response.Response:
             return data
         
         studentData, staffDetails, studentID, staffEmail, oldRelationship = data
@@ -2276,7 +2276,7 @@ def edit_staff_student_relationships(studentID, staffEmail):
     
     data = generate_data_for_student_link(cleanedID, cleanedEmail)
     import werkzeug.wrappers.response
-    if type(data) != werkzeug.wrappers.response.Response:
+    if type(data) == werkzeug.wrappers.response.Response:
         return data
     
     studentData, staffDetails, studentID, staffEmail, oldRelationship = data
