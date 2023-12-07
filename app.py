@@ -332,12 +332,12 @@ def check_for_reset_password():
 @app.before_request
 def session_timeout_management():
     """
-    This function is called before the endpoint code is run.
-    This function adds extra time to the session.
+    This function is called before the endpoint code is run and adds extra time to the session.
+    
     The extra time is added as follows:
-    Admin users get 5 minutes added for every request.
-    Safeguarding or senco users get 10 minutes added for every request.
-    Other users get 15 minutes added ofr every request.
+    - Admin users get 5 minutes added for every request.
+    - Safeguarding or senco users get 10 minutes added for every request.
+    - Other users get 15 minutes added ofr every request.
     """
     if len(request.path) < 4:
         validPath = request.path[0] != "."
