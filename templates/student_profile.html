@@ -41,4 +41,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState === 'hidden') {
+            window.location.href = "/dashboard";
+        }
+    });
+</script>
+
 {% endblock %}
