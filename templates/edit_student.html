@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{url_for('edit_student_css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/edit_student.css')}}">
 
 {% if msg != "" %}
     {% for id in entry %}

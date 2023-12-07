@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{url_for('dashboard_css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/dashboard.css')}}">
 
 <p class="welcome">
     Hello {{current_user.title}} {{current_user.lname}}!
@@ -23,6 +23,7 @@
             User Settings
         </span>
     </a>
+
     {% if current_user.admin %}
         <a class="analytics" href="{{url_for('analytics')}}">
             <img width="20" height="20" src="/static/icons/magnifying_glass.svg"/>

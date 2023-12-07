@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
+
 {% if msg != "" %}
     <style>
         .content {
@@ -19,7 +21,6 @@
     </p>
 {% endif %}
 
-<link rel="stylesheet" href="{{url_for('login_css')}}">
 <form method="POST" action="{{url_for('login')}}">
     <p class="title">
         Login

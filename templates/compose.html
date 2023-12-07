@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{url_for('messaging_compose_css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/messaging_compose.css')}}">
 
 {% if msg != "" %}
     {% for id in entry %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{url_for('student_staff_relationship_css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/student_staff_relationship.css')}}">
 
 {% if msg != "" %}
     {% if entry == "submit" %}

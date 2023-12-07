@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="{{url_for('manage_users_css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='css/manage_users.css')}}">
 
 <div class="options">
     <a class="staff" href="{{url_for('manage_users_staff')}}">
