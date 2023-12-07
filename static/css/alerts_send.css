@@ -1,0 +1,141 @@
+/* colour schemes */
+:root {
+    --text: #201316;
+    --background: #efe6e8;
+    --primary: #5d367d;
+    --secondary: #f5f4ef;
+    --accent: #3c90af;
+    --minor-border: #dad2d3;
+}
+
+.content{
+    margin-top: 3%;
+}
+
+.message {
+    background-color: var(--accent);
+    color: var(--secondary);
+    margin-bottom: 2%;
+    padding: 7px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 5px;
+    border-color: var(--minor-border);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.alert {
+    border-radius: 20px;
+    padding: 3%;
+    padding-top: 2%;
+    padding-left: 5%;
+    padding-right: 5%;
+    background-color: var(--secondary);
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+}
+
+div.back a{
+    float: left;
+    cursor: pointer;
+    color: var(--accent);
+}
+
+p.title {
+    font-size: x-large;
+    color: var(--text);
+    margin-bottom: 2%;
+}
+
+.alert p.empty {
+    margin-top: 4%;
+    margin-left: 75px;
+    margin-right: 75px;
+}
+
+select {
+    border-color: #201316;
+    color: #201316;
+    border-radius: 5px;
+    margin-bottom: 4%;
+    text-decoration: none;
+    display: inline-block;
+    outline: none;
+    background-color: var(--minor-border);
+    padding: 2px;
+    padding-left: 10px;
+    width: 500px;
+    height: 35px;
+    border-style: solid;
+    border-width: 2px;
+    cursor: pointer;
+}
+
+select:focus {
+    border-color: var(--primary);
+    outline: var(--primary);
+}
+
+.alert input#banner {
+    border-color: #201316;
+    color: #201316;
+    border-radius: 5px;
+    margin-bottom: 2%;
+    text-decoration: none;
+    display: inline-block;
+    outline: none;
+    background-color: var(--minor-border);
+    padding: 2px;
+    padding-left: 10px;
+    width: 500px;
+    height: 35px;
+    border-style: solid;
+    border-width: 2px;
+    cursor: pointer;
+}
+.alert input#banner:focus {
+    border-color: var(--primary);
+    outline: var(--primary);
+}
+
+.alert textarea {
+    border-color: #201316;
+    color: #201316;
+    border-radius: 5px;
+    margin-bottom: 2%;
+    text-decoration: none;
+    display: inline-block;
+    outline: none;
+    background-color: var(--minor-border);
+    padding: 2px;
+    padding-left: 10px;
+    width: 500px;
+    height: 100px;
+    border-style: solid;
+    border-width: 2px;
+    cursor: text;
+}
+.alert textarea:focus {
+    border-color: var(--primary);
+    outline: var(--primary);
+}
+
+button {
+    background-color: var(--primary);
+    color: #efe6e8;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    margin-top: 1%;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 10px;
+    font-size: larger;
+    cursor: pointer;
+}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/alerts_view.css')}}">
+
+<div class="notification-content">
+    <div class="back">
+        <a href="{{url_for('alerts_page')}}">
+            Back
+        </a>
+        <br>
+    </div>
+    <p class="sender">
+        From: {{notification[0]}}
+    </p>
+    <p>
+        Notification contents:
+    </p>
+    <textarea class="msg" cols="50" rows="5" readonly>{{notification[1]}}</textarea>
+    {% if ephemeral != "True" %}
+        <form method="POST" action="{{ url_for('alerts_view', notificationID=notificationID) }}">
+            <button>Delete</button>
+        </form>
+    {% endif %}
+</div>
+
+{% endblock %}

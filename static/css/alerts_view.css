@@ -1,0 +1,41 @@
+/* colour schemes */
+:root {
+    --text: #201316;
+    --background: #efe6e8;
+    --primary: #5d367d;
+    --secondary: #f5f4ef;
+    --accent: #3c90af;
+    --minor-border: #dad2d3;
+}
+
+.notification-content {
+    background-color: var(--minor-border);
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+    margin-top: 5%;
+    padding: 2%;
+    border-radius: 30px;
+    text-align: left;
+}
+
+div.back a{
+    cursor: pointer;
+    color: var(--accent);
+}
+
+p.sender {
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+textarea.msg {
+    margin-top: 1%;
+    resize: none;
+    overflow: auto;
+    border-style: none;
+    border-radius: 5px;
+    padding: 5px;
+    padding-left: 10px;
+    background-color: var(--secondary);
+}

@@ -31,16 +31,34 @@
             {% endif %}
             </header>
         {% if current_user.is_authenticated %}
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="notification">
-                        {{ messages[0] }}
-                    </div>
-                {% endif %}
-            {% endwith %}
-            <div class="notification">
-                This is a test notification
-            </div>
+            {% if request.endpoint not in ["login", "reset_password", "alerts_page", "alerts_send", "alerts_view"] %}
+                <div class="notifications">
+                    
+                </div>
+
+                <script>
+                    fetch("{{ url_for('notifications')}}")
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const notificationsDiv = document.querySelector('.notifications');
+                        data.forEach(item => {
+                            const a = document.createElement('a');
+                            a.href = item.link;
+                            a.textContent = item.message;
+                            a.classList.add('notification');
+                            notificationsDiv.appendChild(a);
+                        });
+                    })
+                    .catch(error => {
+                        console.log('Fetch Error :-S', error);
+                    });
+                </script>
+            {% endif %}
         {% endif %}
         <div class="content">
             {% block content %}{% endblock %}

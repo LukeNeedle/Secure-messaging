@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/alerts_home.css')}}">
+
+<div class="options">
+    <a class="create" href="{{url_for('alerts_send')}}">
+        Send Alert
+    </a>
+    <div class="alerts">
+        <p class="title">
+            Your notifications:
+        </p>
+        {% if notifications %}
+            {% for notification in notifications %}
+                <a class="alert" href="{{notification['link']}}">
+                    {{notification['message']|safe}}
+                </a>
+            {% endfor %}
+        {% else %}
+            <p>
+                You have no new notifications
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

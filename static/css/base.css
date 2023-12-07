@@ -89,6 +89,18 @@ span.account-email {
     margin-top: 10%;
 }
 
+.notifications {
+    border-color: var(--minor-border);
+    border-radius: 5px;
+    border-width: 5px;
+    width: 100%;
+    height: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    display: grid;
+    place-items: center;
+}
+
 .notification {
     background-color: #ff0000;
     color: #efe6e8;
@@ -102,5 +114,6 @@ span.account-email {
     padding: 6px;
     padding-left: 2%;
     padding-right: 2%;
-    margin-bottom: 2%;
+    margin-bottom: 0.5%;
+    cursor: pointer;
 }

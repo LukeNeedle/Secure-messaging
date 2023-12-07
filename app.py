@@ -1,5 +1,5 @@
 # Flask libraries
-from flask import Flask, redirect, url_for, render_template, request, send_file, session
+from flask import Flask, redirect, url_for, render_template, request, send_file, session, Response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 # Custom libraries
@@ -1185,7 +1185,7 @@ def preview_report(studentID, reportID):
     cursor.execute("SELECT * FROM Files WHERE Origin=?;"
                    , (f"r+{cleanedReportID}", ))
     result = cursor.fetchall()
-    
+
     if result == None or len(result) == 0:
         report.append([])
         connection.close()
@@ -1322,6 +1322,282 @@ def create_report(studentID):
         save_message_attachments(currentUser['id'], attachments, timeStamp, reportID, type="report")
     connection.close()
     return render_template("write_report.html", msg="Report Filed Successfully", studentID=cleanedID, studentName=studentName, id="submit")
+
+@app.route('/alerts', methods=['GET'])
+@login_required
+def alerts_page():
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT NotificationID, BannerMessage, URL, TimeStamp, Ephemeral FROM Notifications WHERE RecipientID=?;"
+                   , (current_user.id, ))
+    result = cursor.fetchall()
+    
+    if result == None or len(result) == 0:
+        print("No notifications found")
+        connection.close()
+        return render_template('alerts_home.html', notifications=[])
+    
+    data = []
+    
+    for notification in result:
+        if float(notification[3]) >= float(datetime.timestamp(datetime.now())) or notification[4] == "True":
+            if len(notification[1]) > 30:
+                header = (notification[1][:30])
+            elif len(notification[1]) <= 30:
+                header = (notification[1].ljust(30).replace(" ", "&nbsp;"))
+            data.append(
+                {
+                    "message": header,
+                    "link": url_for('alerts_view', notificationID=notification[2])
+                }
+                )
+        else:
+            cursor.execute("DELETE FROM Notifications WHERE NotificationID = ?;"
+                        , (notification[0], ))
+            connection.commit()
+    
+    connection.close()
+    return render_template('alerts_home.html', notifications=data)
+
+@app.route('/alerts/view/<string:notificationID>', methods=['GET', 'POST'])
+def alerts_view(notificationID):
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT NotificationID FROM Notifications WHERE URL=?;"
+                   , (notificationID, ))
+    result = cursor.fetchone()
+    if result == None:
+        print("URL not found")
+        connection.close()
+        return redirect(url_for('alerts_page'))
+    else:
+        cleanedNotificationID = result[0]
+    
+    cursor.execute("SELECT * FROM Notifications WHERE NotificationID=?;"
+                   , (cleanedNotificationID, ))
+    result = cursor.fetchone()
+    if result == None:
+        print("Notification not found")
+        connection.close()
+        return redirect(url_for('alerts_page'))
+    
+    if result[2] != current_user.id:
+        print("Recipient isn't current user")
+        connection.close()
+        return redirect(url_for('alerts_page'))
+    
+    if request.method == 'POST':
+        cursor.execute("DELETE FROM Notifications WHERE NotificationID=?;"
+                    , (cleanedNotificationID, ))
+        connection.commit()
+        return redirect(url_for('alerts_page'))
+    
+    data = result
+    
+    cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
+                   , (data[1], ))
+    result = cursor.fetchone()
+    if result == None:
+        print("Sender not found")
+        connection.close()
+        return redirect(url_for('alerts_page'))
+    
+    notification = [
+        result[0],
+        data[4]
+        ]
+    
+    if data[7] == "True":
+        cursor.execute("DELETE FROM Notifications WHERE NotificationID=?;"
+                    , (cleanedNotificationID, ))
+        connection.commit()
+    
+    connection.close()
+    return render_template("alerts_view.html", notification=notification, notificationID=notificationID, ephemeral=data[7])
+
+@app.route('/alerts/send', methods=['GET', 'POST'])
+@login_required
+def alerts_send():
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT Email FROM Staff WHERE AccountArchived='False' and StaffID!=?;"
+                , (current_user.id, ))
+    result = cursor.fetchall()
+    if result == None or len(result) == 0:
+        print("No accounts found")
+        connection.close()
+        
+        return redirect(url_for("alerts_page"))
+    else:
+        data = result
+    
+    emails = []
+    for email in data:
+        emails.append(email[0])
+    
+    if request.method == 'GET':
+        connection.close()
+        return render_template('alerts_send.html', emails=emails, msg="")
+    
+    staffEmail = request.form.get('email-list')
+    staffRole = request.form.get('role-list')
+    bannerMessage = request.form.get('banner')
+    message = request.form.get('message')
+    timePeriod = request.form.get('time-period')
+    
+    if staffEmail == "_" and staffRole == "_":
+        print("Invalid staff member/role")
+        connection.close()
+        
+        data = [staffEmail, staffRole, bannerMessage, message, timePeriod]
+        return render_template("alerts_send.html", emails=emails, data=data, msg="Please select a recipient", entry=["staff", "role"])
+    
+    if staffRole not in ["_", "1", "2", "3", "0"]:
+        print("Invalid staff role")
+        connection.close()
+        
+        data = [staffEmail, staffRole, bannerMessage, message, timePeriod]
+        return render_template("alerts_send.html", emails=emails, data=data, msg="Invalid staff role", entry=["role"])
+    else:
+        cleanedStaffRole = {
+            "_": "_",
+            "1": "SENCo",
+            "2": "Safeguarding",
+            "3": "Admin",
+            "0": "Other"
+            }[staffRole]
+    
+    cleanedBannerMessage = entry_cleaner(bannerMessage, "sql").replace("\0", '').replace("\a", '')
+    if cleanedBannerMessage != bannerMessage:
+        print("Invalid first name")
+        connection.close()
+        
+        data = [staffEmail, staffRole, bannerMessage, message, timePeriod]
+        return render_template("alerts_send.html", emails=emails, data=data, msg="Invalid banner message", entry=["banner"])
+    del bannerMessage
+    
+    cleanedMessage = entry_cleaner(message, "sql").replace("\0", '').replace("\a", '')
+    if cleanedMessage != message:
+        print("Invalid last name")
+        connection.close()
+        
+        data = [staffEmail, staffRole, cleanedBannerMessage, message, timePeriod]
+        return render_template("alerts_send.html", emails=emails, data=data, msg="Invalid message", entry=["message"])
+    del message
+    
+    if timePeriod not in ["eph", "15m", "30m", "1h", "24h"]:
+        print("Invalid time period")
+        connection.close()
+        
+        data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+        return render_template("alerts_send.html", emails=emails, data=data, msg="Invalid time period", entry=["time-period"])
+    
+    ephemeralNotification = False
+    if timePeriod == "eph":
+        timeStamp = float(datetime.timestamp(datetime.now()))
+        ephemeralNotification = True
+    elif timePeriod == "15m":
+        timeStamp = float((datetime.now() + timedelta(minutes=15)).timestamp())
+    elif timePeriod == "30m":
+        timeStamp = float((datetime.now() + timedelta(minutes=30)).timestamp())
+    elif timePeriod == "1h":
+        timeStamp = float((datetime.now() + timedelta(hours=1)).timestamp())
+    elif timePeriod == "24h":
+        timeStamp = float((datetime.now() + timedelta(days=1)).timestamp())
+    
+    recipients = []
+    if staffEmail != "_":
+        cursor.execute("SELECT StaffID FROM Staff WHERE Email=?;"
+                        , (staffEmail, ))
+        result = cursor.fetchone()
+        if result == None:
+            print("User not found")
+            connection.close()
+            
+            data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+            return render_template("alerts_send.html", emails=emails, data=data, msg="Server Error")
+        recipients.append(result[0])
+    
+    if cleanedStaffRole == "SENCo":
+        cursor.execute("SELECT StaffID FROM Staff WHERE SENCo='True' and AccountArchived='False' and AccountEnabled='True';")
+        result = cursor.fetchall()
+        if result == None or len(result) == 0:
+            print("Users not found")
+            connection.close()
+            
+            data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+            return render_template("alerts_send.html", emails=emails, data=data, msg="No SENCo staff found")
+        
+        for staffID in result:
+            recipients.append(staffID[0])
+    
+    elif cleanedStaffRole == "Safeguarding":
+        cursor.execute("SELECT StaffID FROM Staff WHERE Safeguarding='True' and AccountArchived='False' and AccountEnabled='True';")
+        result = cursor.fetchall()
+        if result == None or len(result) == 0:
+            print("Users not found")
+            connection.close()
+            
+            data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+            return render_template("alerts_send.html", emails=emails, data=data, msg="No safeguarding staff found")
+        
+        for staffID in result:
+            recipients.append(staffID[0])
+    
+    elif cleanedStaffRole == "Admin":
+        cursor.execute("SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';")
+        result = cursor.fetchall()
+        if result == None or len(result) == 0:
+            print("Users not found")
+            connection.close()
+            
+            data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+            return render_template("alerts_send.html", emails=emails, data=data, msg="No admin staff found")
+        
+        for staffID in result:
+            recipients.append(staffID[0])
+    
+    elif cleanedStaffRole == "Other":
+        cursor.execute("SELECT StaffID FROM Staff WHERE SENCo='False' and Safeguarding='False' and Admin='False' and AccountArchived='False' and AccountEnabled='True';")
+        result = cursor.fetchall()
+        if result == None:
+            print("Users not found")
+            connection.close()
+            
+            data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+            return render_template("alerts_send.html", emails=emails, data=data, msg="No staff found without roles found")
+        
+        for staffID in result:
+            recipients.append(staffID[0])
+    
+    
+    for recipientID in recipients:
+        try:
+            cursor.execute("""INSERT INTO Notifications(SenderID, RecipientID, BannerMessage, Message, URL, TimeStamp, Ephemeral)
+                        VALUES (?, ?, ?, ?, ?,?, ?);"""
+                        , (
+                            current_user.id,
+                            recipientID,
+                            cleanedBannerMessage,
+                            cleanedMessage,
+                            str(uuid.uuid4()),
+                            timeStamp,
+                            str(ephemeralNotification)
+                            )
+                        )
+            connection.commit()
+        except sqlite3.IntegrityError:
+            print("Failed CHECK constraint")
+            connection.close()
+            
+            data = [staffEmail, staffRole, cleanedBannerMessage, cleanedMessage, timePeriod]
+            return render_template("alerts_send.html", emails=emails, data=data, msg="Server Error")
+    
+    connection.close()
+    return render_template("alerts_send.html", emails=emails, msg="Sent alert", entry=["submit"])
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -2290,6 +2566,40 @@ def app_settings():# TODO
     
     # return render_template("app_settings.html")
     return render_template("under_construction.html")
+
+@app.route('/app/notifications', methods=['GET'])
+@login_required
+def notifications():
+    connection = sqlite3.connect("database.db")
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT NotificationID, BannerMessage, URL, TimeStamp, Ephemeral FROM Notifications WHERE RecipientID=?;"
+                   , (current_user.id, ))
+    result = cursor.fetchall()
+    
+    if result == None or len(result) == 0:
+        print("No notifications found")
+        connection.close()
+        
+        return Response(json.dumps([]), mimetype='application/json')
+    
+    data = []
+    
+    for notification in result:
+        if float(notification[3]) >= float(datetime.timestamp(datetime.now())) or notification[4] == "True":
+            data.append(
+                {
+                    "message": notification[1],
+                    "link": url_for('alerts_view', notificationID=notification[2])
+                }
+                )
+        else:
+            cursor.execute("DELETE FROM Notifications WHERE NotificationID = ?;"
+                        , (notification[0], ))
+            connection.commit()
+    
+    connection.close()
+    return Response(json.dumps(data), mimetype='application/json')
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
