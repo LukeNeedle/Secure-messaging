@@ -44,7 +44,7 @@
     </p>
     {% if not emails %}
         <p class="empty">
-            No staff accounts were found, <a href="{{url_for('create_staff')}}">Click Here</a> to create one.
+            No staff accounts were found, <a class="redirect" href="{{url_for('create_staff')}}">Click Here</a> to create one.
         </p>
     {% else %}
         <form method="POST" action="{{url_for('alerts_send')}}">

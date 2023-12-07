@@ -46,3 +46,15 @@ p.title {
     padding: 3%;
     border-radius: 10px;
 }
+
+a.redirect{
+    text-decoration: underline;
+    cursor: pointer;
+    color: #0000EE;
+}
+
+a.redirect:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    color: hsla(240, 100%, 47%, 0.788);
+}

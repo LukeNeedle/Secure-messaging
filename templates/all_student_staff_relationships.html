@@ -16,7 +16,7 @@
     </p>
     {% if data == [] %}
         <p class="empty">
-            No links were found, <a href="{{url_for('staff_student_relationships_lookup')}}">Click Here</a> to create one.
+            No links were found, <a class="redirect" href="{{url_for('staff_student_relationships_lookup')}}">Click Here</a> to create one.
         </p>
     {% else %}
         {% for relationship in data %}

@@ -1430,7 +1430,7 @@ def alerts_send():
         print("No accounts found")
         connection.close()
         
-        return redirect(url_for("alerts_page"))
+        return render_template('alerts_send.html', msg="")
     else:
         data = result
     
