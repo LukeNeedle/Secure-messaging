@@ -365,6 +365,10 @@ def generate_data_for_student_link(studentID, staffEmail):
         cleanedEmail (string): The staff member's email address.
 
     Returns:
+        error -
+        redirect response object: redirect(url_for("staff_student_relationships_lookup"))
+        
+        no error -
         tuple: studentData, staffDetails, linked, studentID, staffEmail, relationship
     """
     connection = sqlite3.connect("database.db")
@@ -402,6 +406,7 @@ def generate_data_for_student_link(studentID, staffEmail):
         relationship = "None"
     else:
         relationship = str(result[0])
+    
     connection.close()
     return studentData, staffDetails, studentID, staffEmail, relationship
 
@@ -1733,7 +1738,8 @@ def edit_staff(staffEmail):
     
     try:
         cursor.execute("UPDATE Staff SET FirstName = ?, Lastname = ?, Title = ?, Email = ?, AccountEnabled = ?, AccountArchived = ?, PassHash = ?, PassSalt = ?, SENCo = ?, Safeguarding = ?, Admin = ? WHERE Email = ?"
-                        , (cleanedFName,
+                        , (
+                            cleanedFName,
                             cleanedLName,
                             cleanedTitle,
                             cleanedEmail,
@@ -2124,7 +2130,12 @@ def edit_staff_student_relationships(studentID, staffEmail):
     elif newRelationship == "None":
         cleanedNewRelationship = "None"
     else:
-        studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        data = generate_data_for_student_link(cleanedID, cleanedEmail)
+        import werkzeug.wrappers.response
+        if type(data) != werkzeug.wrappers.response.Response:
+            return data
+        
+        studentData, staffDetails, studentID, staffEmail, oldRelationship = data
         return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Invalid Relationship")
     del newRelationship
 
@@ -2155,27 +2166,52 @@ def edit_staff_student_relationships(studentID, staffEmail):
         # No change in relationship
         print("No change")
         connection.close()
-        studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        
+        data = generate_data_for_student_link(cleanedID, cleanedEmail)
+        import werkzeug.wrappers.response
+        if type(data) != werkzeug.wrappers.response.Response:
+            return data
+        
+        studentData, staffDetails, studentID, staffEmail, oldRelationship = data
         return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="No change detected")
     
     elif oldRelationship != "None" and cleanedNewRelationship == "None":
         # Delete existing relationship
         if result[0] == "":
             connection.close()
-            studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            
+            data = generate_data_for_student_link(cleanedID, cleanedEmail)
+            import werkzeug.wrappers.response
+            if type(data) != werkzeug.wrappers.response.Response:
+                return data
+            
+            studentData, staffDetails, studentID, staffEmail, oldRelationship = data
             return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Unknown Error Occurred")
         cursor.execute("DELETE FROM StudentRelationship WHERE RelationshipID = ?;"
                     , (result[0], ))
         connection.commit()
         connection.close()
-        studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        
+        data = generate_data_for_student_link(cleanedID, cleanedEmail)
+        import werkzeug.wrappers.response
+        if type(data) != werkzeug.wrappers.response.Response:
+            return data
+        
+        studentData, staffDetails, studentID, staffEmail, oldRelationship = data
         return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Link removed", entry="submit")
     
     elif oldRelationship != "None" and cleanedNewRelationship != "None":
         # Change existing relationship
         if result[0] == "":
             connection.close()
-            studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            
+            data = generate_data_for_student_link(cleanedID, cleanedEmail)
+            import werkzeug.wrappers.response
+            if type(data) != werkzeug.wrappers.response.Response:
+                return data
+            
+            studentData, staffDetails, studentID, staffEmail, oldRelationship = data
+            
             return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Unknown Error Occurred")
         try:
             cursor.execute("UPDATE StudentRelationship SET StudentID = ?, StaffID = ?, Relationship = ? WHERE RelationshipID = ?"
@@ -2190,7 +2226,13 @@ def edit_staff_student_relationships(studentID, staffEmail):
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             connection.close()
-            studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            
+            data = generate_data_for_student_link(cleanedID, cleanedEmail)
+            import werkzeug.wrappers.response
+            if type(data) != werkzeug.wrappers.response.Response:
+                return data
+            
+            studentData, staffDetails, studentID, staffEmail, oldRelationship = data
             return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Unknown Error Occurred")
     
     elif oldRelationship == "None" and cleanedNewRelationship != "None":
@@ -2208,17 +2250,36 @@ def edit_staff_student_relationships(studentID, staffEmail):
         except sqlite3.IntegrityError:
             print("Failed CHECK constraint")
             connection.close()
-            studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+            
+            data = generate_data_for_student_link(cleanedID, cleanedEmail)
+            import werkzeug.wrappers.response
+            if type(data) != werkzeug.wrappers.response.Response:
+                return data
+            
+            studentData, staffDetails, studentID, staffEmail, oldRelationship = data
+            
             return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Link removed", entry="submit")
     
     else:
         # Should never get here?
         connection.close()
-        studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+        
+        data = generate_data_for_student_link(cleanedID, cleanedEmail)
+        import werkzeug.wrappers.response
+        if type(data) != werkzeug.wrappers.response.Response:
+            return data
+        
+        studentData, staffDetails, studentID, staffEmail, oldRelationship = data
         return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Unknown Error Occurred")
     
     connection.close()
-    studentData, staffDetails, studentID, staffEmail, oldRelationship = generate_data_for_student_link(cleanedID, cleanedEmail)
+    
+    data = generate_data_for_student_link(cleanedID, cleanedEmail)
+    import werkzeug.wrappers.response
+    if type(data) != werkzeug.wrappers.response.Response:
+        return data
+    
+    studentData, staffDetails, studentID, staffEmail, oldRelationship = data
     return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Sucessfully updated", entry="submit")
 # Objective 6 completed
 
