@@ -143,7 +143,7 @@ These objectives aren't in any particular order and they are only numbered to he
 | Message        | The full notification contents                                               | Testing | Text    | ❌          | -              | Not null                    |
 | URL            | A random UUID to view the full notification                                  | -       | Text    | ❌          | -              | Not null, Unique            |
 | TimeStamp      | The timestamp that the notification will be deleted                          | -       | Text    | ❌          | -              | Not null                    |
-| Ephemeral      | Whether the notification disapears on view                                   | True    | Text    | ❌          | -              | 'True' or 'False', Not null |
+| Ephemeral      | Whether the notification disappears on view                                   | True    | Text    | ❌          | -              | 'True' or 'False', Not null |
 
 
 ## Naming schema
