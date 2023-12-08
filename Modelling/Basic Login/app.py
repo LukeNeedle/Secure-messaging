@@ -49,7 +49,7 @@ def user_loader(email):
     Returns:
         User: The user object if the user exists, otherwise it returns None
     """
-    print(email)
+    
     cleanedEmail = entry_cleaner(entry=email, mode="sql")
 
     connection = sqlite3.connect("database.db")
