@@ -45,7 +45,7 @@ def entry_cleaner(entry:str, mode:str):
 
     Returns:
         string: The cleaned string
-    """
+    """ # Documentation
 
     if mode == "sql":
         allowedChars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -60,19 +60,19 @@ def entry_cleaner(entry:str, mode:str):
 
         return cleanedEntry
     elif mode == "password":
-        cleanedEntry = entry_cleaner(entry, "sql")
+        cleanedEntry = entry_cleaner(entry, "sql") # Recursion
 
         cleanedEntry = cleanedEntry.encode("ascii", "ignore").decode()
 
         return cleanedEntry
     elif mode == "email":
-        cleanedEntry = entry_cleaner(entry, "sql").lower()
+        cleanedEntry = entry_cleaner(entry, "sql").lower() # Recursion
         if not regex.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', cleanedEntry):
             return None
         else:
             return cleanedEntry
     else:
-        raise ValueError(f"Invalid mode: {mode} for entryCleaner")
+        raise ValueError(f"Invalid mode: {mode} for entryCleaner") # Error handling
 
 # Objective 4 started
 def save_message_attachments(senderID:int, attachments, timeStamp:float, messageID:int, type:str):
@@ -85,7 +85,7 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
         timeStamp (float): _description_
         messageID (integer): _description_
         type (string): _description_
-    """
+    """ # Documentation
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     if not os.path.exists(f"uploads/{senderID}"):
@@ -104,7 +104,7 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
                            tempURL,
                            timeStamp
                            )
-                       )
+                       ) # Parameterised SQL
         connection.commit()
         
         cursor.execute("SELECT FileID FROM Files WHERE OwnerID=? and Origin=? and FilePath=? and HashedUrl=? and TimeStamp=?;"
@@ -115,17 +115,19 @@ def save_message_attachments(senderID:int, attachments, timeStamp:float, message
                            tempURL,
                            timeStamp
                            )
-                       )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
         
-        with open("secrets.json", "r") as f:
+        with open("secrets.json", "r") as f: # Reading from files
             cursor.execute("UPDATE Files SET HashedUrl = ? WHERE FileID = ?;"
                            , (encryption.substitution_encrypt(
                                plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
                                key=json.load(f)['UrlKey']),
-                              str(result)))
+                              str(result)
+                              )
+                           ) # Parameterised SQL
         connection.commit()
-        file.save(filePath)
+        file.save(filePath) # Writing to files
 # Objective 4 completed
 
 # Objective 8 started
@@ -138,12 +140,12 @@ def send_read_receipt(data):
 
     Returns:
         nothing: Returns nothing if there is an error in storing a read receipt
-    """    
+    """ # Documentation
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
-    with open("secrets.json", "r") as f:
-        key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey'])
+    with open("secrets.json", "r") as f: # Reading from files
+        key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey']) # Decryption
     
     message = f"{current_user.title} {current_user.lname} has read your message:\n"
     message += str(
@@ -151,7 +153,7 @@ def send_read_receipt(data):
             cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
             vernamKey=str(key[:-2]),
             subsitutionKey=int(key[-2:])
-        )
+        ) # Decryption
     ).replace("\0", '').replace("\a", '')
     
     
@@ -162,12 +164,12 @@ def send_read_receipt(data):
 
     cleanedMessage = message.replace('\0', '')
     
-    encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey)
+    encryptedMessage = encryption.encrypt(cleanedMessage, vernamKey=vernamKey, subsitutionKey=subsitutionKey) # Encryption
     if subsitutionKey < 10:
         subsitutionKey = "0" + str(subsitutionKey)
     
-    with open("secrets.json", "r") as f:
-        key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey'])
+    with open("secrets.json", "r") as f: # Reading from files
+        key = encryption.substitution_encrypt(plainText=(vernamKey + str(subsitutionKey)), key=json.load(f)['MessageKey']) # Encryption
     
     cleanedEncryptedMessage = ""
     for character in encryptedMessage:
@@ -207,9 +209,9 @@ def send_read_receipt(data):
                            timeStamp,
                            key
                            )
-                       )
+                       ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         return
     
@@ -221,26 +223,29 @@ def send_read_receipt(data):
                        timeStamp,
                        key
                        )
-                   )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
 
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Failed to save message")
         return
     else:
         messageID = result[0]
     
-    with open("secrets.json", "r") as f:
+    with open("secrets.json", "r") as f: # Reading from files
         cursor.execute("UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;"
                        , (encryption.substitution_encrypt(
                            plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
-                           key=json.load(f)['UrlKey']),
-                          messageID))
+                           key=json.load(f)['UrlKey']), # Encryption
+                          messageID
+                          )
+                       ) # Parameterised SQL
         connection.commit()
     
     cursor.execute("UPDATE Messages SET ReadReceipts='False' WHERE MessageID=?;"
-                   , (data[0],))
+                   , (data[0],)
+                   ) # Parameterised SQL
     connection.commit()
     connection.close()
 # Objective 8 completed
@@ -254,7 +259,7 @@ def check_password_strength(password:str):
 
     Returns:
         boolean: If the password strength is valid
-    """
+    """ # Documentation
     
     if len(password) <= 8:
         return False
@@ -314,17 +319,19 @@ def check_for_reset_password():
         cursor = connection.cursor()
 
         cursor.execute("SELECT AccountEnabled FROM Staff WHERE StaffID=?;"
-                       , (current_user.id,))
+                       , (current_user.id,)
+                       ) # Parameterised SQL
         result = cursor.fetchone()
         if result[0] == "False":
             logout_user()
             return redirect(url_for('login'))
         
         cursor.execute("SELECT PassHash, PassSalt FROM Staff WHERE StaffID=?;"
-                       , (current_user.id,))
+                       , (current_user.id,)
+                       ) # Parameterised SQL
         result = cursor.fetchone()
         connection.close()
-        if hash_function.hash_variable("ChangeMe", result[1]) == result[0] and request.path != "/ChangePassword" and pathDot != ".":
+        if hash_function.hash_variable("ChangeMe", result[1]) == result[0] and request.path != "/ChangePassword" and pathDot != ".": # Hashing
             print("User needs to change password")
             return redirect(url_for('reset_password'))
 
@@ -338,7 +345,7 @@ def session_timeout_management():
     - Admin users get 5 minutes added for every request.
     - Safeguarding or senco users get 10 minutes added for every request.
     - Other users get 15 minutes added ofr every request.
-    """
+    """ # Documentation
     if len(request.path) < 4:
         validPath = request.path[0] != "."
     else:
@@ -370,14 +377,15 @@ def generate_data_for_student_link(studentID, staffEmail):
         
         no error -
         tuple: studentData, staffDetails, linked, studentID, staffEmail, relationship
-    """
+    """ # Documentation
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
-                       , (studentID, ))
+                    , (studentID, )
+                    )  # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Target user not found")
         return redirect(url_for("staff_student_relationships_lookup"))
@@ -388,9 +396,10 @@ def generate_data_for_student_link(studentID, staffEmail):
     ]
     
     cursor.execute("SELECT StaffID, FirstName, LastName, Title, Email FROM Staff WHERE Email=? and AccountArchived='False';"
-                    , (staffEmail, ))
+                    , (staffEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Target user not found")
         return redirect(url_for("staff_student_relationships_lookup"))
@@ -398,10 +407,11 @@ def generate_data_for_student_link(studentID, staffEmail):
     staffDetails = f"{result[3]} {result[1]} {result[2]}: {result[4]}"
     
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID = ? AND StaffID = ?;"
-                    , (studentID, result[0]))
+                    , (studentID, result[0])
+                    ) # Parameterised SQL
     result = cursor.fetchone()
     
-    if result == None:
+    if result == None: # Error Handling
         print("No relationship found")
         relationship = "None"
     else:
@@ -428,7 +438,7 @@ def user_loader(userID):
 
     Returns:
         User: The user object if the user exists, otherwise it returns None
-    """
+    """ # Documentation
 
     cleanedUserID = entry_cleaner(entry=userID, mode="sql")
 
@@ -436,9 +446,10 @@ def user_loader(userID):
     cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM Staff WHERE StaffID=?;"
-                   , (cleanedUserID, ))
+                   , (cleanedUserID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         return None
     
@@ -457,7 +468,7 @@ def user_loader(userID):
         "admin": result[11]
     }
     connection.close()
-    return User(userDetails)
+    return User(userDetails) # Dynamic generation of objects
 
 
 #########################################################################
@@ -475,6 +486,7 @@ def login():
             print("User not logged in")
             return render_template("login.html", msg="")
         return redirect(url_for('dashboard'))
+    
     if type(current_user._get_current_object()) is User:
         print("User already logged in")
         return redirect(url_for('dashboard'))
@@ -484,14 +496,14 @@ def login():
 
     #Email validation
     cleanedEmail = entry_cleaner(email, "email")
-    if cleanedEmail != email.lower():
+    if cleanedEmail != email.lower(): # Error Handling
         print("Invalid email")
         return render_template("login.html", msg="Invalid Credentials", savedEmail=email)
     del email
     
     #Password Validation
     cleanedPassword = entry_cleaner(password, "password")
-    if cleanedPassword != password:
+    if cleanedPassword != password: # Error Handling
         print("Invalid password")
         return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
     del password
@@ -500,9 +512,10 @@ def login():
     cursor = connection.cursor()
     
     cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("User not found")
         return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
@@ -510,25 +523,27 @@ def login():
         passHash = result[0]
     
     cursor.execute("SELECT PassSalt FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("User not found")
         return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
     else:
         salt = result[0]
     
-    if passHash != hash_function.hash_variable(cleanedPassword, salt):
+    if passHash != hash_function.hash_variable(cleanedPassword, salt): # Hashing and Error Handling
         connection.close()
         print("Password doesn't match stored password")
         return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
     
     cursor.execute("SELECT * FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
     connection.close()
-    if result == None:
+    if result == None: # Error Handling
         print("User not found")
         return render_template("login.html", msg="Invalid Credentials", savedEmail=cleanedEmail)
     
@@ -547,7 +562,7 @@ def login():
         "admin": result[11]
     }
 
-    login_user(User(userDetails), remember=False)
+    login_user(User(userDetails), remember=False) # Dynamic generation of objects
     print("Successfully logged in")
     return redirect(url_for('dashboard'))
 # Objective 2 completed
@@ -560,10 +575,11 @@ def reset_password():
         cursor = connection.cursor()
 
         cursor.execute("SELECT PassHash, PassSalt FROM Staff WHERE StaffID=?;"
-                       ,(current_user.id, ))
+                       ,(current_user.id, )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
         connection.close()
-        if hash_function.hash_variable("ChangeMe", result[1]) == result[0]:
+        if hash_function.hash_variable("ChangeMe", result[1]) == result[0]: # Hashing
             print("User needs to change password")
             return render_template("change_reset_password.html", msg="")
         else:
@@ -575,10 +591,10 @@ def reset_password():
     #Password Validation
     cleanedNewPassword = entry_cleaner(newPassword, "password")
     cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
-    if cleanedNewPassword != newPassword:
+    if cleanedNewPassword != newPassword: # Error Handling
         print("Invalid new password")
         return render_template("change_reset_password.html", msg="New password contains illegal characters", entry=["new-password"])
-    if cleanedConfirmNewPassword != confirmNewPassword:
+    if cleanedConfirmNewPassword != confirmNewPassword: # Error Handling
         print("Invalid confirm new password")
         return render_template("change_reset_password.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"])
     del newPassword
@@ -593,9 +609,10 @@ def reset_password():
     
     # Getting user's password salt  
     cursor.execute("SELECT passSalt FROM Staff WHERE StaffID=?;"
-                   , (current_user.id, ))
+                   , (current_user.id, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("User not found")
         return render_template("change_reset_password.html", msg="Server Error")
@@ -612,14 +629,14 @@ def reset_password():
                        cleanedNewPassword,
                        salt),
                       current_user.id
-                      )
-                   )
+                      ) # Hashing
+                   ) # Parameterised SQL
     connection.commit()
     
     userDetails = current_user.get_user_dictionary()
-    userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
+    userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt) # Hashing
     logout_user()
-    login_user(User(userDetails), remember=False)
+    login_user(User(userDetails), remember=False) # Dynamic generation of objects
     print("Changed Password")
     return redirect(url_for('dashboard'))
 
@@ -640,7 +657,8 @@ def messages_inbox():
     cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM Messages WHERE RecipientID=? and Archived='False';"
-                   , (current_user.id, ))
+                   , (current_user.id, )
+                   ) # Parameterised SQL
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         return render_template("inbox.html", msg="empty")
@@ -653,9 +671,10 @@ def messages_inbox():
         tempResponse = [message[1]]
         
         cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                       , (message[1], ))
+                       , (message[1], )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("Recipient not found")
             return redirect(url_for('messages'))
@@ -668,9 +687,10 @@ def messages_inbox():
             )
         
         cursor.execute("SELECT HashedUrl FROM Messages WHERE MessageID=?;"
-                       , (message[0], ))
+                       , (message[0], )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("URL not found")
             return redirect(url_for('messages'))
@@ -678,14 +698,14 @@ def messages_inbox():
             tempResponse.append(result[0])
         
         with open("secrets.json", "r") as f:
-            key = encryption.substitution_decrypt(encryptedText=message[8], key=json.load(f)['MessageKey'])
+            key = encryption.substitution_decrypt(encryptedText=message[8], key=json.load(f)['MessageKey']) # Decryption
 
         mail = str(
             encryption.decrypt(
                 cipherText=message[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
                 vernamKey=str(key[:-2]),
                 subsitutionKey=int(key[-2:])
-                )
+                ) # Decryption
             ).strip().replace("\n", ' ').replace("\0", '').replace("\a", '')
         
         if len(mail) > 30:
@@ -704,6 +724,7 @@ def messages_inbox():
 def messages_compose():
     if request.method == 'GET':
         return render_template("compose.html", msg="")
+    
     currentUser = current_user.get_user_dictionary()
     recipient = request.form.get('recipient')
     message = request.form.get('message')
@@ -712,7 +733,7 @@ def messages_compose():
     
     #Email validation
     cleanedEmail = entry_cleaner(recipient, "email")
-    if cleanedEmail != recipient.lower():
+    if cleanedEmail != recipient.lower(): # Error Handling
         print("Invalid email")
         data = [recipient, message, readReceipts]
         return render_template("compose.html", data=data, msg="Email is invalid", entry=["recipient"])
@@ -727,9 +748,10 @@ def messages_compose():
     cursor = connection.cursor()
 
     cursor.execute("SELECT StaffID FROM Staff WHERE Email=? and AccountArchived='False';"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Invalid email")
         connection.close()
         data = [cleanedEmail, message, readReceipts]
@@ -748,11 +770,11 @@ def messages_compose():
     if subsitutionKey < 10:
         subsitutionKey = "0" + str(subsitutionKey)
         
-    with open("secrets.json", "r") as f:
+    with open("secrets.json", "r") as f: # Reading from files
         key = encryption.substitution_encrypt(
             plainText=(vernamKey + str(subsitutionKey)),
             key=json.load(f)['MessageKey']
-            )
+            ) # Encryption
     
     cleanedEncryptedMessage = ""
     for character in encryptedMessage:
@@ -793,9 +815,9 @@ def messages_compose():
                             str(readReceipts),
                             key
                             )
-                        )
+                        ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         data = [cleanedEmail, message, readReceipts]
         return render_template("compose.html", data=data, msg="Server Error")
@@ -810,10 +832,10 @@ def messages_compose():
                         str(readReceipts),
                         key
                         )
-                    )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
 
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Failed to save message")
         data = [cleanedEmail, message, readReceipts]
@@ -821,12 +843,13 @@ def messages_compose():
     else:
         messageID = result[0]
     
-    with open("secrets.json", "r") as f:
+    with open("secrets.json", "r") as f: # Reading from files
         cursor.execute("UPDATE Messages SET HashedUrl = ? WHERE MessageID = ?;"
                         , (encryption.substitution_encrypt(
                             plainText=str(uuid.uuid5(uuid.NAMESPACE_URL, str(messageID))),
                             key=json.load(f)['UrlKey']),
-                            messageID))
+                            messageID) # Encryption
+                        ) # Parameterised SQL
         connection.commit()
     
     connection.close()
@@ -843,9 +866,10 @@ def preview_message(encryptedMessageID):
     cursor = connection.cursor()
     
     cursor.execute("SELECT MessageID FROM Messages WHERE HashedUrl=?;"
-                   , (encryptedMessageID, ))
+                   , (encryptedMessageID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("URL not found")
         connection.close()
         return redirect(url_for('messages_inbox'))
@@ -854,23 +878,25 @@ def preview_message(encryptedMessageID):
     
     if request.method == 'POST':
         cursor.execute("UPDATE Messages SET Archived='True' WHERE MessageID=?;"
-                       , (messageID, ))
+                       , (messageID, )
+                       ) # Parameterised SQL
         connection.commit()
         print("Message archived")
         connection.close()
         return redirect(url_for('messages_inbox'))
     
     cursor.execute("SELECT * FROM Messages WHERE MessageID=?;"
-                   , (messageID, ))
+                   , (messageID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Message not found")
         connection.close()
         return redirect(url_for('messages_inbox'))
     else:
         data = result
     
-    if data[2] != current_user.id:
+    if data[2] != current_user.id: # Error Handling
         print("Recipient isn't current user")
         connection.close()
         return redirect(url_for('messages_inbox'))
@@ -879,9 +905,10 @@ def preview_message(encryptedMessageID):
         send_read_receipt(data)
     
     cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                   , (data[1], ))
+                   , (data[1], )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Sender not found")
         connection.close()
         return redirect(url_for('messages_inbox'))
@@ -889,7 +916,7 @@ def preview_message(encryptedMessageID):
         mail = [result[0]]
         
     with open("secrets.json", "r") as f:
-        key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey'])
+        key = encryption.substitution_decrypt(encryptedText=data[8], key=json.load(f)['MessageKey']) # Decryption
             
     mail.append(
         str(
@@ -897,7 +924,7 @@ def preview_message(encryptedMessageID):
                 cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
                 vernamKey=str(key[:-2]),
                 subsitutionKey=int(key[-2:])
-            )
+            ) # Decryption
         ).replace("\0", '').replace("\a", '')
     )
     
@@ -909,7 +936,8 @@ def preview_message(encryptedMessageID):
     mail.append(data[4])
     
     cursor.execute("SELECT * FROM Files WHERE Origin=?;"
-                   , (f"m+{messageID}", ))
+                   , (f"m+{messageID}", )
+                   ) # Parameterised SQL
     result = cursor.fetchall()
     if result == None or len(result) == 0:
         mail.append([])
@@ -935,9 +963,10 @@ def download_user_content(encryptedAttachmentID):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     cursor.execute("SELECT FilePath FROM Files WHERE HashedUrl=?;"
-                   , (encryptedAttachmentID, ))
+                   , (encryptedAttachmentID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("File not found")
         connection.close()
         return redirect(url_for('messages_inbox'))
@@ -951,19 +980,20 @@ def download_user_content(encryptedAttachmentID):
 def reporting_search():
     if request.method == 'POST':
         dataString = request.form.get('email-list')
-        if not dataString:
+        if not dataString: # Error Handling
             return redirect(url_for('reporting_search'))
         
         data = dataString.split("|")
-        if len(data) != 3:
+        if len(data) != 3: # Error Handling
             return redirect(url_for('reporting_search'))
         
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
-                       , (data[0], data[1], data[2]))
+                       , (data[0], data[1], data[2])
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             print("No accounts found")
             connection.close()
             return redirect(url_for("reporting_search"))
@@ -976,7 +1006,7 @@ def reporting_search():
     if current_user.senco or current_user.safeguarding:
         cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students;")
         result = cursor.fetchall()
-        if result == None or len(result) == 0:
+        if result == None or len(result) == 0: # Error Handling
             print("No accounts found")
             connection.close()
             return render_template("report_lookup.html", msg="empty")
@@ -989,9 +1019,10 @@ def reporting_search():
         return render_template("report_lookup.html", names=names)
     
     cursor.execute("SELECT StudentID FROM StudentRelationship WHERE StaffID=?;"
-                   , (current_user.id, ))
+                   , (current_user.id, )
+                   ) # Parameterised SQL
     students = cursor.fetchall()
-    if students == None or len(students) == 0:
+    if students == None or len(students) == 0: # Error Handling
         print("No links found")
         connection.close()
         return render_template("report_lookup.html", msg="empty")
@@ -999,9 +1030,10 @@ def reporting_search():
     names=[]
     for student in students:
         cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
-                       , (student[0], ))
+                       , (student[0], )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             print("No students found")
             connection.close()
             return render_template("report_lookup.html", msg="empty")
@@ -1018,32 +1050,35 @@ def student_reports(studentID):
     cursor = connection.cursor()
     
     cleanedID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedID:
+    if studentID != cleanedID: # Error Handling
         print("Invalid ID")
         return redirect(url_for("reporting_search"))
     del studentID
     
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
-                   , (cleanedID, current_user.id))
+                   , (cleanedID, current_user.id)
+                   ) # Parameterised SQL
     result = cursor.fetchone()
     
-    if result == None and not (current_user.senco or current_user.safeguarding):
+    if result == None and not (current_user.senco or current_user.safeguarding): # Error Handling
         print("No relationship found")
         connection.close()
         return redirect(url_for("reporting_search"))
 
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
-                   , (cleanedID, ))
+                   , (cleanedID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No student")
         connection.close()
         return redirect(url_for("reporting_search"))
     
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
-                   , (cleanedID, ))
+                   , (cleanedID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("No students found")
         connection.close()
         return render_template("report_lookup.html", msg="empty")
@@ -1056,7 +1091,7 @@ def student_reports(studentID):
 @login_required
 def view_reports(studentID):
     cleanedID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedID:
+    if studentID != cleanedID: # Error Handling
         print("Invalid ID")
         return redirect(url_for("reporting_search"))
     cleanedID = int(cleanedID)
@@ -1066,18 +1101,21 @@ def view_reports(studentID):
     cursor = connection.cursor()
     
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
-                    , (cleanedID, current_user.id))
+                    , (cleanedID, current_user.id)
+                    ) # Parameterised SQL
     result = cursor.fetchone()
     
     if current_user.senco or current_user.safeguarding or result in [1, 2, 3, 0]:
         cursor.execute("SELECT * FROM Reporting WHERE StudentID=?;"
-                    , (cleanedID, ))
+                    , (cleanedID, )
+                    ) # Parameterised SQL
     else:
         cursor.execute("SELECT * FROM Reporting WHERE StudentID=? and StaffID=?;"
-                    , (cleanedID, current_user.id))
+                    , (cleanedID, current_user.id)
+                    ) # Parameterised SQL
     
     result = cursor.fetchall()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         return render_template("reports.html", msg="empty", studentID=cleanedID)
     else:
         reports = result
@@ -1088,9 +1126,10 @@ def view_reports(studentID):
         tempResponse = [report[1]]
         
         cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                       , (report[2], ))
+                       , (report[2], )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("Sender not found")
             return redirect(url_for('reporting_search'))
@@ -1114,14 +1153,14 @@ def view_reports(studentID):
 @login_required
 def preview_report(studentID, reportID):
     cleanedStudentID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedStudentID:
+    if studentID != cleanedStudentID: # Error Handling
         print("Invalid student ID")
         return redirect(url_for("reporting_search"))
     cleanedStudentID = int(cleanedStudentID)
     del studentID
     
     cleanedReportID = entry_cleaner(reportID, "sql")
-    if reportID != cleanedReportID:
+    if reportID != cleanedReportID: # Error Handling
         print("Invalid report ID")
         return redirect(url_for("reporting_search"))
     cleanedReportID = int(cleanedReportID)
@@ -1131,33 +1170,36 @@ def preview_report(studentID, reportID):
     cursor = connection.cursor()
     
     cursor.execute("SELECT * FROM Reporting WHERE ReportID=?;"
-                   , (cleanedReportID, ))
+                   , (cleanedReportID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Report not found")
         connection.close()
         return redirect(url_for('view_reports', studentID=cleanedStudentID))
     else:
         data = result
 
-    if data[1] != cleanedStudentID:
+    if data[1] != cleanedStudentID: # Error Handling
         return redirect(url_for("reporting_search"))
     
     cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID=? and StaffID=?;"
-                    , (cleanedStudentID, current_user.id))
+                    , (cleanedStudentID, current_user.id)
+                    ) # Parameterised SQL
     
-    if current_user.id != data[2] and not (current_user.senco or current_user.safeguarding) and result not in [1, 2, 3, 0]:
+    if current_user.id != data[2] and not (current_user.senco or current_user.safeguarding) and result not in [1, 2, 3, 0]: # Error Handling
         print("No permission no view report")
         connection.close()
         return redirect(url_for("reporting_search"))
     
-    with open("secrets.json", "r") as f:
-        key = encryption.substitution_decrypt(encryptedText=data[6], key=json.load(f)['ReportKey'])
+    with open("secrets.json", "r") as f: # Reading from files
+        key = encryption.substitution_decrypt(encryptedText=data[6], key=json.load(f)['ReportKey']) # Decryption
     
     cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                   , (data[2], ))
+                   , (data[2], )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Reporter not found")
         connection.close()
         return redirect(url_for('view_reports', studentID=cleanedStudentID))
@@ -1171,7 +1213,7 @@ def preview_report(studentID, reportID):
                 cipherText=data[3].replace("<Double_Quote>", "\"").replace("<Single_Quote>", "\'").replace("<Escape>", "\\").replace("<New_Line>", "\n").replace("<Tab>", "\t").replace("<Carriage_Return>", "\r").replace("<Null_Character>", "\0").replace("<ASCII_Bell>", "\a").replace("<ASCII_Backspace>", "\b").replace("<ASCII_Form_Feed>", "\f").replace("<ASCII_Vertical_Tab>", "\v"),
                 vernamKey=str(key[:-2]),
                 subsitutionKey=int(key[-2:])
-            )
+            ) # Decryption
         ).replace("\0", '').replace("\a", '')
     )
     
@@ -1183,10 +1225,11 @@ def preview_report(studentID, reportID):
     report.append(data[4])
     
     cursor.execute("SELECT * FROM Files WHERE Origin=?;"
-                   , (f"r+{cleanedReportID}", ))
+                   , (f"r+{cleanedReportID}", )
+                   ) # Parameterised SQL
     result = cursor.fetchall()
 
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         report.append([])
         connection.close()
         print("No attachments")
@@ -1209,7 +1252,7 @@ def preview_report(studentID, reportID):
 @login_required
 def create_report(studentID):
     cleanedID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedID:
+    if studentID != cleanedID: # Error Handling
         print("Invalid ID")
         return redirect(url_for("reporting_search"))
     del studentID
@@ -1217,9 +1260,10 @@ def create_report(studentID):
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
-                , (cleanedID, ))
+                   , (cleanedID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Student not found")
         connection.close()
         return redirect(url_for("reporting_search"))
@@ -1245,11 +1289,11 @@ def create_report(studentID):
     if subsitutionKey < 10:
         subsitutionKey = "0" + str(subsitutionKey)
     
-    with open("secrets.json", "r") as f:
+    with open("secrets.json", "r") as f: # Reading from files
         key = encryption.substitution_encrypt(
             plainText=(vernamKey + str(subsitutionKey)),
             key=json.load(f)['ReportKey']
-            )
+            ) # Encryption
     
     cleanedEncryptedMessage = ""
     for character in encryptedMessage:
@@ -1291,9 +1335,9 @@ def create_report(studentID):
                             timeStamp,
                             key
                             )
-                        )
+                        ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         return render_template("write_report.html", reportContent=message, msg="Server Error", studentID=cleanedID, studentName=studentName)
     
@@ -1307,10 +1351,10 @@ def create_report(studentID):
                         timeStamp,
                         key
                         )
-                    )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
 
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Failed to save message")
         return render_template("write_report.html", reportContent=message, msg="Server Error", studentID=cleanedID, studentName=studentName)
@@ -1330,10 +1374,11 @@ def alerts_page():
     cursor = connection.cursor()
     
     cursor.execute("SELECT NotificationID, BannerMessage, URL, TimeStamp, Ephemeral FROM Notifications WHERE RecipientID=?;"
-                   , (current_user.id, ))
+                   , (current_user.id, )
+                   ) # Parameterised SQL
     result = cursor.fetchall()
     
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No notifications found")
         connection.close()
         return render_template('alerts_home.html', notifications=[])
@@ -1347,14 +1392,15 @@ def alerts_page():
             elif len(notification[1]) <= 30:
                 header = (notification[1].ljust(30).replace(" ", "&nbsp;"))
             data.append(
-                {
-                    "message": header,
-                    "link": url_for('alerts_view', notificationID=notification[2])
-                }
+                    {
+                        "message": header,
+                        "link": url_for('alerts_view', notificationID=notification[2])
+                    }
                 )
         else:
             cursor.execute("DELETE FROM Notifications WHERE NotificationID = ?;"
-                        , (notification[0], ))
+                        , (notification[0], )
+                        ) # Parameterised SQL
             connection.commit()
     
     connection.close()
@@ -1366,9 +1412,10 @@ def alerts_view(notificationID):
     cursor = connection.cursor()
     
     cursor.execute("SELECT NotificationID FROM Notifications WHERE URL=?;"
-                   , (notificationID, ))
+                   , (notificationID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("URL not found")
         connection.close()
         return redirect(url_for('alerts_page'))
@@ -1376,30 +1423,33 @@ def alerts_view(notificationID):
         cleanedNotificationID = result[0]
     
     cursor.execute("SELECT * FROM Notifications WHERE NotificationID=?;"
-                   , (cleanedNotificationID, ))
+                   , (cleanedNotificationID, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Notification not found")
         connection.close()
         return redirect(url_for('alerts_page'))
     
-    if result[2] != current_user.id:
+    if result[2] != current_user.id: # Error Handling
         print("Recipient isn't current user")
         connection.close()
         return redirect(url_for('alerts_page'))
     
     if request.method == 'POST':
         cursor.execute("DELETE FROM Notifications WHERE NotificationID=?;"
-                    , (cleanedNotificationID, ))
+                    , (cleanedNotificationID, )
+                    ) # Parameterised SQL
         connection.commit()
         return redirect(url_for('alerts_page'))
     
     data = result
     
     cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                   , (data[1], ))
+                   , (data[1], )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("Sender not found")
         connection.close()
         return redirect(url_for('alerts_page'))
@@ -1411,7 +1461,8 @@ def alerts_view(notificationID):
     
     if data[7] == "True":
         cursor.execute("DELETE FROM Notifications WHERE NotificationID=?;"
-                    , (cleanedNotificationID, ))
+                       , (cleanedNotificationID, )
+                       ) # Parameterised SQL
         connection.commit()
     
     connection.close()
@@ -1424,9 +1475,10 @@ def alerts_send():
     cursor = connection.cursor()
     
     cursor.execute("SELECT Email FROM Staff WHERE AccountArchived='False' and StaffID!=?;"
-                , (current_user.id, ))
+                   , (current_user.id, )
+                   ) # Parameterised SQL
     result = cursor.fetchall()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No accounts found")
         connection.close()
         
@@ -1448,14 +1500,14 @@ def alerts_send():
     message = request.form.get('message')
     timePeriod = request.form.get('time-period')
     
-    if staffEmail == "_" and staffRole == "_":
+    if staffEmail == "_" and staffRole == "_": # Error Handling
         print("Invalid staff member/role")
         connection.close()
         
         data = [staffEmail, staffRole, bannerMessage, message, timePeriod]
         return render_template("alerts_send.html", emails=emails, data=data, msg="Please select a recipient", entry=["staff", "role"])
     
-    if staffRole not in ["_", "1", "2", "3", "0"]:
+    if staffRole not in ["_", "1", "2", "3", "0"]: # Error Handling
         print("Invalid staff role")
         connection.close()
         
@@ -1471,7 +1523,7 @@ def alerts_send():
             }[staffRole]
     
     cleanedBannerMessage = entry_cleaner(bannerMessage, "sql").replace("\0", '').replace("\a", '')
-    if cleanedBannerMessage != bannerMessage:
+    if cleanedBannerMessage != bannerMessage: # Error Handling
         print("Invalid first name")
         connection.close()
         
@@ -1480,7 +1532,7 @@ def alerts_send():
     del bannerMessage
     
     cleanedMessage = entry_cleaner(message, "sql").replace("\0", '').replace("\a", '')
-    if cleanedMessage != message:
+    if cleanedMessage != message: # Error Handling
         print("Invalid last name")
         connection.close()
         
@@ -1488,7 +1540,7 @@ def alerts_send():
         return render_template("alerts_send.html", emails=emails, data=data, msg="Invalid message", entry=["message"])
     del message
     
-    if timePeriod not in ["eph", "15m", "30m", "1h", "24h"]:
+    if timePeriod not in ["eph", "15m", "30m", "1h", "24h"]: # Error Handling
         print("Invalid time period")
         connection.close()
         
@@ -1511,9 +1563,10 @@ def alerts_send():
     recipients = []
     if staffEmail != "_":
         cursor.execute("SELECT StaffID FROM Staff WHERE Email=?;"
-                        , (staffEmail, ))
+                        , (staffEmail, )
+                        ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             print("User not found")
             connection.close()
             
@@ -1524,7 +1577,7 @@ def alerts_send():
     if cleanedStaffRole == "SENCo":
         cursor.execute("SELECT StaffID FROM Staff WHERE SENCo='True' and AccountArchived='False' and AccountEnabled='True';")
         result = cursor.fetchall()
-        if result == None or len(result) == 0:
+        if result == None or len(result) == 0: # Error Handling
             print("Users not found")
             connection.close()
             
@@ -1537,7 +1590,7 @@ def alerts_send():
     elif cleanedStaffRole == "Safeguarding":
         cursor.execute("SELECT StaffID FROM Staff WHERE Safeguarding='True' and AccountArchived='False' and AccountEnabled='True';")
         result = cursor.fetchall()
-        if result == None or len(result) == 0:
+        if result == None or len(result) == 0: # Error Handling
             print("Users not found")
             connection.close()
             
@@ -1550,7 +1603,7 @@ def alerts_send():
     elif cleanedStaffRole == "Admin":
         cursor.execute("SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';")
         result = cursor.fetchall()
-        if result == None or len(result) == 0:
+        if result == None or len(result) == 0: # Error Handling
             print("Users not found")
             connection.close()
             
@@ -1563,7 +1616,7 @@ def alerts_send():
     elif cleanedStaffRole == "Other":
         cursor.execute("SELECT StaffID FROM Staff WHERE SENCo='False' and Safeguarding='False' and Admin='False' and AccountArchived='False' and AccountEnabled='True';")
         result = cursor.fetchall()
-        if result == None:
+        if result == None: # Error Handling
             print("Users not found")
             connection.close()
             
@@ -1587,9 +1640,9 @@ def alerts_send():
                             timeStamp,
                             str(ephemeralNotification)
                             )
-                        )
+                        ) # Parameterised SQL
             connection.commit()
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError: # Error Handling
             print("Failed CHECK constraint")
             connection.close()
             
@@ -1612,7 +1665,7 @@ def user_settings():
 
     #Email validation
     cleanedEmail = entry_cleaner(email, "email")
-    if cleanedEmail != email.lower():
+    if cleanedEmail != email.lower(): # Error Handling
         print("Invalid email")
         return render_template("user_settings.html", msg="Invalid Email", entry=["email"], savedEmail=email)
     del email
@@ -1621,13 +1674,13 @@ def user_settings():
     cleanedOldPassword = entry_cleaner(oldPassword, "password")
     cleanedNewPassword = entry_cleaner(newPassword, "password")
     cleanedConfirmNewPassword = entry_cleaner(confirmNewPassword, "password")
-    if cleanedOldPassword != oldPassword:
+    if cleanedOldPassword != oldPassword: # Error Handling
         print("Invalid old password")
         return render_template("user_settings.html", msg="Old password contains illegal characters", entry=["old-password"], savedEmail=cleanedEmail)
-    if cleanedNewPassword != newPassword:
+    if cleanedNewPassword != newPassword: # Error Handling
         print("Invalid new password")
         return render_template("user_settings.html", msg="New password contains illegal characters", entry=["new-password"], savedEmail=cleanedEmail)
-    if cleanedConfirmNewPassword != confirmNewPassword:
+    if cleanedConfirmNewPassword != confirmNewPassword: # Error Handling
         print("Invalid confirm new password")
         return render_template("user_settings.html", msg="Confirm new password contains illegal characters", entry=["confirm-new-password"], savedEmail=cleanedEmail)
     del oldPassword
@@ -1643,22 +1696,24 @@ def user_settings():
 
     # Checking email
     cursor.execute("SELECT Email FROM Staff WHERE StaffID=?;"
-                    , (current_user.id, ))
+                    , (current_user.id, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("User not found")
         return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
-    elif result[0].lower() != cleanedEmail.lower():
+    elif result[0].lower() != cleanedEmail.lower(): # Error Handling
         connection.close()
         print("Invalid email")
         return render_template("user_settings.html", msg="Your email contains illegal characters", entry=["email"], savedEmail=cleanedEmail)
     
     # Getting user's password
     cursor.execute("SELECT passHash FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("User not found")
         return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
@@ -1666,21 +1721,22 @@ def user_settings():
         passHash = result[0]
     
     cursor.execute("SELECT passSalt FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("User not found")
         return render_template("user_settings.html", msg="The email you entered isn't your email", entry=["email"], savedEmail=cleanedEmail)
     else:
         salt = result[0]
     
-    if passHash != hash_function.hash_variable(cleanedOldPassword, salt):
+    if passHash != hash_function.hash_variable(cleanedOldPassword, salt): # Hashing
         connection.close()
         print("Old password isn't valid")
         return render_template("user_settings.html", msg="Your old password doesn't match the password that you entered", entry=["old-password"], savedEmail=cleanedEmail)
     
-    if cleanedNewPassword != cleanedConfirmNewPassword:
+    if cleanedNewPassword != cleanedConfirmNewPassword: # Error Handling
         connection.close()
         print("New password and confirm new password aren't the same")
         return render_template("user_settings.html", msg="Please use the same new password when confirming your new password", entry=["new-password", "confirm-new-password"], savedEmail=cleanedEmail)
@@ -1689,15 +1745,15 @@ def user_settings():
                     , (hash_function.hash_variable(
                         cleanedNewPassword,
                         salt),
-                        ),
+                        ), # Hashing
                     current_user.id
-                    )
+                    ) # Parameterised SQL
     connection.commit()
     
     userDetails = current_user.get_user_dictionary()
-    userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt)
+    userDetails["passhash"] = hash_function.hash_variable(cleanedNewPassword, salt) # Hashing
     logout_user()
-    login_user(User(userDetails), remember=False)
+    login_user(User(userDetails), remember=False) # Dynamic generation of objects
     return render_template("user_settings.html", msg="Password changed successfully", entry=["submit"])
 
 @app.route('/app/analytics', methods=['GET'])
@@ -1761,35 +1817,35 @@ def create_staff():
         enabled = "False"
     
     cleanedEmail = entry_cleaner(email, "email")
-    if cleanedEmail != email:
+    if cleanedEmail != email: # Error Handling
         print("Invalid email")
         data = [email, fName, lName, title, senco, safeguarding, admin, enabled, password]
         return render_template("create_staff.html", data=data, msg="Email is invalid", entry=["email"])
     del email
     
     cleanedFName = entry_cleaner(fName, "sql")
-    if cleanedFName != fName:
+    if cleanedFName != fName: # Error Handling
         print("Invalid first name")
         data = [cleanedEmail, fName, lName, title, senco, safeguarding, admin, enabled, password]
         return render_template("create_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
     del fName
     
     cleanedLName = entry_cleaner(lName, "sql")
-    if cleanedLName != lName:
+    if cleanedLName != lName: # Error Handling
         print("Invalid last name")
         data = [cleanedEmail, cleanedFName, lName, title, senco, safeguarding, admin, enabled, password]
         return render_template("create_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
     del lName
     
     cleanedTitle = entry_cleaner(title, "sql")
-    if cleanedTitle != title:
+    if cleanedTitle != title: # Error Handling
         print("Invalid title")
         data = [cleanedEmail, cleanedFName, cleanedLName, title, senco, safeguarding, admin, enabled, password]
         return render_template("create_staff.html", data=data, msg="Title is invalid", entry=["title"])
     del title
     
     cleanedPassword = entry_cleaner(password, "password")
-    if cleanedPassword != password:
+    if cleanedPassword != password: # Error Handling
         print("Invalid old password")
         data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, password]
         return render_template("create_staff.html", data=data, msg="Password is invalid", entry=["password"])
@@ -1802,7 +1858,7 @@ def create_staff():
             return render_template("create_staff.html", data=data, msg="Password is insecure", entry=["password"])
 
     passwordSalt = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(len(cleanedPassword)))
-    passwordHash = hash_function.hash_variable(cleanedPassword, passwordSalt)
+    passwordHash = hash_function.hash_variable(cleanedPassword, passwordSalt) # Hashing
     
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
@@ -1822,9 +1878,9 @@ def create_staff():
                            safeguarding,
                            admin
                            )
-                       )
+                       ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         connection.close()
         data = [cleanedEmail, cleanedFName, cleanedLName, cleanedTitle, senco, safeguarding, admin, enabled, cleanedPassword]
@@ -1850,7 +1906,7 @@ def search_staff():
     
     cursor.execute("SELECT Email FROM Staff WHERE AccountArchived='False';")
     result = cursor.fetchall()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No accounts found")
         connection.close()
         return redirect(url_for("search_staff"))
@@ -1871,7 +1927,7 @@ def edit_staff(staffEmail):
     
     if request.method == 'GET':
         cleanedEmail = entry_cleaner(staffEmail, "email")
-        if staffEmail != cleanedEmail:
+        if staffEmail != cleanedEmail: # Error Handling
             print("Invalid Email")
             return redirect(url_for("search_staff"))
         del staffEmail
@@ -1879,9 +1935,10 @@ def edit_staff(staffEmail):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM Staff WHERE Email=?;"
-                       , (cleanedEmail, ))
+                       , (cleanedEmail, )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("Target user not found")
             return redirect(url_for("search_staff"))
@@ -1900,7 +1957,7 @@ def edit_staff(staffEmail):
         return render_template("edit_staff.html", data=data, msg="")
     
     cleanedStaffEmail = entry_cleaner(staffEmail, "sql")
-    if staffEmail != cleanedStaffEmail:
+    if staffEmail != cleanedStaffEmail: # Error Handling
         print("Invalid ID")
         return redirect(url_for("search_students"))
     del staffEmail
@@ -1935,28 +1992,28 @@ def edit_staff(staffEmail):
         deleteAccount = "False"
     
     cleanedEmail = entry_cleaner(email, "email")
-    if cleanedEmail != email:
+    if cleanedEmail != email: # Error Handling
         print("Invalid email")
         data = [firstName, lastName, title, email, enabled, senco, safeguarding, admin]
         return render_template("edit_staff.html", data=data, msg="Email is invalid", entry=["email"])
     del email
     
     cleanedFName = entry_cleaner(firstName, "sql")
-    if cleanedFName != firstName:
+    if cleanedFName != firstName: # Error Handling
         print("Invalid first name")
         data = [firstName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
         return render_template("edit_staff.html", data=data, msg="First name is invalid", entry=["first-name"])
     del firstName
     
     cleanedLName = entry_cleaner(lastName, "sql")
-    if cleanedLName != lastName:
+    if cleanedLName != lastName: # Error Handling
         print("Invalid last name")
         data = [cleanedFName, lastName, title, cleanedEmail, enabled, senco, safeguarding, admin]
         return render_template("edit_staff.html", data=data, msg="Last name is invalid", entry=["last-name"])
     del lastName
     
     cleanedTitle = entry_cleaner(title, "sql")
-    if cleanedTitle != title:
+    if cleanedTitle != title: # Error Handling
         print("Invalid title")
         data = [cleanedFName, cleanedLName, title, cleanedEmail, enabled, senco, safeguarding, admin]
         return render_template("edit_staff.html", data=data, msg="Title is invalid", entry=["title"])
@@ -1966,9 +2023,10 @@ def edit_staff(staffEmail):
     cursor = connection.cursor()
     
     cursor.execute("SELECT Admin FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Target user not found")
         return redirect(url_for("search_staff"))
@@ -1976,32 +2034,34 @@ def edit_staff(staffEmail):
     if admin == "False" and result[0] == "True":
         cursor.execute("SELECT StaffID FROM Staff WHERE Admin='True' and AccountArchived='False' and AccountEnabled='True';")
         result = cursor.fetchall()
-        if result == None or len(result) == 0:
+        if result == None or len(result) == 0: # Error Handling
             connection.close()
             print("Target user not found")
             return redirect(url_for("search_staff"))
-        if len(result) == 1:
+        if len(result) == 1: # Error Handling
             data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, "True"]
             print("User is trying to remove last admin")
             return render_template("edit_staff.html", data=data, msg="There must always be at least one admin account active", entry=["admin"])
     
     cursor.execute("SELECT StaffID, Passhash, PassSalt FROM Staff WHERE Email=?;"
-                    , (cleanedEmail, ))
+                    , (cleanedEmail, )
+                    ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Target user not found")
         return redirect(url_for("search_staff"))
     
     if resetPassword == "True":
         print(resetPassword)
-        passHash = hash_function.hash_variable("ChangeMe", result[2])
+        passHash = hash_function.hash_variable("ChangeMe", result[2]) # Hashing
     else:
         passHash = result[1]
 
     if deleteAccount == "True":
         cursor.execute("DELETE FROM StudentRelationship WHERE StaffID = ?;"
-                        , (result[0], ))
+                        , (result[0], )
+                        ) # Parameterised SQL
         connection.commit()
         enabled = "False"
         archived = "True"
@@ -2027,9 +2087,9 @@ def edit_staff(staffEmail):
                             admin,
                             cleanedEmail
                             )
-                        )
+                        ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         connection.close()
         data = [cleanedFName, cleanedLName, cleanedTitle, cleanedEmail, enabled, senco, safeguarding, admin]
@@ -2038,7 +2098,7 @@ def edit_staff(staffEmail):
     if current_user.id == result[0]:
         userDetails = current_user.get_user_dictionary()
         logout_user()
-        login_user(User(userDetails), remember=False)
+        login_user(User(userDetails), remember=False) # Dynamic generation of objects
     
     if current_user.get_user_dictionary()["admin"] == "False":
         return redirect(url_for("dashboard"))
@@ -2063,14 +2123,14 @@ def create_student():
     date = request.form.get('date')
     
     cleanedFName = entry_cleaner(fName, "sql")
-    if cleanedFName != fName:
+    if cleanedFName != fName: # Error Handling
         print("Invalid first name")
         data = [fName, lName, date]
         return render_template("create_students.html", data=data, msg="First name is invalid", entry=["first-name"])
     del fName
     
     cleanedLName = entry_cleaner(lName, "sql")
-    if cleanedLName != lName:
+    if cleanedLName != lName: # Error Handling
         print("Invalid last name")
         data = [cleanedFName, lName, date]
         return render_template("create_students.html", data=data, msg="Last name is invalid", entry=["last-name"])
@@ -2081,9 +2141,10 @@ def create_student():
     
     try:
         cursor.execute("INSERT INTO Students(FirstName, LastName, DateOfBirth) VALUES (?, ?, ?);"
-                       , (cleanedFName, cleanedLName, date))
+                       , (cleanedFName, cleanedLName, date)
+                       ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         connection.close()
         data = [cleanedFName, cleanedLName, date]
@@ -2100,19 +2161,20 @@ def search_students():
     
     if request.method == 'POST':
         dataString = request.form.get('email-list')
-        if not dataString:
+        if not dataString: # Error Handling
             return redirect(url_for('search_students'))
         
         data = dataString.split("|")
-        if len(data) != 3:
+        if len(data) != 3: # Error Handling
             return redirect(url_for('search_students'))
         
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
-                       , (data[0], data[1], data[2]))
+                       , (data[0], data[1], data[2])
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             print("No accounts found")
             connection.close()
             return redirect(url_for("search_students"))
@@ -2124,7 +2186,7 @@ def search_students():
     
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students;")
     result = cursor.fetchall()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No accounts found")
         connection.close()
         return render_template("manage_student_lookup.html", msg="empty")
@@ -2145,7 +2207,7 @@ def edit_student(studentID):
     
     if request.method == 'GET':
         cleanedID = entry_cleaner(studentID, "sql")
-        if studentID != cleanedID:
+        if studentID != cleanedID: # Error Handling
             print("Invalid ID")
             return redirect(url_for("search_students"))
         del studentID
@@ -2153,9 +2215,10 @@ def edit_student(studentID):
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM Students WHERE StudentID=?;"
-                       , (cleanedID, ))
+                       , (cleanedID, )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("Target user not found")
             return redirect(url_for("search_students"))
@@ -2169,7 +2232,7 @@ def edit_student(studentID):
 
         return render_template("edit_student.html", data=data, msg="")
     cleanedID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedID:
+    if studentID != cleanedID: # Error Handling
         print("Invalid ID")
         return redirect(url_for("search_students"))
     del studentID
@@ -2184,31 +2247,34 @@ def edit_student(studentID):
     
     if delete == "True":
         cursor.execute("DELETE FROM Reporting WHERE StudentID = ?;"
-                        , (cleanedID, ))
+                        , (cleanedID, )
+                        ) # Parameterised SQL
         connection.commit()
         cursor.execute("DELETE FROM StudentRelationship WHERE StudentID = ?;"
-                        , (cleanedID, ))
+                        , (cleanedID, )
+                        ) # Parameterised SQL
         connection.commit()
         cursor.execute("DELETE FROM Students WHERE StudentID = ?;"
-                        , (cleanedID, ))
+                        , (cleanedID, )
+                        ) # Parameterised SQL
         connection.commit()
         
         cursor.execute("SELECT StudentID FROM Students;")
         result = cursor.fetchall()
         connection.close()
-        if result == None or len(result) == 0:
+        if result == None or len(result) == 0: # Error Handling
             return redirect(url_for("manage_users_students"))
         return redirect(url_for('search_students'))
 
     cleanedFName = entry_cleaner(firstName, "sql")
-    if cleanedFName != firstName:
+    if cleanedFName != firstName: # Error Handling
         print("Invalid first name")
         data = [cleanedID, firstName, lastName, dateOfBirth]
         return render_template("edit_student.html", data=data, msg="First name is invalid", entry=["first-name"])
     del firstName
     
     cleanedLName = entry_cleaner(lastName, "sql")
-    if cleanedLName != lastName:
+    if cleanedLName != lastName: # Error Handling
         print("Invalid last name")
         data = [cleanedID, cleanedFName, lastName, dateOfBirth]
         return render_template("edit_student.html", data=data, msg="Last name is invalid", entry=["last-name"])
@@ -2222,9 +2288,9 @@ def edit_student(studentID):
                             dateOfBirth,
                             cleanedID
                             )
-                        )
+                        ) # Parameterised SQL
         connection.commit()
-    except sqlite3.IntegrityError:
+    except sqlite3.IntegrityError: # Error Handling
         print("Failed CHECK constraint")
         connection.close()
         data = [cleanedID, cleanedFName, cleanedLName, dateOfBirth]
@@ -2242,19 +2308,20 @@ def staff_student_relationships_lookup():
     
     if request.method == 'POST':
         dataString = request.form.get('email-list')
-        if not dataString:
+        if not dataString: # Error Handling
             return redirect(url_for('staff_student_relationships_lookup'))
         
         data = dataString.split("|")
-        if len(data) != 3:
+        if len(data) != 3: # Error Handling
             return redirect(url_for('staff_student_relationships_lookup'))
         
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
         cursor.execute("SELECT StudentID FROM Students WHERE FirstName = ? and LastName = ? and DateOfBirth = ?;"
-                       , (data[0], data[1], data[2]))
+                       , (data[0], data[1], data[2])
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             print("No accounts found")
             connection.close()
             return redirect(url_for("staff_student_relationships_lookup"))
@@ -2266,7 +2333,7 @@ def staff_student_relationships_lookup():
     
     cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students;")
     result = cursor.fetchall()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No accounts found")
         connection.close()
         return render_template("manage_student_lookup.html", msg="empty")
@@ -2287,13 +2354,17 @@ def view_all_student_staff_relationships():
     
     connection = sqlite3.connect("database.db")
     cursor = connection.cursor()
-    cursor.execute("SELECT Students.StudentID, Staff.StaffID, StudentRelationship.Relationship FROM StudentRelationship INNER JOIN Students ON StudentRelationship.StudentID = Students.StudentID INNER JOIN Staff ON StudentRelationship.StaffID = Staff.StaffID")
+    cursor.execute("SELECT Students.StudentID, Staff.StaffID, StudentRelationship.Relationship FROM StudentRelationship INNER JOIN Students ON StudentRelationship.StudentID = Students.StudentID INNER JOIN Staff ON StudentRelationship.StaffID = Staff.StaffID") # Cross-table SQL
     relationships = cursor.fetchall()
     data = []
     for row in relationships:
-        cursor.execute("SELECT Firstname, LastName FROM Students WHERE StudentID=?", (row[0], ))
+        cursor.execute("SELECT Firstname, LastName FROM Students WHERE StudentID=?"
+                       , (row[0], )
+                       ) # Parameterised SQL
         studentData = cursor.fetchone()
-        cursor.execute("SELECT Firstname, LastName, Title FROM Staff WHERE StaffID=?", (row[1], ))
+        cursor.execute("SELECT Firstname, LastName, Title FROM Staff WHERE StaffID=?"
+                        , (row[1], )
+                        ) # Parameterised SQL
         staffData = cursor.fetchone()
         relationshipTypes = {
             0: "other relationship",
@@ -2313,7 +2384,7 @@ def staff_student_relationships(studentID):
         return redirect(url_for('dashboard'))
     
     cleanedID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedID:
+    if studentID != cleanedID: # Error Handling
         print("Invalid ID")
         return redirect(url_for("staff_student_relationships_lookup"))
     del studentID
@@ -2329,7 +2400,7 @@ def staff_student_relationships(studentID):
     
     cursor.execute("SELECT Email FROM Staff WHERE AccountArchived='False';")
     result = cursor.fetchall()
-    if result == None or len(result) == 0:
+    if result == None or len(result) == 0: # Error Handling
         print("No accounts found")
         connection.close()
         return render_template("staff_student_relationships.html", msg="empty")
@@ -2347,13 +2418,13 @@ def edit_staff_student_relationships(studentID, staffEmail):
         return redirect(url_for('dashboard'))
     
     cleanedID = entry_cleaner(studentID, "sql")
-    if studentID != cleanedID:
+    if studentID != cleanedID: # Error Handling
         print("Invalid ID")
         return redirect(url_for("staff_student_relationships_lookup"))
     del studentID
     
     cleanedEmail = entry_cleaner(staffEmail, "sql")
-    if staffEmail != cleanedEmail:
+    if staffEmail != cleanedEmail: # Error Handling
         print("Invalid ID")
         return redirect(url_for("staff_student_relationships_lookup"))
     del staffEmail
@@ -2363,9 +2434,10 @@ def edit_staff_student_relationships(studentID, staffEmail):
         cursor = connection.cursor()
         
         cursor.execute("SELECT FirstName, LastName, DateOfBirth FROM Students WHERE StudentID=?;"
-                       , (cleanedID, ))
+                       , (cleanedID, )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("Target user not found")
             return redirect(url_for("staff_student_relationships_lookup"))
@@ -2376,9 +2448,10 @@ def edit_staff_student_relationships(studentID, staffEmail):
         ]
         
         cursor.execute("SELECT StaffID, FirstName, LastName, Title, Email FROM Staff WHERE Email=? and AccountArchived='False';"
-                       , (cleanedEmail, ))
+                       , (cleanedEmail, )
+                       ) # Parameterised SQL
         result = cursor.fetchone()
-        if result == None:
+        if result == None: # Error Handling
             connection.close()
             print("Target user not found")
             return redirect(url_for("staff_student_relationships_lookup"))
@@ -2386,11 +2459,12 @@ def edit_staff_student_relationships(studentID, staffEmail):
         staffDetails = f"{result[3]} {result[1]} {result[2]}: {result[4]}"
         
         cursor.execute("SELECT Relationship FROM StudentRelationship WHERE StudentID = ? AND StaffID = ?;"
-                       , (cleanedID, result[0]))
+                       , (cleanedID, result[0])
+                       ) # Parameterised SQL
         result = cursor.fetchone()
         connection.close()
         
-        if result == None:
+        if result == None: # Error Handling
             print("No relationship found")
             oldRelationship = "None"
         else:
@@ -2418,9 +2492,10 @@ def edit_staff_student_relationships(studentID, staffEmail):
     cursor = connection.cursor()
     
     cursor.execute("SELECT StaffID FROM Staff WHERE Email=? and AccountArchived='False';"
-                   , (cleanedEmail, ))
+                   , (cleanedEmail, )
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         connection.close()
         print("Target user not found")
         return redirect(url_for("staff_student_relationships_lookup"))
@@ -2428,9 +2503,10 @@ def edit_staff_student_relationships(studentID, staffEmail):
         staffID = result[0]
     
     cursor.execute("SELECT RelationshipID, Relationship FROM StudentRelationship WHERE StudentID = ? AND StaffID = ?;"
-                   , (cleanedID, staffID))
+                   , (cleanedID, staffID)
+                   ) # Parameterised SQL
     result = cursor.fetchone()
-    if result == None:
+    if result == None: # Error Handling
         print("No relationship found")
         oldRelationship = "None"
         result = [""]
@@ -2463,7 +2539,8 @@ def edit_staff_student_relationships(studentID, staffEmail):
             studentData, staffDetails, studentID, staffEmail, oldRelationship = data
             return render_template("student_staff_relationship.html", studentData=studentData, staffDetails=staffDetails, studentID=cleanedID, staffEmail=cleanedEmail, relationship=oldRelationship, msg="Unknown Error Occurred")
         cursor.execute("DELETE FROM StudentRelationship WHERE RelationshipID = ?;"
-                    , (result[0], ))
+                       , (result[0], )
+                       ) # Parameterised SQL
         connection.commit()
         connection.close()
         
@@ -2496,9 +2573,9 @@ def edit_staff_student_relationships(studentID, staffEmail):
                                cleanedNewRelationship,
                                result[0]
                                )
-                           )
+                           ) # Parameterised SQL
             connection.commit()
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError: # Error Handling
             print("Failed CHECK constraint")
             connection.close()
             
@@ -2519,10 +2596,10 @@ def edit_staff_student_relationships(studentID, staffEmail):
                                staffID,
                                cleanedNewRelationship
                                )
-                           )
+                           ) # Parameterised SQL
             
             connection.commit()
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError: # Error Handling
             print("Failed CHECK constraint")
             connection.close()
             
@@ -2574,7 +2651,8 @@ def notifications():
     cursor = connection.cursor()
     
     cursor.execute("SELECT NotificationID, BannerMessage, URL, TimeStamp, Ephemeral FROM Notifications WHERE RecipientID=?;"
-                   , (current_user.id, ))
+                   , (current_user.id, )
+                   ) # Parameterised SQL
     result = cursor.fetchall()
     
     if result == None or len(result) == 0:
@@ -2588,14 +2666,15 @@ def notifications():
     for notification in result:
         if float(notification[3]) >= float(datetime.timestamp(datetime.now())) or notification[4] == "True":
             data.append(
-                {
-                    "message": notification[1],
-                    "link": url_for('alerts_view', notificationID=notification[2])
-                }
+                    {
+                        "message": notification[1],
+                        "link": url_for('alerts_view', notificationID=notification[2])
+                    }
                 )
         else:
             cursor.execute("DELETE FROM Notifications WHERE NotificationID = ?;"
-                        , (notification[0], ))
+                           , (notification[0], )
+                           ) # Parameterised SQL
             connection.commit()
     
     connection.close()
